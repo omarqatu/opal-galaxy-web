@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% load opal %}
+{% block title %}{{ page|tr:"title" }} — Opal Galaxy{% if lang == 'ar' %}، دبي{% else %}, Dubai{% endif %}{% endblock %}
+{% block description %}{{ page|tr:"lead" }}{% endblock %}
+{% block content %}
+{% include "includes/crumbs.html" with current_label=page|tr:"title" %}
+<section class="page-hero"><div class="wrap"><div class="copy">
+  <h1>{{ page|tr:"title" }}</h1>
+  <p class="lead">{{ page|tr:"lead" }}</p>
+  {% if page.cta_en %}<div class="cta"><a class="btn btn-accent" href="#contact">{{ page|tr:"cta" }}</a></div>{% endif %}
+</div><div class="art"><span class="ico" style="display:block">{% icon "parts" %}</span></div></div></section>
+<section><div class="wrap">
+  <h2>{{ page|tr:"list_title" }}</h2>
+  <ul class="svc-list">{% for i in page.items.all %}<li><b>{{ i|tr:"title" }}</b><span>{{ i|tr:"text" }}</span></li>{% endfor %}</ul>
+</div></section>
+{% endblock %}

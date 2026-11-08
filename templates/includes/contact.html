@@ -1,0 +1,60 @@
+{% load opal %}{% with s=settings.core.CompanySettings %}
+<section id="contact" class="contact">
+  <div class="wrap">
+    <div>
+      <h2>{% T "Request a quote" "طلب عرض سعر" %}</h2>
+      <p class="lead">{{ s|tr:"quote_reply" }}</p>
+      <a class="btn btn-wa wa-big" href="https://wa.me/{{ s.whatsapp }}?text={% if lang == 'ar' %}%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%B9%D8%B1%D8%B6%20%D8%B3%D8%B9%D8%B1{% else %}Hello%2C%20I%20would%20like%20a%20quote{% endif %}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% T "Send your BOQ on WhatsApp" "إرسال جدول الكميات عبر واتساب" %}</span></a>
+      {% if s.email %}<p class="alt" style="margin-top:18px">{% T "Or by email:" "أو عبر البريد الإلكتروني:" %} <a class="ltr" href="mailto:{{ s.email }}">{{ s.email }}</a></p>{% endif %}
+    </div>
+    <form id="quote" method="post" action="/quote/">
+      {% csrf_token %}
+      <input type="hidden" name="lang" value="{{ lang }}">
+      <input type="hidden" name="source_page" value="{{ request.path }}">
+      <label class="hp" aria-hidden="true">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+      <div class="form-ctx{% if category or brand or page_kind == 'service' %} show{% endif %}" id="form-ctx">
+        {% if category %}{% T "Quote for:" "الطلب عن:" %} <b>{{ category|tr:"name" }}</b>
+        {% elif brand %}{% T "Quote for:" "الطلب عن منتجات:" %} <b>{{ brand.name }}</b>
+        {% elif page_kind == 'service' %}{% T "Request:" "الطلب عن:" %} <b>{% T "maintenance / spare parts" "صيانة / قطع غيار" %}</b>{% endif %}
+      </div>
+      <label class="f"><span>{% T "Name" "الاسم" %}</span><input type="text" name="name" autocomplete="name" maxlength="120"></label>
+      <label class="f"><span>{% T "Phone" "رقم الهاتف" %}</span><input type="tel" name="phone" autocomplete="tel" dir="ltr" placeholder="+971" required maxlength="40"></label>
+      <div class="f full"><span>{% T "Customer type" "صفة العميل" %}</span>
+        <div class="seg">
+          <label><input type="radio" name="type" value="contractor" checked><span>{% T "Contractor" "مقاول" %}</span></label>
+          <label><input type="radio" name="type" value="company"><span>{% T "Company" "شركة" %}</span></label>
+          <label><input type="radio" name="type" value="owner"><span>{% T "End user" "عميل فرد" %}</span></label>
+        </div>
+      </div>
+      <label class="f"><span>{% T "Product" "نوع الوحدة" %}</span>
+        <select name="unit" id="f-unit">
+          <option value="">{% T "Choose a product" "اختر نوع الوحدة" %}</option>
+          {% for c in nav_categories %}<option value="{{ c.slug }}" data-brands="{{ c|brand_ids }}"{% if category.slug == c.slug %} selected{% endif %}>{{ c|tr:"name" }}</option>{% endfor %}
+          <option value="maintenance"{% if page_kind == 'service' %} selected{% endif %}>{% T "Maintenance / spare parts" "صيانة / قطع غيار" %}</option>
+        </select></label>
+      <label class="f"><span>{% T "Brand" "العلامة التجارية" %}</span>
+        <select name="brand" id="f-brand">
+          <option value="">{% T "Any brand" "أي علامة تجارية" %}</option>
+          {% for b in nav_brands %}<option value="{{ b.slug }}"{% if brand.slug == b.slug %} selected{% endif %}>{{ b.name }}</option>{% endfor %}
+          <option value="other">{% T "Other brand" "علامة تجارية أخرى" %}</option>
+        </select></label>
+      <label class="f"><span>{% T "Quantity" "الكمية" %}</span><input type="number" name="qty" min="1" max="100000" dir="ltr"></label>
+      <label class="f"><span>{% T "Emirate" "الإمارة" %}</span><select name="emirate">
+        <option value="Dubai">{% T "Dubai" "دبي" %}</option><option value="Sharjah">{% T "Sharjah" "الشارقة" %}</option><option value="Ajman">{% T "Ajman" "عجمان" %}</option><option value="Abu Dhabi">{% T "Abu Dhabi" "أبوظبي" %}</option><option value="Other">{% T "Other" "أخرى" %}</option></select></label>
+      <div class="f full"><span>{% T "With installation?" "هل يشمل الطلب التركيب؟" %}</span>
+        <div class="seg">
+          <label><input type="radio" name="install" value="no" checked><span>{% T "Supply only" "توريد فقط" %}</span></label>
+          <label><input type="radio" name="install" value="yes"><span>{% T "Supply and install" "التوريد والتركيب" %}</span></label>
+        </div>
+      </div>
+      <label class="f full"><span>{% T "Notes / project details" "ملاحظات / تفاصيل المشروع" %}</span><textarea name="notes" maxlength="4000"></textarea></label>
+      {% if quote_sent %}<div class="notice ok" role="status">{% T "Request sent. We reply within one working day." "تم إرسال الطلب، وسنوافيكم بالرد خلال يوم عمل واحد." %}</div>
+      {% elif quote_error %}<div class="notice err" role="alert">{% T "Please enter a phone number we can reach you on." "يُرجى إدخال رقم هاتف صحيح للتواصل معكم." %}</div>{% endif %}
+      <div class="form-foot">
+        <button class="btn btn-accent" type="submit">{% T "Send request" "إرسال الطلب" %}</button>
+        <span class="alt">{% T "We never share your details." "لن تتم مشاركة بياناتكم مع أي جهة." %}</span>
+      </div>
+    </form>
+  </div>
+</section>
+{% endwith %}

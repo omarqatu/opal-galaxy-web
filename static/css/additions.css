@@ -1,0 +1,19 @@
+/* Additions for the Django/Wagtail build (on top of the static v0.7 stylesheet) */
+a.lang{text-decoration:none;display:inline-block;line-height:1.2}
+.notice.ok{display:block;border-color:#2e7d5b;background:#eef7f2;color:#1d5a40}
+.notice.err{display:block}
+/* Visually hidden without off-screen offsets (offsets break RTL scrolling) */
+.hp,.skip:not(:focus){position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.skip:focus{position:fixed;top:8px;inset-inline-start:8px;z-index:50;background:#fff;padding:8px 12px}
+/* Mobile header: logo · language · menu. WhatsApp lives in the bottom action bar. */
+@media (max-width:960px){
+  .nav{gap:12px}
+  .nav .logo{margin-inline-end:auto;min-width:0}
+  .tools{order:2}
+  .burger{order:3;margin-inline-end:-10px}
+}
+@media (max-width:560px){
+  .nav .btn-wa{display:none}
+  .nav .logo small{letter-spacing:.08em}
+}
+.supply + h3,.foot-note + h3{margin-top:40px}

@@ -1,9 +1,13 @@
 .git
 .github
-data
-staticfiles
+.gitignore
+.dockerignore
+Dockerfile
+README.md
+status.md
+docs/
+data/
+staticfiles/
 **/__pycache__
 *.pyc
 .env
-README.md
-status.md

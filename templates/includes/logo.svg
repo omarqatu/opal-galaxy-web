@@ -1,0 +1,32 @@
+<svg viewBox="25 75 365 250" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <linearGradient id="opal-a" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8FD3E6"/>
+      <stop offset="0.5" stop-color="#74C4D9"/>
+      <stop offset="1" stop-color="#5AB6D1"/>
+    </linearGradient>
+    <radialGradient id="streak1-a" cx="0.3" cy="0.3" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="streak2-a" cx="0.7" cy="0.45" r="0.35">
+      <stop offset="0" stop-color="#F3D9B6" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#F3D9B6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+    <g id="mark" >
+    <!-- G: ring open at the right, with bar -->
+    <path id="g-full" d="M 344 143 A 100 100 0 1 0 362 200 L 298 200" fill="none" stroke="#0B1A2B" stroke-width="34" stroke-linecap="butt"/>
+    <circle cx="150" cy="200" r="83" fill="#FFFFFF"/>
+    <!-- O over G at the upper crossing -->
+    <circle cx="150" cy="200" r="100" fill="none" stroke="#FFFFFF" stroke-width="50"/>
+    <circle cx="150" cy="200" r="100" fill="none" stroke="#0B1A2B" stroke-width="34"/>
+    <!-- G back over O at the lower crossing (angles 105° to 145°) -->
+    <path d="M 253.284 299.856 A 100 100 0 0 1 180.085 257.595" fill="none" stroke="#FFFFFF" stroke-width="50"/>
+    <path d="M 258.510 300.176 A 100 100 0 0 1 175.397 250.237" fill="none" stroke="#0B1A2B" stroke-width="34"/>
+    <!-- Opal -->
+    <circle cx="150" cy="200" r="70" fill="url(#opal-a)"/>
+    <circle cx="150" cy="200" r="70" fill="url(#streak1-a)"/>
+    <circle cx="150" cy="200" r="70" fill="url(#streak2-a)"/>
+  </g>
+  </svg>

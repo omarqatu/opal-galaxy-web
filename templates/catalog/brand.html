@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% load opal %}
+{% block title %}{% if lang == 'ar' %}مكيفات {{ brand.name }} من Opal Galaxy، دبي{% else %}{{ brand.name }} air conditioning from Opal Galaxy, Dubai{% endif %}{% endblock %}
+{% block description %}{{ brand|tr:"about" }}{% endblock %}
+{% block content %}
+{% T "Brands" "العلامات التجارية" as blabel %}{% include "includes/crumbs.html" with parent_href=home_url|add:"#brands" parent_label=blabel current_label=brand.name %}
+<section class="page-hero"><div class="wrap"><div class="copy">
+  <h1>{% if lang == 'ar' %}{{ brand.name }} من Opal Galaxy{% else %}{{ brand.name }} from Opal Galaxy{% endif %}</h1>
+  <p class="lead">{{ brand|tr:"about" }}</p>
+  <div class="cta"><a class="btn btn-accent" href="#contact">{% if lang == 'ar' %}اطلب سعر {{ brand.name }}{% else %}Get a {{ brand.name }} price{% endif %}</a><a class="btn btn-wa" href="https://wa.me/{{ settings.core.CompanySettings.whatsapp }}?text={% if lang == 'ar' %}{{ 'مرحباً، أريد عرض سعر لمنتجات '|add:brand.name|urlencode }}{% else %}{{ 'Hello, I would like a quote for '|add:brand.name|urlencode }}{% endif %}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% T "WhatsApp" "واتساب" %}</span></a></div>
+  <div class="meta"><span>{% T "Origin:" "المنشأ:" %} <b>{{ brand|tr:"origin" }}</b></span><span>{% if lang == 'ar' %}<b>{{ supplies|length }}</b> أنواع من المنتجات{% else %}<b>{{ supplies|length }}</b> product types{% endif %}</span></div>
+</div><div class="art"><div style="font-size:clamp(40px,7vw,84px);font-weight:700;letter-spacing:-.02em;color:var(--primary);line-height:1">{{ brand.name }}</div></div></div></section>
+
+<section style="background:#fff"><div class="wrap">
+  <h2>{% if lang == 'ar' %}ما نورّده من {{ brand.name }}{% else %}What we supply from {{ brand.name }}{% endif %}</h2>
+  <p class="lead">{{ brand|tr:"line" }}</p>
+  <div class="supply">{% for s in supplies %}
+    <div class="row"><div><h3><a href="{{ s.category.get_url }}">{{ s.category|tr:"name" }}</a></h3><div class="sub"><span class="ltr">{{ s.category.capacity_range }}</span></div></div><div>
+      <p class="models"><span class="ltr">{{ s.models_text }}</span></p>
+      {% if s.pending %}<p class="pending">{% T "Models and capacities are confirmed on the quote." "الطرازات والسعات تؤكَّد في عرض السعر." %}</p>
+      {% elif s.spec_list %}<div class="spec">{% for x in s.spec_list %}<span>{{ x }}</span>{% endfor %}</div>{% endif %}
+    </div><a class="go" href="{{ s.category.get_url }}">{% T "About this product" "عن هذا النوع" %}</a></div>
+  {% endfor %}</div>
+  <p class="foot-note">{% T "Model availability changes by season and by distributor stock. Every quote names the exact model, capacity, refrigerant and lead time." "يتغير توفر الطرازات بحسب الموسم ومخزون الوكيل. يُحدَّد في كل عرض سعر الطراز الدقيق والسعة ونوع الغاز ومدة التوريد." %}</p>
+  <h3>{% T "Other brands" "علامات تجارية أخرى" %}</h3>
+  <div class="chips" style="margin-top:12px">{% for x in all_brands %}<a href="{{ x.get_url }}"{% if x.pk == brand.pk %} class="cur" aria-current="page"{% endif %}>{{ x.name }}</a>{% endfor %}</div>
+</div></section>
+{% endblock %}

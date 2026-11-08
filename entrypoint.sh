@@ -1,20 +1,35 @@
 #!/bin/sh
-# Start-up: fix volume ownership as root, then run everything as the unprivileged "app" user.
+# Prepare the database on every start: wait for it, migrate, seed an empty site,
+# create the admin user once (if env vars are set), then start the server.
 set -e
-mkdir -p "$DATA_DIR/media"
-chown -R app:app "$DATA_DIR"
 
-as_app() { setpriv --reuid=app --regid=app --init-groups "$@"; }
+python - <<'PY'
+import os, sys, time
+import django
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "opal.settings")
+django.setup()
+from django.db import connection
+for i in range(30):
+    try:
+        connection.ensure_connection(); break
+    except Exception as e:  # database container may still be starting
+        print(f"waiting for database ({i+1}/30): {e.__class__.__name__}", flush=True); time.sleep(2)
+else:
+    sys.exit("database not reachable")
+PY
 
-as_app python manage.py migrate --noinput
-as_app python manage.py seed_site          # no-op once the site has content
+python manage.py migrate --noinput
+python manage.py seed_site            # no-op once the site has content
 
 if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
-  as_app python manage.py createsuperuser --noinput \
-    --username "$DJANGO_SUPERUSER_USERNAME" --email "${DJANGO_SUPERUSER_EMAIL:-admin@example.com}" 2>/dev/null \
-    || echo "Admin user already exists — skipped."
+  python manage.py shell -c "
+import os
+from django.contrib.auth import get_user_model
+U = get_user_model(); n = os.environ['DJANGO_SUPERUSER_USERNAME']
+if not U.objects.filter(username=n).exists():
+    U.objects.create_superuser(n, os.environ.get('DJANGO_SUPERUSER_EMAIL', ''), os.environ['DJANGO_SUPERUSER_PASSWORD'])
+    print('admin user created:', n)
+"
 fi
 
-exec setpriv --reuid=app --regid=app --init-groups \
-  gunicorn opal.wsgi:application --bind 0.0.0.0:8000 \
-  --workers "${WEB_CONCURRENCY:-2}" --timeout 60 --access-logfile -
+exec "$@"

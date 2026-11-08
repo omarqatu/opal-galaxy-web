@@ -1,0 +1,66 @@
+{% extends "base.html" %}{% load opal wagtailimages_tags %}
+{% block title %}{{ page|tr:"seo_title"|default:page.title }}{% endblock %}
+{% block description %}{{ page|tr:"meta_description" }}{% endblock %}
+{% block content %}
+<section class="hero"><div class="wrap"><div class="copy">
+  <h1>{{ page|tr:"hero_title" }}</h1>
+  <p class="lead">{{ page|tr:"hero_lead" }}</p>
+  <div class="cta"><a class="btn btn-accent" href="#contact">{% T "Request a quote" "طلب عرض سعر" %}</a><a class="btn btn-outline" href="#products">{% T "Browse products" "استعراض المنتجات" %}</a></div>
+  <div class="brands-line"><span>{% T "We supply:" "العلامات التجارية:" %}</span>{% for b in nav_brands %}<b><a href="{{ b.get_url }}" style="text-decoration:none">{{ b.name }}</a></b>{% endfor %}</div>
+</div>
+{% if page.hero_image %}<figure>{% image page.hero_image width-960 format-webp as hero %}<img src="{{ hero.url }}" alt="{{ page|tr:'hero_alt' }}" width="{{ hero.width }}" height="{{ hero.height }}" fetchpriority="high"><figcaption><b>{{ page|tr:"hero_caption" }}</b><span>{{ page|tr:"hero_subcaption" }}</span></figcaption></figure>{% endif %}
+</div></section>
+
+{% if page.facts.all %}<div class="facts"><div class="wrap">{% for f in page.facts.all %}<div><b>{{ f|tr:"title" }}</b><span>{{ f|tr:"text" }}</span></div>{% endfor %}</div></div>{% endif %}
+
+<section id="products"><div class="wrap">
+  <h2>{{ page|tr:"products_title" }}</h2><p class="lead">{{ page|tr:"products_lead" }}</p>
+  <div class="prod-grid">{% for c in nav_categories %}
+    <a class="prod" href="{{ c.get_url }}">{% include "catalog/includes/cat_art.html" with c=c cls="prod-img" %}<h3>{{ c|tr:"name" }}</h3><span class="range">{{ c.capacity_range }}</span><p>{{ c|tr:"lead" }}</p><span class="brands">{% for s in c.supplies.all %}{{ s.brand.name }}{% if not forloop.last %} · {% endif %}{% endfor %}</span></a>
+  {% endfor %}</div>
+</div></section>
+
+<section id="brands" style="background:#fff;border-top:1px solid var(--stone)"><div class="wrap">
+  <h2>{{ page|tr:"brands_title" }}</h2><p class="lead">{{ page|tr:"brands_lead" }}</p>
+  <div class="brand-grid">{% for b in nav_brands %}
+    <a class="brand" href="{{ b.get_url }}"><h3>{{ b.name }}</h3><div class="origin">{{ b|tr:"line" }}</div><div class="cats">{% for c in b.categories %}{{ c|tr:"name" }}{% if not forloop.last %} <span>·</span> {% endif %}{% endfor %}</div></a>
+  {% endfor %}</div>
+</div></section>
+
+<section id="contractors" class="contractors"><div class="wrap"><div>
+  <h2>{{ page|tr:"contractors_title" }}</h2><p class="lead">{{ page|tr:"contractors_lead" }}</p>
+  <a class="btn btn-accent" href="#contact">{% T "Send your BOQ" "إرسال جدول الكميات" %}</a></div>
+  <ol>{% for p in page.contractor_points.all %}<li><b>{{ p|tr:"title" }}</b><span>{{ p|tr:"text" }}</span></li>{% endfor %}</ol>
+</div></section>
+
+<section id="install"><div class="wrap">
+  <h2>{{ page|tr:"install_title" }}</h2><p class="lead">{{ page|tr:"install_lead" }}</p>
+  <div class="steps">{% for s in page.install_steps.all %}<div class="step"><div class="k">{{ forloop.counter }}</div><h3>{{ s|tr:"title" }}</h3><p>{{ s|tr:"text" }}</p></div>{% endfor %}</div>
+  {% if page.install_link_en %}<p class="maint"><a href="{% lurl '/maintenance/' %}">{{ page|tr:"install_link" }}</a></p>{% endif %}
+</div></section>
+
+{% if page.gallery.all %}<section id="projects" class="projects"><div class="wrap">
+  <h2>{{ page|tr:"projects_title" }}</h2><p class="lead">{{ page|tr:"projects_lead" }}</p>
+  <div class="gallery">{% for g in page.gallery.all %}{% image g.image width-800 format-webp as im %}
+    <figure><img src="{{ im.url }}" alt="{{ g|tr:'alt' }}" width="{{ im.width }}" height="{{ im.height }}" loading="lazy"><figcaption><b>{{ g|tr:"caption" }}</b><span>{{ g|tr:"subcaption" }}</span></figcaption></figure>
+  {% endfor %}</div>
+</div></section>{% endif %}
+
+{% with s=settings.core.CompanySettings %}
+<section id="about" class="about"><div class="wrap"><div>
+  <h2>{{ page|tr:"about_title" }}</h2>
+  {% for p in page.about_paragraphs %}<p>{{ p }}</p>{% endfor %}
+</div><dl>
+  <dt>{% T "Address" "العنوان" %}</dt><dd class="ltr">{{ s.address }}</dd>
+  <dt>{% T "Hours" "الدوام" %}</dt><dd>{{ s|tr:"hours_full" }}</dd>
+  <dt>{% T "Phone / WhatsApp" "الهاتف / واتساب" %}</dt><dd class="ltr"><a href="tel:{{ s.phone }}">{{ s.phone_display|default:s.phone }}</a></dd>
+  {% if s.email %}<dt>{% T "Email" "البريد" %}</dt><dd class="ltr"><a href="mailto:{{ s.email }}">{{ s.email }}</a></dd>{% endif %}
+  {% if s.licence_en %}<dt>{% T "Licence" "الرخصة" %}</dt><dd>{{ s|tr:"licence" }}</dd>{% endif %}
+</dl></div></section>
+{% endwith %}
+
+{% if page.faqs.all %}<section id="faq" class="faq"><div class="wrap">
+  <h2>{{ page|tr:"faq_title" }}</h2><p class="lead">{{ page|tr:"faq_lead" }}</p>
+  <div class="faq-list">{% for f in page.faqs.all %}<details><summary>{{ f|tr:"question" }}</summary><p>{{ f|tr:"answer" }}</p></details>{% endfor %}</div>
+</div></section>{% endif %}
+{% endblock %}

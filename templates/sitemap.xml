@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">{% for p in paths %}
+  <url><loc>{{ base }}{{ p }}</loc><lastmod>{{ today|date:"Y-m-d" }}</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="{{ base }}{{ p }}"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="{{ base }}/ar{{ p }}"/></url>
+  <url><loc>{{ base }}/ar{{ p }}</loc><lastmod>{{ today|date:"Y-m-d" }}</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="{{ base }}{{ p }}"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="{{ base }}/ar{{ p }}"/></url>{% endfor %}
+</urlset>

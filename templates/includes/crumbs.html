@@ -1,0 +1,1 @@
+{% load opal %}<nav class="crumbs wrap" aria-label="{% T 'Breadcrumb' 'مسار التنقل' %}"><span><a href="{{ home_url }}">{% T "Home" "الرئيسية" %}</a></span>{% if parent_href %}<span><a href="{{ parent_href }}">{{ parent_label }}</a></span>{% endif %}<span><b>{{ current_label }}</b></span></nav>

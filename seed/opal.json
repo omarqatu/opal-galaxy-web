@@ -1,0 +1,1420 @@
+{
+ "company": {
+  "legal_name": "Opal Galaxy Air Condition Trading L.L.C",
+  "short_name": "OPAL GALAXY",
+  "tagline": {
+   "en": "AIR CONDITION TRADING",
+   "ar": "لتجارة مكيفات الهواء"
+  },
+  "phone": "+971541981593",
+  "phone_display": "+971 54 198 1593",
+  "whatsapp": "971541981593",
+  "email": "opalgalaxyac@gmail.com",
+  "address": "St152 – Port Saeed, Deira, Dubai – UAE",
+  "hours_short": {
+   "en": "Saturday – Thursday 8:00 – 18:00",
+   "ar": "السبت – الخميس 8:00 – 18:00"
+  },
+  "hours_full": {
+   "en": "Saturday – Thursday, 8:00 – 18:00 · Sunday closed",
+   "ar": "السبت – الخميس، 8:00 – 18:00 · الأحد عطلة"
+  },
+  "licence": {
+   "en": "Dubai Department of Economy and Tourism",
+   "ar": "دائرة الاقتصاد والسياحة – دبي"
+  },
+  "footer_about": {
+   "en": "Opal Galaxy Air Condition Trading L.L.C — air-conditioning supplier for contractors, projects and villas in the UAE.",
+   "ar": "Opal Galaxy Air Condition Trading L.L.C — شركة توريد أنظمة تكييف للمقاولين والمشاريع والفلل في دولة الإمارات."
+  },
+  "domain_label": "opalgalaxy.ae",
+  "quote_reply": {
+   "en": "Fill the form or send your BOQ on WhatsApp. We reply within one working day.",
+   "ar": "يُرجى تعبئة النموذج أو إرسال جدول الكميات عبر واتساب، وسنوافيكم بالرد خلال يوم عمل واحد."
+  }
+ },
+ "brands": [
+  {
+   "slug": "carrier",
+   "name": "Carrier",
+   "origin": {
+    "en": "United States",
+    "ar": "الولايات المتحدة"
+   },
+   "line": {
+    "en": "For commercial projects and multi-storey buildings",
+    "ar": "للمشاريع التجارية والمباني متعددة الطوابق"
+   },
+   "about": {
+    "en": "Carrier covers the whole range we supply, from a 1-ton wall split to chilled-water plant. Carrier Middle East publishes the full lineup for the UAE, including the older R22 series that some specifications still call for, and backs it with submittal documents consultants accept without discussion.",
+    "ar": "تغطي Carrier كامل النطاق الذي نورّده، من وحدة جدارية بسعة طن واحد إلى معدات المياه المبرّدة. تنشر Carrier الشرق الأوسط التشكيلة الكاملة لدولة الإمارات، بما فيها سلاسل R22 القديمة التي ما زالت بعض المواصفات تشترطها، وتدعمها بمستندات اعتماد يقبلها الاستشاريون دون نقاش."
+   }
+  },
+  {
+   "slug": "o-general",
+   "name": "O General",
+   "origin": {
+    "en": "Japan (Fujitsu General)",
+    "ar": "اليابان (Fujitsu General)"
+   },
+   "line": {
+    "en": "The villa favourite in the UAE",
+    "ar": "الخيار الأكثر طلباً للفلل في الإمارات"
+   },
+   "about": {
+    "en": "O General is the brand most villa owners ask for by name, and has been in the Middle East market since 1971. The 2026 UAE lineup runs on R32 inverter technology rated to 55 °C: wall, ducted and cassette splits from 12,000 to 60,000 BTU, window units, and the AIRSTAGE VRF family from the compact J-III Tropical to the 80-HP VC-V cooling-only system.",
+    "ar": "O General هي العلامة التي يطلبها معظم أصحاب الفلل بالاسم، والحاضرة في سوق الشرق الأوسط منذ عام 1971. تعتمد تشكيلة الإمارات لعام 2026 على تقنية Inverter بغاز R32 مصنّفة حتى 55 °م: وحدات جدارية ومخفية وكاسيت من 12,000 إلى 60,000 BTU، ووحدات شباك، وعائلة AIRSTAGE لأنظمة VRF من J-III Tropical الصغيرة حتى منظومة VC-V للتبريد فقط بسعة 80 HP."
+   }
+  },
+  {
+   "slug": "midea",
+   "name": "Midea",
+   "origin": {
+    "en": "China",
+    "ar": "الصين"
+   },
+   "line": {
+    "en": "The value choice for residential and commercial projects",
+    "ar": "الخيار الاقتصادي للمشاريع السكنية والتجارية"
+   },
+   "about": {
+    "en": "Midea Building Technologies supplies VRF systems with a complete controls family: wired and central controllers, gateways and monitoring software. Indoor and outdoor unit data for the UAE is confirmed on each quote.",
+    "ar": "تورّد Midea Building Technologies أنظمة VRF مع عائلة كاملة من أنظمة التحكم: متحكمات سلكية ومركزية وبوابات وبرمجيات مراقبة. تؤكَّد بيانات الوحدات الداخلية والخارجية لدولة الإمارات في كل عرض سعر."
+   }
+  },
+  {
+   "slug": "mitsubishi-electric",
+   "name": "Mitsubishi Electric",
+   "origin": {
+    "en": "Japan",
+    "ar": "اليابان"
+   },
+   "line": {
+    "en": "For hotels and buildings that need VRF and high efficiency",
+    "ar": "للفنادق والمباني التي تتطلب أنظمة VRF وكفاءة عالية"
+   },
+   "about": {
+    "en": "City Multi is the VRF reference for hotels and offices: the R2 series cools and heats different zones at once with heat recovery, and the Y series serves straightforward cooling-or-heating buildings. Specified when efficiency and zoning matter more than first cost.",
+    "ar": "City Multi هو المرجع في أنظمة VRF للفنادق والمكاتب: سلسلة R2 تبرّد وتدفّئ مناطق مختلفة في آن واحد مع استرجاع الحرارة، وسلسلة Y تخدم المباني التي تحتاج التبريد أو التدفئة. تُحدَّد حين تكون الكفاءة والتقسيم أهم من الكلفة الأولية."
+   }
+  },
+  {
+   "slug": "super-general",
+   "name": "Super General",
+   "origin": {
+    "en": "UAE",
+    "ar": "الإمارات"
+   },
+   "line": {
+    "en": "Economical and reliable for apartments and housing projects",
+    "ar": "خيار اقتصادي وموثوق للشقق والمشاريع السكنية"
+   },
+   "about": {
+    "en": "A UAE brand with wide after-sales reach. Wall splits from 18,000 to 36,000 BTU in inverter, rotary, reciprocating and scroll compressor versions; ducted units from 18,000 to 60,000 BTU and cassettes from 36,000 to 48,000 BTU in inverter and fixed-speed series; plus window and portable units for housing and staff accommodation.",
+    "ar": "علامة إماراتية ذات انتشار واسع في خدمة ما بعد البيع. وحدات جدارية من 18,000 إلى 36,000 BTU بضواغط Inverter وRotary وReciprocating وScroll؛ ووحدات مخفية من 18,000 إلى 60,000 BTU وكاسيت من 36,000 إلى 48,000 BTU بسلاسل Inverter وسرعة ثابتة؛ إضافة إلى وحدات الشباك والمتنقلة للمشاريع السكنية وسكن العمال."
+   }
+  },
+  {
+   "slug": "westpoint",
+   "name": "Westpoint",
+   "origin": {
+    "en": "Europe · UAE distribution",
+    "ar": "أوروبا · توزيع في الإمارات"
+   },
+   "line": {
+    "en": "An inverter-led range at volume pricing for residential projects",
+    "ar": "تشكيلة يغلب عليها Inverter بأسعار الكميات للمشاريع السكنية"
+   },
+   "about": {
+    "en": "Westpoint covers residential and light-commercial air conditioning in one catalogue: wall, window, duct, cassette, floor-ceiling and floor-standing units, plus an air-cooled chiller. Most split ranges are inverter on R32 with A++ ratings; window units use T3 rotary or piston compressors. A practical choice when a project needs one brand across every unit type.",
+    "ar": "تغطي Westpoint التكييف السكني والتجاري الخفيف في كتالوج واحد: وحدات جدارية وشباك ومخفية وكاسيت وأرضية-سقفية وعمودية، إضافة إلى شيلر مبرّد بالهواء. معظم الوحدات المنفصلة تعمل بتقنية Inverter بغاز R32 وتصنيف A++، أما وحدات الشباك فتعمل بضواغط Rotary أو Piston مصنّفة T3. خيار عملي حين يحتاج المشروع علامة واحدة لجميع أنواع الوحدات."
+   }
+  },
+  {
+   "slug": "coolex",
+   "name": "Coolex",
+   "origin": {
+    "en": "Kuwait",
+    "ar": "الكويت"
+   },
+   "line": {
+    "en": "Gulf-built, certified equipment for projects: ducted, package, chillers, precision cooling and VRF",
+    "ar": "معدات خليجية الصنع ومعتمدة للمشاريع: مخفية ومجمّعة وشيلرات وتبريد دقيق وVRF"
+   },
+   "about": {
+    "en": "Coolex is the Gulf-built option: manufactured in Kuwait by RIC since 1986, rated for 52 – 55 °C ambient, with UL, AHRI and Eurovent certification across the range. Inverter ducted splits, PNGv package units, air-cooled chillers, fan coils, precision cooling for data rooms, condensing units and the IVCF VRF series.",
+    "ar": "Coolex هي الخيار خليجي الصنع: تصنّعها RIC في الكويت منذ 1986، مصنّفة لحرارة محيطة 52 – 55 °م، وحاصلة على شهادات UL وAHRI وEurovent عبر التشكيلة. وحدات مخفية Inverter، ووحدات مجمّعة PNGv، وشيلرات هوائية، وفان كويل، وتبريد دقيق لغرف البيانات، ووحدات تكثيف، وسلسلة IVCF لأنظمة VRF."
+   }
+  }
+ ],
+ "categories": [
+  {
+   "slug": "wall",
+   "name": {
+    "en": "Wall mounted split",
+    "ar": "وحدات جدارية"
+   },
+   "range": "9,000 – 36,000 BTU",
+   "lead": {
+    "en": "The everyday unit for rooms, apartments and small offices: indoor unit on the wall, condenser outside, no ductwork.",
+    "ar": "الوحدة الأكثر شيوعاً للغرف والشقق والمكاتب الصغيرة: وحدة داخلية على الجدار ووحدة خارجية، دون مجارٍ للهواء."
+   },
+   "image": "cat-wall.webp",
+   "icon": "",
+   "know": [
+    {
+     "title": {
+      "en": "Inverter or fixed speed",
+      "ar": "Inverter أو سرعة ثابتة"
+     },
+     "text": {
+      "en": "Inverter units vary compressor speed with the load and cost less to run. Fixed-speed units are simpler and cheaper to buy.",
+      "ar": "وحدات Inverter تغيّر سرعة الضاغط بحسب الحمل وتستهلك طاقة أقل، ووحدات السرعة الثابتة أبسط وأقل سعراً عند الشراء."
+     }
+    },
+    {
+     "title": {
+      "en": "Sizing",
+      "ar": "تقدير السعة"
+     },
+     "text": {
+      "en": "Roughly 12,000 BTU per 12 – 15 m² in a UAE villa; sun-facing rooms and glass fronts need more. We size from the plan.",
+      "ar": "تقريباً 12,000 BTU لكل 12 – 15 م² في الفلل الإماراتية، وتزيد للغرف المواجهة للشمس والواجهات الزجاجية. نقدّر السعة من المخطط."
+     }
+    },
+    {
+     "title": {
+      "en": "Refrigerant",
+      "ar": "غاز التبريد"
+     },
+     "text": {
+      "en": "Newer ranges run on R32; R410A and R22 are still supplied where a project specifies them. The quote states the gas for every model.",
+      "ar": "الطرازات الأحدث تعمل بغاز R32، ويُورَّد R410A وR22 حيث تشترطهما المواصفات. يُذكر نوع الغاز في عرض السعر لكل طراز."
+     }
+    }
+   ],
+   "supply": [
+    {
+     "brand": "carrier",
+     "models": "Optimax™ Pro 38KHCT/42KHCT · Creation™ Pro 38KHB/42KHB · Xpression™ Pro 38KHL/42KHL · Inverter 38QHA/42QHA · Optimax 38QHCT · Xpression 38XPL",
+     "specs": [
+      "1 – 3 ton",
+      "R410A · R22 (Optimax, Xpression)",
+      "EER 10.00 – 14.00"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "westpoint",
+     "models": "BREEZE ONE 9/12/18/24k BTU · AIR COLOR black / blue · AIR EDGE · AIR BREEZE",
+     "specs": [
+      "9,000 – 24,000 BTU",
+      "R32 (BREEZE ONE)",
+      "Inverter · A++ / A+++"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "super-general",
+     "models": "Split 18,000 · 24,000 · 30,000 · 36,000 BTU",
+     "specs": [
+      "1.5 – 3 ton",
+      "Inverter · Rotary · Reciprocating · Scroll"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "coolex",
+     "models": "Wall Mounted Inverter Units",
+     "specs": [
+      "Inverter"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "o-general",
+     "models": "Inverter R32: ASGH 18 – 36 CXTA · Handy ASGG 12 – 36 CMTA · Fixed speed R410A: ASGA 18 – 36 FUTD / FUTA",
+     "specs": [
+      "12,000 – 36,000 BTU",
+      "R32 inverter rated to 55 °C · R410A fixed speed to 52 °C",
+      "T1 EER to 13.64 · T3 rated at 46 °C · blue fin · AIRSTAGE Mobile Wi-Fi"
+     ],
+     "pending": false
+    }
+   ]
+  },
+  {
+   "slug": "window",
+   "name": {
+    "en": "Window units",
+    "ar": "وحدات شباك"
+   },
+   "range": "18,000 – 27,000 BTU",
+   "lead": {
+    "en": "A single unit through the wall or window. The lowest-cost option for staff accommodation, shops and rooms with no space for an outdoor unit.",
+    "ar": "وحدة واحدة تُركَّب في الجدار أو النافذة. الخيار الأقل كلفة لسكن العمال والمحال والغرف التي لا تتسع لوحدة خارجية."
+   },
+   "image": "cat-window.webp",
+   "icon": "",
+   "know": [
+    {
+     "title": {
+      "en": "Where it fits",
+      "ar": "أين تناسب"
+     },
+     "text": {
+      "en": "Labour camps, guard rooms, kiosks and retrofits where running copper pipe is not practical.",
+      "ar": "سكن العمال وغرف الحراسة والأكشاك، وأعمال الاستبدال التي يصعب فيها تمديد الأنابيب النحاسية."
+     }
+    },
+    {
+     "title": {
+      "en": "Opening size",
+      "ar": "فتحة التركيب"
+     },
+     "text": {
+      "en": "The wall opening must match the chassis; we confirm dimensions before delivery so replacements drop in.",
+      "ar": "يجب أن تطابق فتحة الجدار هيكل الوحدة، ونؤكد الأبعاد قبل التوريد ليتم الاستبدال دون أعمال إضافية."
+     }
+    },
+    {
+     "title": {
+      "en": "Batches",
+      "ar": "الكميات"
+     },
+     "text": {
+      "en": "Usually ordered in tens for accommodation; staged delivery to site is available.",
+      "ar": "تُطلب عادةً بالعشرات لمشاريع السكن، مع إمكانية التوريد على دفعات إلى الموقع."
+     }
+    }
+   ],
+   "supply": [
+    {
+     "brand": "westpoint",
+     "models": "AIR FRAME · Rotary: WWT-1815TYA · 1821 / 1823 LTYA · 2415TYA · 2419 LTYH · Piston: WWT-1817 / 2417 KRT",
+     "specs": [
+      "18,000 – 24,000 BTU (1.5 – 2 ton)",
+      "T3 rotary compressor · piston option (KRT series)",
+      "T3 capacity up to 17,000 BTU (24k model)"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "super-general",
+     "models": "Rotary: SGA-19 / 25 HE · SGA19AE · SGA24AE · SGA1919FE · SGA19-42HE · Reciprocating: SGA-192 / 252 SE-1 · SGA-248-HE · Inverter: SGA24i",
+     "specs": [
+      "18,000 – 24,000 BTU (1.5 – 2 ton)",
+      "T3 rotary or reciprocating compressor · inverter (new SGA24i)",
+      "R410A · T3 capacity to 15,800 BTU (18k model) · 5-year compressor warranty (SE series)"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "o-general",
+     "models": "ALGA24AAT / ALGA27AAT · AXGS18ABTH / AXGS24ABTH",
+     "specs": [
+      "18,000 – 27,000 BTU",
+      "Hyper Tropical spec · non-stop operation under high ambient",
+      "Single phase"
+     ],
+     "pending": false
+    }
+   ]
+  },
+  {
+   "slug": "ducted",
+   "name": {
+    "en": "Ducted split",
+    "ar": "وحدات مخفية (Ducted)"
+   },
+   "range": "1 – 28 ton",
+   "lead": {
+    "en": "The villa standard: a concealed indoor unit above the false ceiling feeding diffusers through ductwork, one condenser per zone outside.",
+    "ar": "الخيار الأساسي للفلل: وحدة داخلية مخفية فوق السقف المستعار تغذي فتحات التوزيع عبر مجاري الهواء، ووحدة خارجية لكل منطقة."
+   },
+   "image": "cat-ducted.webp",
+   "icon": "",
+   "know": [
+    {
+     "title": {
+      "en": "Static pressure",
+      "ar": "الضغط الساكن"
+     },
+     "text": {
+      "en": "Long duct runs and many diffusers need medium or high static units. We match the static to the duct design, not just the tonnage.",
+      "ar": "المجاري الطويلة وكثرة فتحات التوزيع تحتاج وحدات بضغط ساكن متوسط أو عالٍ. نطابق الضغط مع تصميم المجاري لا مع السعة فقط."
+     }
+    },
+    {
+     "title": {
+      "en": "T3 for the UAE",
+      "ar": "تصنيف T3"
+     },
+     "text": {
+      "en": "Rated at 46 °C outdoor, versus T1 at 35 °C. We supply T3 or tropical-rated units so capacity holds in August.",
+      "ar": "مختبرة عند 46 °م خارجياً مقابل T1 عند 35 °م. نورّد وحدات T3 أو الاستوائية ليستمر الأداء في ذروة الصيف."
+     }
+    },
+    {
+     "title": {
+      "en": "Villa packages",
+      "ar": "حزم الفلل"
+     },
+     "text": {
+      "en": "A typical 4-bedroom villa takes 5 – 7 ducted units of 2 – 5 ton. Send the HVAC drawing and we price the full set.",
+      "ar": "الفيلا بأربع غرف نوم تحتاج عادةً 5 – 7 وحدات مخفية بسعة 2 – 5 طن. أرسل مخطط التكييف ونسعّر المجموعة كاملة."
+     }
+    }
+   ],
+   "supply": [
+    {
+     "brand": "carrier",
+     "models": "38CKP/42TPM · PowerCOOL 38PK/FB4P · ClassiCOOL 38KD/42KD · 38CKM/FB4C · PowerCOOL 38AUM/40RUM",
+     "specs": [
+      "1 – 15 ton",
+      "R410A",
+      "EER 11.20 – 13.10"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "westpoint",
+     "models": "PURE FLOW 30,000 · 60,000 BTU",
+     "specs": [
+      "2.5 – 5 ton",
+      "R410A"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "coolex",
+     "models": "Concealed Ducted Split Inverter CIDC/CIDE 018 – 060 · Concealed Ducted Split · Compact Series NGCF/NGEF (R410A) and NGCC/NGEC (R407C) 076 – 340 (tropical ducted split)",
+     "specs": [
+      "Inverter 1.5 – 5 ton (18 – 60 MBH) · Full DC · low / medium / high static · outdoor to 55 °C",
+      "Compact Series 6.3 – 28.3 ton (76 – 340 MBH) · R410A or R407C · tropical hermetic compressor · rated to 125 °F"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "o-general",
+     "models": "Inverter R32: ARGG 18 – 60 CLTA / CMTA · slim ARGH 18 – 60 CMTA (240 mm indoor) · Fixed speed R410A: ARGA 18 / 25 / 30 FMTA · ARGA 36 FMTB · 45 FMTD · 60 FHTB",
+     "specs": [
+      "1.5 – 5 ton (18,000 – 60,000 BTU)",
+      "External static 30 – 150 Pa, set from the remote controller · 48 / 60k 3-phase",
+      "R32 inverter rated to 55 °C · R410A fixed speed to 52 °C · T3 rated at 46 °C"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "midea",
+     "models": "Large Splits R410A outdoor units (duct): T3 cooling only MOV-76 / 96 / 120 C and MOVTA-96 · T1 heat pump MOV-120 / 150 / 192 H and MOVG1-76 / 96 HD · side discharge MHC-96 (single phase)",
+     "specs": [
+      "T3 cooling 20 – 35 kW (approx. 6 – 10 ton) · T1 heat pump to 192 size (approx. 15 ton, 3 scroll compressors)",
+      "R410A · scroll · 380 – 415 V 3-phase 50 Hz (76 – 96 C also 208 – 230 V 60 Hz) · T3 tropical rating",
+      "Indoor static pressure 0 – 150 Pa (MHC-96)"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "super-general",
+     "models": "Inverter: SGDI 1830 / 2430 / 3030 / 3630 / 4830 / 6030 AE · Fixed speed: SGDA 1810 / 2410 / 3010 / 3610 / 4810 / 6010 HE",
+     "specs": [
+      "18,000 – 60,000 BTU (1.5 – 5 ton)",
+      "Inverter (SGDI) or fixed speed rotary / twin-rotary / scroll (SGDA)",
+      "R410A · 36k model single-phase 220 – 240 V"
+     ],
+     "pending": false
+    }
+   ]
+  },
+  {
+   "slug": "cassette",
+   "name": {
+    "en": "Cassette",
+    "ar": "كاسيت"
+   },
+   "range": "9,000 – 60,000 BTU",
+   "lead": {
+    "en": "Flush with the ceiling, four-way air throw. The standard choice for shops, offices, clinics and majlis rooms with a false ceiling.",
+    "ar": "تُركَّب داخل السقف وتوزّع الهواء في أربعة اتجاهات. الخيار المعتاد للمحال والمكاتب والعيادات والمجالس ذات السقف المستعار."
+   },
+   "image": "cat-cassette.webp",
+   "icon": "",
+   "know": [
+    {
+     "title": {
+      "en": "Compact or standard",
+      "ar": "مدمج أو قياسي"
+     },
+     "text": {
+      "en": "Compact cassettes fit a 600 × 600 tile for small rooms; standard cassettes cover halls and open offices.",
+      "ar": "الكاسيت المدمج يناسب بلاطة 600 × 600 للغرف الصغيرة، والقياسي يغطي القاعات والمكاتب المفتوحة."
+     }
+    },
+    {
+     "title": {
+      "en": "Ceiling depth",
+      "ar": "عمق السقف"
+     },
+     "text": {
+      "en": "Most units need 250 – 300 mm above the tile plus drain fall. We check the void before quoting.",
+      "ar": "تحتاج معظم الوحدات إلى 250 – 300 مم فوق البلاطة إضافة إلى ميل التصريف. نتحقق من الفراغ قبل التسعير."
+     }
+    },
+    {
+     "title": {
+      "en": "Condensate",
+      "ar": "تصريف المياه"
+     },
+     "text": {
+      "en": "Built-in lift pumps allow drainage over longer runs; useful in retail fit-outs.",
+      "ar": "مضخات الرفع المدمجة تتيح التصريف لمسافات أطول، وهي مفيدة في تجهيزات المحال."
+     }
+    }
+   ],
+   "supply": [
+    {
+     "brand": "carrier",
+     "models": "Décor™ Pro 38KTD/42KTD",
+     "specs": [
+      "2 – 4 ton",
+      "R410A",
+      "EER 11.70 – 12.37"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "westpoint",
+     "models": "AIR CLOUD A++ (60 × 60 and 90 × 90 cm cassettes) · FLOW CORE 18,000 · 60,000 BTU",
+     "specs": [
+      "9,000 – 60,000 BTU",
+      "Inverter · SEER to 6.8 (A++) · SCOP to 4.1 (A+) · R32 (FLOW CORE)",
+      "4D 360° air flow · UV-C and ionizer · Wi-Fi · refrigerant leak detection"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "coolex",
+     "models": "Cassette Units",
+     "specs": [],
+     "pending": false
+    },
+    {
+     "brand": "o-general",
+     "models": "Inverter R32 circular flow: AUGG 18 – 54 CRTA · Fixed speed R410A: AUGA 18 / 25 / 30 / 36 FRTA",
+     "specs": [
+      "18,000 – 54,000 BTU · 840 × 840 mm 4-way circular flow",
+      "R32 inverter rated to 55 °C · 45 / 54k 3-phase",
+      "T1 EER to 13.64 · individual louver control · blue fin and PCB coating"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "super-general",
+     "models": "Inverter: SGCA 3600i · 4800i (cool & heat) · Fixed speed: SGCA-HE (SGCA3600HE) · SGCA-SE (SGCA4800SE)",
+     "specs": [
+      "36,000 – 48,000 BTU (3 – 4 ton)",
+      "T3 inverter — 38,400 BTU at T3 (48k model) · or fixed speed",
+      "R410A · 4-way cassette · 36k single-phase 220 – 240 V"
+     ],
+     "pending": false
+    }
+   ]
+  },
+  {
+   "slug": "floor-ceiling",
+   "name": {
+    "en": "Floor / ceiling",
+    "ar": "أرضية – سقفية"
+   },
+   "range": "24,000 – 60,000 BTU",
+   "lead": {
+    "en": "One unit that mounts low on the wall or under the ceiling. For halls, showrooms and rooms with no false ceiling.",
+    "ar": "وحدة واحدة تُركَّب أسفل الجدار أو تحت السقف. للقاعات وصالات العرض والغرف التي لا تحتوي سقفاً مستعاراً."
+   },
+   "image": "cat-floor-ceiling.webp",
+   "icon": "",
+   "know": [
+    {
+     "title": {
+      "en": "Two mounting positions",
+      "ar": "وضعان للتركيب"
+     },
+     "text": {
+      "en": "The same chassis mounts on the floor or at ceiling level, so the position can follow the room.",
+      "ar": "الهيكل نفسه يُركَّب على الأرض أو عند مستوى السقف، فيتبع موضعه شكل الغرفة."
+     }
+    },
+    {
+     "title": {
+      "en": "Throw",
+      "ar": "مدى الهواء"
+     },
+     "text": {
+      "en": "Long horizontal throw suits deep rooms where a cassette would short-cycle.",
+      "ar": "مدى الهواء الأفقي الطويل يناسب الغرف العميقة التي لا يغطيها الكاسيت."
+     }
+    },
+    {
+     "title": {
+      "en": "Exposed unit",
+      "ar": "وحدة ظاهرة"
+     },
+     "text": {
+      "en": "The casing is visible, so finish and noise level matter more than in concealed units.",
+      "ar": "الوحدة ظاهرة، لذلك يكون للشكل ومستوى الضجيج أهمية أكبر مقارنة بالوحدات المخفية."
+     }
+    }
+   ],
+   "supply": [
+    {
+     "brand": "westpoint",
+     "models": "FLOW AIR 24,000 · 60,000 BTU",
+     "specs": [
+      "2 – 5 ton",
+      "R32",
+      "Inverter · A++"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "o-general",
+     "models": "ABG24ABAJX (indoor ABG24ABAJ · outdoor AOG24ADTH) · Tropical Spec",
+     "specs": [
+      "24,000 BTU class · 23,200 – 23,600 BTU (6.8 – 6.9 kW) cooling only",
+      "R22 · 240 – 220 V single-phase 50 Hz · EER 2.58 – 2.69",
+      "530 CFM · indoor 199 × 990 × 655 mm"
+     ],
+     "pending": false
+    }
+   ]
+  },
+  {
+   "slug": "floor-standing",
+   "name": {
+    "en": "Floor standing",
+    "ar": "وحدات عمودية"
+   },
+   "range": "36,000 – 60,000 BTU",
+   "lead": {
+    "en": "A tall cabinet unit on the floor. Majlis rooms, halls and tents where ceiling work is not an option.",
+    "ar": "وحدة عمودية على الأرض. للمجالس والقاعات والخيام حيث لا تتوفر إمكانية العمل في السقف."
+   },
+   "image": "cat-floor-standing.webp",
+   "icon": "",
+   "know": [
+    {
+     "title": {
+      "en": "No ceiling work",
+      "ar": "دون أعمال سقف"
+     },
+     "text": {
+      "en": "Installs against a wall with a short pipe run; the fastest high-capacity option for an occupied space.",
+      "ar": "تُركَّب على الجدار بتمديد قصير، وهي الخيار الأسرع للسعات العالية في المساحات المأهولة."
+     }
+    },
+    {
+     "title": {
+      "en": "Capacity",
+      "ar": "السعة"
+     },
+     "text": {
+      "en": "3 – 5 ton per unit; two units handle most majlis layouts.",
+      "ar": "3 – 5 طن للوحدة، ووحدتان تكفيان لمعظم تصاميم المجالس."
+     }
+    },
+    {
+     "title": {
+      "en": "Floor space",
+      "ar": "المساحة الأرضية"
+     },
+     "text": {
+      "en": "Allow roughly 0.5 m² and a clear front for airflow.",
+      "ar": "يُحسب نحو 0.5 م² مع فراغ أمامي لتدفق الهواء."
+     }
+    }
+   ],
+   "supply": [
+    {
+     "brand": "carrier",
+     "models": "Comfort™ Pro 38SL/42SL · Comfort™ 38SD/42SD",
+     "specs": [
+      "3 – 5 ton",
+      "R410A · R22 (Comfort)"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "westpoint",
+     "models": "AIR TOWER A++ 48,000 BTU · ICE TOWER 36,000 BTU",
+     "specs": [
+      "3 – 4 ton",
+      "R410A (ICE TOWER)",
+      "Cooling and heating (AIR TOWER)"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "o-general",
+     "models": "Floor standing",
+     "specs": [
+      "Specifications on request"
+     ],
+     "pending": false
+    }
+   ]
+  },
+  {
+   "slug": "package",
+   "name": {
+    "en": "Package / rooftop",
+    "ar": "وحدات مجمّعة (Package)"
+   },
+   "range": "3 – 100 ton",
+   "lead": {
+    "en": "Compressor, coil and fan in one rooftop cabinet, ducted into the building. Commercial buildings, warehouses, mosques and labour camps.",
+    "ar": "الضاغط والملف والمروحة في هيكل واحد على السطح يُوصَل بمجاري الهواء. للمباني التجارية والمستودعات والمساجد وسكن العمال."
+   },
+   "image": "cat-package.webp",
+   "icon": "",
+   "know": [
+    {
+     "title": {
+      "en": "One lift, one connection",
+      "ar": "رفعة واحدة وتوصيل واحد"
+     },
+     "text": {
+      "en": "No refrigerant piping on site: the unit arrives charged and connects to the duct and power only.",
+      "ar": "لا تمديدات لغاز التبريد في الموقع: تصل الوحدة مشحونة وتُوصل بمجاري الهواء والكهرباء فقط."
+     }
+    },
+    {
+     "title": {
+      "en": "Fresh air",
+      "ar": "الهواء النقي"
+     },
+     "text": {
+      "en": "Fresh-air package units bring in treated outside air for mosques, halls and kitchens.",
+      "ar": "وحدات الهواء النقي المجمّعة تُدخل هواءً خارجياً معالَجاً للمساجد والقاعات والمطابخ."
+     }
+    },
+    {
+     "title": {
+      "en": "Crane and curb",
+      "ar": "الرافعة والقاعدة"
+     },
+     "text": {
+      "en": "We coordinate the crane slot and confirm the roof curb dimensions with your contractor.",
+      "ar": "ننسّق موعد الرافعة ونؤكد أبعاد القاعدة على السطح مع المقاول."
+     }
+    }
+   ],
+   "supply": [
+    {
+     "brand": "carrier",
+     "models": "Desert Master™ 50ZPM · 50TCM · 50TJM",
+     "specs": [
+      "3 – 27 ton",
+      "R410A",
+      "EER / SEER 10.48 – 12.2"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "coolex",
+     "models": "Rooftop Package Inverter CIPK 048 – 120 · Rooftop Package PNGF 048 – 350 · PNGv 076 – 300 · SPU 420 – 1200 · Fresh Air Package Unit (FAPU)",
+     "specs": [
+      "CIPK 4 – 10 ton · Full DC inverter",
+      "PNGF 4 – 29 ton · R410A · UL listed · PNGv 6 – 25 ton · R410A · AHRI 210/240 and 340/360",
+      "SPU 35 – 100 ton · tropical hermetic compressor",
+      "Rated to 52 °C ambient; FAPU to 125 °F with two circuits from 12.5 ton"
+     ],
+     "pending": false
+    }
+   ]
+  },
+  {
+   "slug": "vrf",
+   "name": {
+    "en": "VRF systems",
+    "ar": "أنظمة VRF"
+   },
+   "range": "4 – 80 HP per system",
+   "lead": {
+    "en": "One outdoor system serving many indoor units on a single refrigerant circuit, each zone controlled on its own. Hotels, towers, offices and compounds.",
+    "ar": "منظومة خارجية واحدة تخدم عدة وحدات داخلية على دائرة تبريد واحدة، مع تحكم مستقل لكل منطقة. للفنادق والأبراج والمكاتب والمجمعات."
+   },
+   "image": "cat-vrf.webp",
+   "icon": "",
+   "know": [
+    {
+     "title": {
+      "en": "Heat recovery",
+      "ar": "استرجاع الحرارة"
+     },
+     "text": {
+      "en": "Heat-recovery systems cool and heat different zones at the same time; heat-pump systems do one or the other per circuit.",
+      "ar": "أنظمة استرجاع الحرارة تبرّد وتدفّئ مناطق مختلفة في الوقت نفسه، أما أنظمة المضخة الحرارية فتقوم بأحدهما لكل دائرة."
+     }
+    },
+    {
+     "title": {
+      "en": "Indoor lineup",
+      "ar": "الوحدات الداخلية"
+     },
+     "text": {
+      "en": "Compact cassette, cassette, ducted, wall and floor units on the same outdoor system.",
+      "ar": "كاسيت مدمج وكاسيت ومخفي وجداري وأرضي على المنظومة الخارجية نفسها."
+     }
+    },
+    {
+     "title": {
+      "en": "Controls",
+      "ar": "أنظمة التحكم"
+     },
+     "text": {
+      "en": "Wired and central controllers, BMS gateways and monitoring software, specified with the system.",
+      "ar": "متحكمات سلكية ومركزية وبوابات BMS وبرمجيات مراقبة، تُحدَّد مع المنظومة."
+     }
+    }
+   ],
+   "supply": [
+    {
+     "brand": "carrier",
+     "models": "XPower VRF",
+     "specs": [
+      "4 – 56 HP (single unit 4 – 20 HP)",
+      "R410A",
+      "−20 °C to 52 °C · up to 64 indoor units"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "mitsubishi-electric",
+     "models": "City Multi — R2 series (simultaneous cooling and heating with heat recovery) · Y series (cooling or heating)",
+     "specs": [
+      "Heat recovery and heat pump"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "midea",
+     "models": "Outdoor units: VC Pro 8 – 32 HP (cooling only, all DC inverter, for hot regions) · V6 and V6-I 8 – 32 HP (heat pump, combinations to 96 HP) · V6R 8 – 20 HP (heat recovery) · V6-I side discharge 20 – 33.5 kW · Mini C 8 – 15.5 kW (single phase, up to 9 indoor units) · V4+W water cooled 8 – 36 HP. Controls: WDC-120G · WDC-86E wired · CCM-180A · CCM-270B central · CCM-15 gateway · IMMPRO software · MCAC-DIAG",
+     "specs": [
+      "VC Pro 22.4 – 85 kW · V6 / V6-I 25.2 – 90 kW · V6R 22.4 – 63 kW",
+      "R410A · 380 – 415 V 3-phase (Mini C single phase)",
+      "Cooling to 55 °C ambient (VC Pro, V6-I side discharge, Mini C) · 54 °C (V6)",
+      "Central controller up to 64 indoor / 32 outdoor units"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "coolex",
+     "models": "IVCF Series",
+     "specs": [],
+     "pending": false
+    },
+    {
+     "brand": "o-general",
+     "models": "AIRSTAGE™ VC-V cooling only 8 – 80 HP (51 models, one refrigerant system up to 80 HP) · V-III Tropical heat pump 8 – 54 HP · J-III Tropical compact 36 – 54k class, single and 3-phase · indoor lineup (compact cassette, cassette, duct, wall, floor) · AIRSTAGE controllers, Modbus and KNX converters",
+     "specs": [
+      "8 – 80 HP per system",
+      "Cooling to 52 °C · connectable indoor capacity to 150 % · up to 64 indoor units (V-III)",
+      "Total piping 180 m (J-III) · PCB silicon coating · blue fin · JRA 4002 anti-corrosion"
+     ],
+     "pending": false
+    }
+   ]
+  },
+  {
+   "slug": "chillers-ahu",
+   "name": {
+    "en": "Chillers, AHU and fan coils",
+    "ar": "شيلرات ووحدات مناولة الهواء"
+   },
+   "range": "3 – 500 ton",
+   "lead": {
+    "en": "Chilled-water plant and air-side equipment for large buildings: chillers, air handling units, fan coils and condensing units, supplied against the consultant’s schedule.",
+    "ar": "معدات المياه المبرّدة وجانب الهواء للمباني الكبيرة: شيلرات ووحدات مناولة هواء وفان كويل ووحدات تكثيف، تُورَّد وفق جداول الاستشاري."
+   },
+   "image": "cat-chillers-ahu.webp",
+   "icon": "",
+   "know": [
+    {
+     "title": {
+      "en": "Selection by schedule",
+      "ar": "الاختيار وفق الجداول"
+     },
+     "text": {
+      "en": "We work from the equipment schedule and return selections, submittals and lead times for approval.",
+      "ar": "نعمل من جدول المعدات ونقدّم الاختيارات ومستندات الاعتماد ومدد التوريد للموافقة."
+     }
+    },
+    {
+     "title": {
+      "en": "Air cooled or water cooled",
+      "ar": "تبريد هوائي أو مائي"
+     },
+     "text": {
+      "en": "Screw and scroll chillers in both configurations; the choice follows plant room space and water availability.",
+      "ar": "شيلرات Screw وScroll بالنوعين، ويتبع الاختيار مساحة غرفة المعدات وتوفر المياه."
+     }
+    },
+    {
+     "title": {
+      "en": "Controls and plant",
+      "ar": "التحكم والمعدات الملحقة"
+     },
+     "text": {
+      "en": "Chiller plant managers, BMS and energy monitoring can be supplied with the equipment.",
+      "ar": "يمكن توريد أنظمة إدارة محطات الشيلرات وBMS ومراقبة الطاقة مع المعدات."
+     }
+    }
+   ],
+   "supply": [
+    {
+     "brand": "carrier",
+     "models": "Air cooled: AquaForce® 30XA · AquaSnap® 30RB · AquaSnap® 30RQM modular heat pump. Water cooled: AquaEdge® 19MV magnetic-bearing centrifugal · AquaForce® 23XW chiller / 23XQ heat pump · Global Chiller 30HXC · AquaForce® 30XW. AHU: Airovision™ 39HQ · 39HQM · 40RMS. Controls: ComfortID™ 33ZCFANCOL fan coil controller",
+     "specs": [
+      "Chillers 1,300 – 1,750 kW (30XA / 30RB / 30HXC / 30XW)",
+      "AHU 600 – 74,000 CFM",
+      "BMS · Chiller Plant Manager · energy monitoring",
+      "19MV, 23XW/23XQ and 30RQM: UAE availability confirmed on the quote"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "coolex",
+     "models": "Chillers: THAC 03 – 050 (R-410A scroll, brazed plate) · ACC Mini 03 – 017 (R407C scroll, brazed plate) · ACC 20 – 100 (R407C scroll, shell and tube) · ACSC 080 – 500 (R-134A semi-hermetic screw, shell and tube). Air side: RA central station AHU · fan coils FCL low static and FCH high static · Commercial Condensing Units CCU 380 – 1500",
+     "specs": [
+      "Chillers 3 – 500 ton (11 – 1,760 kW) · AHRI rated · UL listed · ACSC stepless 25 – 100 %",
+      "AHU 1,100 – 44,000 CFM · Eurovent certified",
+      "Fan coils 200 – 2,000 CFM · 2 / 3 row · 2-pipe or 4-pipe",
+      "CCU 32 – 125 ton · tropical hermetic compressor"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "westpoint",
+     "models": "AIR CHILL · Air-cooled chiller",
+     "specs": [
+      "Specifications on request"
+     ],
+     "pending": false
+    }
+   ]
+  },
+  {
+   "slug": "data-center",
+   "name": {
+    "en": "Data centre cooling",
+    "ar": "تبريد مراكز البيانات"
+   },
+   "range": "3.5 ton – 500 ton",
+   "lead": {
+    "en": "Precision cooling for server rooms and chillers built for data halls: close-control units that hold temperature and humidity around the clock, and high-capacity chillers with free-cooling for larger facilities.",
+    "ar": "تبريد دقيق لغرف الخوادم وشيلرات مصممة لقاعات البيانات: وحدات تحكم دقيق تحافظ على الحرارة والرطوبة على مدار الساعة، وشيلرات عالية السعة مع التبريد الحر للمنشآت الكبيرة."
+   },
+   "image": null,
+   "icon": "dc",
+   "know": [
+    {
+     "title": {
+      "en": "Sensible heat, not comfort",
+      "ar": "حرارة محسوسة لا راحة"
+     },
+     "text": {
+      "en": "Servers produce dry heat. Precision units are sized on sensible capacity with a high sensible ratio, unlike comfort units that spend capacity on humidity.",
+      "ar": "الخوادم تنتج حرارة جافة. تُقدَّر وحدات التبريد الدقيق على السعة المحسوسة بنسبة محسوسة عالية، بخلاف وحدات الراحة التي تستهلك سعتها في إزالة الرطوبة."
+     }
+    },
+    {
+     "title": {
+      "en": "Redundancy",
+      "ar": "التكرار الاحتياطي"
+     },
+     "text": {
+      "en": "Rooms are usually designed N+1: one unit more than the load needs, so maintenance never means shutdown.",
+      "ar": "تُصمَّم الغرف عادةً بنظام N+1: وحدة إضافية فوق الحمل المطلوب، كي لا تعني الصيانة إيقاف التشغيل."
+     }
+    },
+    {
+     "title": {
+      "en": "Heating and humidity control",
+      "ar": "التدفئة والتحكم بالرطوبة"
+     },
+     "text": {
+      "en": "Optional electric heaters and humidifiers keep conditions inside the equipment envelope in winter and during low load.",
+      "ar": "سخانات كهربائية ومرطبات اختيارية تُبقي الظروف ضمن حدود تشغيل المعدات شتاءً وعند الأحمال المنخفضة."
+     }
+    }
+   ],
+   "supply": [
+    {
+     "brand": "coolex",
+     "models": "PHE Precision Cooling Units PHEF / PHCF 042 · 076 · 130 · 175",
+     "specs": [
+      "3.5 – 15 ton (12.3 – 52 kW)",
+      "R410A · scroll · EC fans",
+      "Rated at 48 °C ambient, operates to 55 °C · optional heater and humidifier"
+     ],
+     "pending": false
+    },
+    {
+     "brand": "carrier",
+     "models": "AquaForce® 30XF air cooled screw chiller with integrated free cooling",
+     "specs": [
+      "400 – 500 ton (1,400 – 1,758 kW)",
+      "R-513A",
+      "−20 °F to 140 °F · UAE availability confirmed on the quote"
+     ],
+     "pending": false
+    }
+   ]
+  }
+ ],
+ "home": {
+  "seo_title": {
+   "en": "Opal Galaxy — Air conditioning supplier for projects and contractors | Dubai",
+   "ar": "Opal Galaxy — توريد أنظمة التكييف للمشاريع والمقاولين | دبي"
+  },
+  "meta_description": {
+   "en": "Opal Galaxy Air Condition Trading L.L.C — O General, Midea, Carrier, Mitsubishi Electric, Super General, Westpoint and Coolex air conditioning supplied at project scale, with installation on request. Dubai, UAE.",
+   "ar": "Opal Galaxy لتجارة مكيفات الهواء — توريد مكيفات O General وMidea وCarrier وMitsubishi Electric وSuper General وWestpoint وCoolex بكميات المشاريع، مع التركيب عند الطلب. دبي، الإمارات."
+  },
+  "hero_title": {
+   "en": "Air conditioning, supplied at project scale",
+   "ar": "توريد أنظمة التكييف بكميات المشاريع"
+  },
+  "hero_lead": {
+   "en": "Dubai-based supplier of split, ducted, cassette, package and VRF systems, chillers and air handling units for contractors, companies and villas. Seven brands, one quote. Delivery across the UAE, installation on request.",
+   "ar": "شركة متخصصة في دبي بتوريد الوحدات المنفصلة والمخفية والكاسيت والمجمّعة وأنظمة VRF والشيلرات ووحدات مناولة الهواء للمقاولين والشركات وأصحاب الفلل. سبع علامات تجارية في عرض سعر واحد، مع التوصيل إلى جميع الإمارات والتركيب عند الطلب."
+  },
+  "hero_image": "hero.webp",
+  "hero_alt": {
+   "en": "Rooftop package air-conditioning units on a commercial building in Dubai",
+   "ar": "وحدات تكييف مجمّعة على سطح مبنى تجاري في دبي"
+  },
+  "hero_caption": {
+   "en": "Rooftop package units",
+   "ar": "وحدات مجمّعة على سطح مبنى تجاري"
+  },
+  "hero_subcaption": {
+   "en": "Supplied at project scale · Dubai",
+   "ar": "توريد بكميات المشاريع · دبي"
+  },
+  "facts": [
+   {
+    "title": {
+     "en": "Delivery within 48 hours",
+     "ar": "التوصيل خلال 48 ساعة"
+    },
+    "text": {
+     "en": "Dubai, Sharjah and Ajman. Other emirates by order size.",
+     "ar": "في دبي والشارقة وعجمان، وإلى بقية الإمارات وفق حجم الطلب"
+    }
+   },
+   {
+    "title": {
+     "en": "Trade pricing for contractors",
+     "ar": "أسعار الجملة للمقاولين"
+    },
+    "text": {
+     "en": "Volume quotes with tax invoice and manufacturer warranty",
+     "ar": "عروض أسعار للكميات مع فاتورة ضريبية وضمان الشركة المصنّعة"
+    }
+   },
+   {
+    "title": {
+     "en": "Installation on request",
+     "ar": "التركيب عند الطلب"
+    },
+    "text": {
+     "en": "Split, ducted and package installation with full site protection",
+     "ar": "فريق تركيب متخصص للوحدات المنفصلة والمخفية والمجمّعة، مع حماية كاملة للموقع"
+    }
+   }
+  ],
+  "products_title": {
+   "en": "Products",
+   "ar": "المنتجات"
+  },
+  "products_lead": {
+   "en": "Ten equipment types, each with a page that explains where it fits and which of our brands make it.",
+   "ar": "عشرة أنواع من المعدات، لكل منها صفحة توضح أين تناسب وأي علاماتنا التجارية تصنّعها."
+  },
+  "brands_title": {
+   "en": "Brands we supply",
+   "ar": "العلامات التجارية التي نورّدها"
+  },
+  "brands_lead": {
+   "en": "Genuine units through authorised UAE distributors, with manufacturer warranty and original spare parts.",
+   "ar": "وحدات أصلية عبر الوكلاء المعتمدين في دولة الإمارات، مشمولة بضمان الشركة المصنّعة وقطع الغيار الأصلية."
+  },
+  "contractors_title": {
+   "en": "The supply partner behind your programme",
+   "ar": "شريك التوريد خلف برنامج مشروعك"
+  },
+  "contractors_lead": {
+   "en": "We work with villa and building contractors and FM companies as a standing supplier: one price for the volume, deliveries tied to your site schedule, and complete paperwork for the consultant.",
+   "ar": "نعمل مع مقاولي الفلل والمباني وشركات إدارة المرافق بصفة مورّد معتمد: سعر موحّد للكمية، وجدول توريد مرتبط ببرنامج الموقع، ومستندات كاملة للاستشاري."
+  },
+  "contractor_points": [
+   {
+    "title": {
+     "en": "Volume quote within one working day",
+     "ar": "عرض سعر للكميات خلال يوم عمل واحد"
+    },
+    "text": {
+     "en": "From your BOQ or HVAC drawings, with alternatives from two brands on request.",
+     "ar": "استناداً إلى جدول الكميات أو مخططات التكييف، مع تقديم بدائل من علامتين تجاريتين عند الطلب."
+    }
+   },
+   {
+    "title": {
+     "en": "Staged deliveries",
+     "ar": "التوريد على دفعات"
+    },
+    "text": {
+     "en": "We reserve the quantity and deliver as the site progresses, no storage on your side.",
+     "ar": "نحجز الكمية كاملة ونورّدها وفق تقدّم أعمال الموقع، دون الحاجة إلى التخزين لديكم."
+    }
+   },
+   {
+    "title": {
+     "en": "Consultant and owner paperwork",
+     "ar": "مستندات الاستشاري والمالك"
+    },
+    "text": {
+     "en": "Submittals, compliance certificates and warranty cards in the project name.",
+     "ar": "مستندات الاعتماد (Submittals) وشهادات المطابقة وبطاقات الضمان باسم المشروع."
+    }
+   },
+   {
+    "title": {
+     "en": "Installation or supervision when needed",
+     "ar": "التركيب أو الإشراف عند الحاجة"
+    },
+    "text": {
+     "en": "Our team installs, or supervises yours through commissioning and handover.",
+     "ar": "يتولى فريقنا التركيب، أو يشرف على فريقكم حتى التشغيل والتسليم."
+    }
+   }
+  ],
+  "install_title": {
+   "en": "Supply with installation for villas and shops",
+   "ar": "التوريد مع التركيب للفلل والمحال التجارية"
+  },
+  "install_lead": {
+   "en": "One contract from sizing to handover, with the site protected while people live and work in it.",
+   "ar": "عقد واحد من تقدير السعة حتى التسليم، مع حماية الموقع أثناء السكن والعمل فيه."
+  },
+  "install_link": {
+   "en": "Scheduled maintenance and original spare parts for every brand we supply →",
+   "ar": "الصيانة الدورية وقطع الغيار الأصلية لجميع العلامات التي نورّدها ←"
+  },
+  "install_steps": [
+   {
+    "title": {
+     "en": "Visit and sizing",
+     "ar": "المعاينة والتقدير"
+    },
+    "text": {
+     "en": "We measure area, orientation and insulation, then recommend tonnage and type.",
+     "ar": "نقيس المساحة والتوجيه والعزل الحراري، ونقترح السعة والنوع المناسبين."
+    }
+   },
+   {
+    "title": {
+     "en": "Supply and install",
+     "ar": "التوريد والتركيب"
+    },
+    "text": {
+     "en": "Full protection of furniture and floors, insulated copper runs and clean drainage.",
+     "ar": "حماية كاملة للأثاث والأرضيات، وتمديدات نحاسية معزولة، وتصريف سليم."
+    }
+   },
+   {
+    "title": {
+     "en": "Commissioning and handover",
+     "ar": "التشغيل والتسليم"
+    },
+    "text": {
+     "en": "Pressure and cooling check, warranty registration and a walkthrough.",
+     "ar": "اختبار الضغط والتبريد، وتسجيل الضمان، وشرح طريقة التشغيل."
+    }
+   }
+  ],
+  "projects_title": {
+   "en": "From the field",
+   "ar": "من أعمالنا"
+  },
+  "projects_lead": {
+   "en": "Photos from real jobs: deliveries, crane lifts, rooftop installations and interior site protection.",
+   "ar": "صور من مشاريع منفّذة: التوريد، والرفع بالرافعة، والتركيب على الأسطح، وحماية المواقع من الداخل."
+  },
+  "gallery": [
+   {
+    "image": "gal-1.jpg",
+    "alt": {
+     "en": "Rooftop package units on a commercial building",
+     "ar": "وحدات مجمّعة على سطح مبنى تجاري"
+    },
+    "caption": {
+     "en": "O General 5 ton",
+     "ar": "O General 5 ton"
+    },
+    "subcaption": {
+     "en": "Commercial rooftop",
+     "ar": "سطح مبنى تجاري"
+    }
+   },
+   {
+    "image": "gal-2.jpg",
+    "alt": {
+     "en": "Two inverter condensers beside a villa",
+     "ar": "وحدتان خارجيتان Inverter بجانب فيلا"
+    },
+    "caption": {
+     "en": "Twin Inverter units",
+     "ar": "وحدتان Inverter"
+    },
+    "subcaption": {
+     "en": "Private villa",
+     "ar": "فيلا سكنية"
+    }
+   },
+   {
+    "image": "gal-3.jpg",
+    "alt": {
+     "en": "Crane lifting a package unit onto a roof",
+     "ar": "رافعة ترفع وحدة مجمّعة إلى السطح"
+    },
+    "caption": {
+     "en": "Crane lift, package unit",
+     "ar": "رفع وحدة مجمّعة بالرافعة"
+    },
+    "subcaption": {
+     "en": "Commercial compound",
+     "ar": "مجمّع تجاري"
+    }
+   },
+   {
+    "image": "gal-4.jpg",
+    "alt": {
+     "en": "Package unit at a warehouse",
+     "ar": "وحدة مجمّعة في مستودع"
+    },
+    "caption": {
+     "en": "Midea Package 15 ton",
+     "ar": "Midea Package 15 ton"
+    },
+    "subcaption": {
+     "en": "Warehouse",
+     "ar": "مستودع"
+    }
+   },
+   {
+    "image": "gal-5.jpg",
+    "alt": {
+     "en": "Ducted unit delivered to a villa site",
+     "ar": "توريد وحدة مخفية إلى موقع فيلا"
+    },
+    "caption": {
+     "en": "Ducted unit delivery",
+     "ar": "توريد وحدة مخفية"
+    },
+    "subcaption": {
+     "en": "Villa under construction",
+     "ar": "فيلا قيد الإنشاء"
+    }
+   },
+   {
+    "image": "gal-6.jpg",
+    "alt": {
+     "en": "Technician vacuuming a split system",
+     "ar": "فني يفرّغ دائرة وحدة منفصلة"
+    },
+    "caption": {
+     "en": "Midea 5 ton",
+     "ar": "Midea 5 ton"
+    },
+    "subcaption": {
+     "en": "Installation and vacuum",
+     "ar": "التركيب والتفريغ"
+    }
+   },
+   {
+    "image": "gal-7.jpg",
+    "alt": {
+     "en": "Floors and furniture covered during installation",
+     "ar": "تغطية الأرضيات والأثاث أثناء التركيب"
+    },
+    "caption": {
+     "en": "Interior site protection",
+     "ar": "حماية الموقع من الداخل"
+    },
+    "subcaption": {
+     "en": "Occupied villa",
+     "ar": "فيلا مسكونة"
+    }
+   },
+   {
+    "image": "gal-8.jpg",
+    "alt": {
+     "en": "Batch of boxed units on a residential site",
+     "ar": "دفعة وحدات معبأة في موقع سكني"
+    },
+    "caption": {
+     "en": "Batch delivery",
+     "ar": "توريد دفعة وحدات"
+    },
+    "subcaption": {
+     "en": "Residential project",
+     "ar": "مشروع سكني"
+    }
+   }
+  ],
+  "about_title": {
+   "en": "About Opal Galaxy",
+   "ar": "عن Opal Galaxy"
+  },
+  "about_text": {
+   "en": "Opal Galaxy Air Condition Trading L.L.C is a licensed air-conditioning trading company in Dubai, built on years of supplying and installing HVAC for villas and projects across the UAE. We sit between the authorised distributors and the contractor: distributor pricing with the speed of a small supplier.\n\nOur promise is simple: the model on the quote is the model that arrives on site, on the agreed date, with a warranty card in your name.",
+   "ar": "Opal Galaxy Air Condition Trading L.L.C شركة مرخّصة في دبي لتجارة مكيفات الهواء، قائمة على سنوات من الخبرة في توريد أنظمة التكييف وتركيبها للفلل والمشاريع في دولة الإمارات. تعمل الشركة حلقة وصل بين الوكلاء المعتمدين والمقاولين، فتجمع بين أسعار الوكيل وسرعة الاستجابة.\n\nالتزامنا واضح: الطراز المذكور في عرض السعر هو ما يصل إلى الموقع، في الموعد المتفق عليه، مع بطاقة ضمان باسم العميل."
+  },
+  "faq_title": {
+   "en": "Frequently asked questions",
+   "ar": "أسئلة شائعة"
+  },
+  "faq_lead": {
+   "en": "Short answers to what we are usually asked before an order.",
+   "ar": "إجابات مختصرة على ما يُسأل عنه عادةً قبل الطلب."
+  },
+  "faqs": [
+   {
+    "q": {
+     "en": "What is the difference between inverter and fixed-speed units?",
+     "ar": "ما الفرق بين وحدات Inverter والسرعة الثابتة؟"
+    },
+    "a": {
+     "en": "An inverter unit varies compressor speed with the load, so it reaches the set temperature faster and uses less power once stable. A fixed-speed unit is simpler and cheaper and suits intermittent use or tighter budgets.",
+     "ar": "وحدة Inverter تغيّر سرعة الضاغط بحسب الحمل، فتصل إلى درجة الحرارة المطلوبة أسرع وتستهلك طاقة أقل عند الاستقرار. وحدة السرعة الثابتة أبسط وأقل سعراً وتناسب الاستخدام المتقطع أو الميزانيات المحدودة."
+    }
+   },
+   {
+    "q": {
+     "en": "What does the T3 rating mean and is it needed in the UAE?",
+     "ar": "ما معنى تصنيف T3 وهل يلزم في الإمارات؟"
+    },
+    "a": {
+     "en": "T3 means the unit is rated at 46 °C outdoor temperature, versus T1 at 35 °C. For the UAE climate we supply T3-rated units or equivalent so performance holds through summer.",
+     "ar": "تصنيف T3 يعني أن الوحدة مختبرة عند حرارة خارجية 46° مئوية، بخلاف T1 المختبرة عند 35°. لمناخ الإمارات نورّد وحدات T3 أو ما يعادلها لضمان الأداء في الصيف."
+    }
+   },
+   {
+    "q": {
+     "en": "What is the difference between R32, R410A and R22?",
+     "ar": "ما الفرق بين غازات R32 وR410A وR22؟"
+    },
+    "a": {
+     "en": "R32 is the newest generation: higher efficiency and lower environmental impact. R410A is still common with parts readily available. R22 is a legacy gas kept for replacements and specifications that still call for it. The refrigerant is stated on every quote.",
+     "ar": "R32 هو الجيل الأحدث بكفاءة أعلى وأثر بيئي أقل. R410A ما زال منتشراً وقطع غياره متوفرة. R22 غاز قديم يُبقى عليه لأعمال الاستبدال والمواصفات التي لا تزال تشترطه. يُذكر نوع الغاز في كل عرض سعر."
+    }
+   },
+   {
+    "q": {
+     "en": "How long does delivery take?",
+     "ar": "كم يستغرق التوصيل؟"
+    },
+    "a": {
+     "en": "For in-stock items: within 48 hours in Dubai, Sharjah and Ajman, and to other emirates depending on order size. For large quantities we agree a phased delivery schedule tied to the site programme.",
+     "ar": "للمواد المتوفرة: خلال 48 ساعة في دبي والشارقة وعجمان، وإلى بقية الإمارات وفق حجم الطلب. للكميات الكبيرة نتفق على جدول توريد على دفعات مرتبط ببرنامج الموقع."
+    }
+   },
+   {
+    "q": {
+     "en": "What documents do you provide for contractors and consultants?",
+     "ar": "ما المستندات التي تقدمونها للمقاول والاستشاري؟"
+    },
+    "a": {
+     "en": "A detailed quote with model numbers, a tax invoice, submittals and manufacturer catalogues, and warranty cards in the client’s or project’s name.",
+     "ar": "عرض سعر تفصيلي برقم الطراز، وفاتورة ضريبية، ومستندات الاعتماد (Submittals) وكتالوجات المصنّع، وبطاقات الضمان باسم العميل أو المشروع."
+    }
+   },
+   {
+    "q": {
+     "en": "How do I request a quote?",
+     "ar": "كيف أطلب عرض سعر؟"
+    },
+    "a": {
+     "en": "Use the form below, or send your BOQ or HVAC drawings on WhatsApp. We reply within one working day.",
+     "ar": "عبر النموذج أدناه أو بإرسال جدول الكميات (BOQ) أو مخططات التكييف على واتساب. نرد خلال يوم عمل واحد."
+    }
+   }
+  ]
+ },
+ "services": [
+  {
+   "slug": "maintenance",
+   "title": {
+    "en": "Maintenance and spare parts",
+    "ar": "الصيانة وقطع الغيار"
+   },
+   "lead": {
+    "en": "Scheduled maintenance for villas and buildings, and original spare parts for every brand we supply, sourced through the same distributors as the units.",
+    "ar": "صيانة دورية للفلل والمباني، وقطع غيار أصلية لجميع العلامات التي نورّدها، من الوكلاء أنفسهم الذين نورّد منهم الوحدات."
+   },
+   "cta": {
+    "en": "Request maintenance or a part",
+    "ar": "اطلب عقد صيانة أو قطعة غيار"
+   },
+   "list_title": {
+    "en": "What is covered",
+    "ar": "ما تشمله الخدمة"
+   },
+   "items": [
+    {
+     "title": {
+      "en": "Annual maintenance contracts",
+      "ar": "عقود الصيانة السنوية"
+     },
+     "text": {
+      "en": "Two to four visits a year: coil and filter cleaning, drain flushing, gas pressure and electrical checks, with a report after each visit.",
+      "ar": "من زيارتين إلى أربع في السنة: تنظيف الملفات والفلاتر، وغسل التصريف، وفحص ضغط الغاز والكهرباء، مع تقرير بعد كل زيارة."
+     }
+    },
+    {
+     "title": {
+      "en": "Original spare parts",
+      "ar": "قطع الغيار الأصلية"
+     },
+     "text": {
+      "en": "Compressors, PCBs, fan motors, sensors and remotes for the seven brands, ordered by model number.",
+      "ar": "ضواغط ولوحات إلكترونية ومحركات مراوح وحساسات وأجهزة تحكم للعلامات السبع، تُطلب برقم الطراز."
+     }
+    },
+    {
+     "title": {
+      "en": "Repairs and gas charging",
+      "ar": "الإصلاح وتعبئة الغاز"
+     },
+     "text": {
+      "en": "Leak testing, vacuuming and charging with the correct refrigerant for the unit.",
+      "ar": "اختبار التسرب والتفريغ والتعبئة بغاز التبريد الصحيح للوحدة."
+     }
+    },
+    {
+     "title": {
+      "en": "Replacement of old units",
+      "ar": "استبدال الوحدات القديمة"
+     },
+     "text": {
+      "en": "Like-for-like replacement of ducted and package units, including removal and disposal of the old equipment.",
+      "ar": "استبدال الوحدات المخفية والمجمّعة بمثيلاتها، مع فك المعدات القديمة والتخلص منها."
+     }
+    }
+   ]
+  }
+ ]
+}

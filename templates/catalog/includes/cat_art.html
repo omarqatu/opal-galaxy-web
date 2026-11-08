@@ -1,0 +1,1 @@
+{% load opal wagtailimages_tags %}{% if c.image %}{% image c.image width-480 format-webp as ci %}<img{% if cls %} class="{{ cls }}"{% endif %} src="{{ ci.url }}" alt="{{ c|tr:'name' }}" width="{{ ci.width }}" height="{{ ci.height }}" loading="lazy">{% else %}<span class="ico">{% icon c.icon %}</span>{% endif %}

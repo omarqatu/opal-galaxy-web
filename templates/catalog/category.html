@@ -1,0 +1,31 @@
+{% extends "base.html" %}{% load opal %}
+{% block title %}{% if lang == 'ar' %}{{ category.name_ar }} — توريد Opal Galaxy، دبي{% else %}{{ category.name_en }} — supplied by Opal Galaxy, Dubai{% endif %}{% endblock %}
+{% block description %}{{ category|tr:"lead" }}{% endblock %}
+{% block content %}
+{% T "Products" "المنتجات" as plabel %}{% include "includes/crumbs.html" with parent_href=home_url|add:"#products" parent_label=plabel current_label=category|tr:"name" %}
+<section class="page-hero"><div class="wrap"><div class="copy">
+  <h1>{{ category|tr:"name" }}</h1>
+  <p class="lead">{{ category|tr:"lead" }}</p>
+  <div class="cta"><a class="btn btn-accent" href="#contact">{% if lang == 'ar' %}اطلب سعر {{ category.name_ar }}{% else %}Get a price for {{ category.name_en|lower }}{% endif %}</a><a class="btn btn-wa" href="https://wa.me/{{ settings.core.CompanySettings.whatsapp }}?text={% if lang == 'ar' %}{{ 'مرحباً، أريد عرض سعر: '|add:category.name_ar|urlencode }}{% else %}{{ 'Hello, I would like a quote for: '|add:category.name_en|urlencode }}{% endif %}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% T "WhatsApp" "واتساب" %}</span></a></div>
+  <div class="meta"><span>{% T "Range:" "النطاق:" %} <b>{{ category.capacity_range }}</b></span><span>{% if lang == 'ar' %}متوفر من <b>{{ supplies|length }}</b> علامات تجارية{% else %}Available from <b>{{ supplies|length }}</b> brands{% endif %}</span></div>
+</div><div class="art">{% include "catalog/includes/cat_art.html" with c=category cls="" %}</div></div></section>
+
+{% if category.know_items.all %}<section><div class="wrap">
+  <h2>{% T "Good to know before you order" "ما ينبغي معرفته قبل الطلب" %}</h2>
+  <div class="know">{% for k in category.know_items.all %}<div><b>{{ k|tr:"title" }}</b><p>{{ k|tr:"text" }}</p></div>{% endfor %}</div>
+</div></section>{% endif %}
+
+<section style="background:#fff;border-top:1px solid var(--stone)"><div class="wrap">
+  <h2>{% T "Available from these brands" "متوفرة من هذه العلامات التجارية" %}</h2>
+  <p class="lead">{% T "Series and ranges as published by each manufacturer for the Gulf. The quote states the exact model, capacity and refrigerant." "السلاسل والنطاقات كما تنشرها كل شركة مصنّعة لمنطقة الخليج. يُذكر الطراز الدقيق والسعة ونوع الغاز في عرض السعر." %}</p>
+  <div class="supply">{% for s in supplies %}
+    <div class="row"><div><h3><a href="{{ s.brand.get_url }}">{{ s.brand.name }}</a></h3></div><div>
+      <p class="models"><span class="ltr">{{ s.models_text }}</span></p>
+      {% if s.pending %}<p class="pending">{% T "Ranges and model numbers are confirmed on the quote." "النطاقات والطرازات تؤكَّد في عرض السعر." %}</p>
+      {% elif s.spec_list %}<div class="spec">{% for x in s.spec_list %}<span>{{ x }}</span>{% endfor %}</div>{% endif %}
+    </div><a class="go" href="{{ s.brand.get_url }}">{% if lang == 'ar' %}كل منتجات {{ s.brand.name }}{% else %}All {{ s.brand.name }} products{% endif %}</a></div>
+  {% endfor %}</div>
+  <h3>{% T "Other products" "منتجات أخرى" %}</h3>
+  <div class="chips" style="margin-top:12px">{% for x in all_categories %}<a href="{{ x.get_url }}"{% if x.pk == category.pk %} class="cur" aria-current="page"{% endif %}>{{ x|tr:"name" }}</a>{% endfor %}</div>
+</div></section>
+{% endblock %}

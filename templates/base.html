@@ -1,0 +1,92 @@
+{% load static opal wagtailcore_tags %}<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<title>{% block title %}{% endblock %}</title>
+<meta name="description" content="{% block description %}{% endblock %}">
+{% if site_noindex %}<meta name="robots" content="noindex, nofollow">{% endif %}
+<link rel="canonical" href="{{ site_base_url }}{% if lang == 'ar' %}{{ ar_url }}{% else %}{{ en_url }}{% endif %}">
+<link rel="alternate" hreflang="en" href="{{ site_base_url }}{{ en_url }}">
+<link rel="alternate" hreflang="ar" href="{{ site_base_url }}{{ ar_url }}">
+<link rel="alternate" hreflang="x-default" href="{{ site_base_url }}{{ en_url }}">
+<link rel="icon" type="image/svg+xml" href="{% static 'img/opal-galaxy-logo-v1.svg' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/site.css' %}">
+<link rel="stylesheet" href="{% static 'css/additions.css' %}">
+</head>
+<body>
+<a class="skip" href="#app">{% T "Skip to content" "انتقل إلى المحتوى" %}</a>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="{{ home_url }}" aria-label="Opal Galaxy">
+      {% include "includes/logo.svg" %}
+      <span><b>{{ settings.core.CompanySettings.short_name }}</b><small>{{ settings.core.CompanySettings|tr:"tagline" }}</small></span>
+    </a>
+    <button class="burger" aria-label="{% T 'Main menu' 'القائمة الرئيسية' %}" aria-expanded="false" id="burger">{% include "includes/burger.svg" %}</button>
+    <ul class="menu" id="menu">
+      <li><a href="{{ home_url }}#products">{% T "Products" "المنتجات" %}</a></li>
+      <li><a href="{{ home_url }}#brands">{% T "Brands" "العلامات التجارية" %}</a></li>
+      <li><a href="{{ home_url }}#contractors">{% T "For contractors" "للمقاولين والمشاريع" %}</a></li>
+      <li><a href="{{ home_url }}#install">{% T "With installation" "التوريد مع التركيب" %}</a></li>
+      <li><a href="{% lurl '/maintenance/' %}">{% T "Maintenance and parts" "الصيانة وقطع الغيار" %}</a></li>
+      <li><a href="#contact">{% T "Contact" "تواصل معنا" %}</a></li>
+    </ul>
+    <div class="tools">
+      <a class="lang" href="{{ other_lang_url }}" hreflang="{{ other_lang }}" lang="{{ other_lang }}" aria-label="{% T 'Switch to Arabic' 'Switch to English' %}">{% if lang == 'ar' %}EN{% else %}عربي{% endif %}</a>
+      <a class="btn btn-wa" href="https://wa.me/{{ settings.core.CompanySettings.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% T "WhatsApp" "واتساب" %}</span></a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <div id="app">{% block content %}{% endblock %}</div>
+  {% include "includes/contact.html" %}
+</main>
+
+{% with s=settings.core.CompanySettings %}
+<div class="mbar" id="mbar" aria-label="{% T 'Quick actions' 'إجراءات سريعة' %}">
+  <a class="call" href="tel:{{ s.phone }}">{% include "includes/phone.svg" %}<span>{% T "Call" "اتصال" %}</span></a>
+  <a class="wa" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% T "WhatsApp" "واتساب" %}</span></a>
+  <a class="quote" href="#contact"><span>{% T "Request a quote" "طلب عرض سعر" %}</span></a>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <a class="logo" href="{{ home_url }}">{% include "includes/logo.svg" %}<span><b>{{ s.short_name }}</b><small>{{ s|tr:"tagline" }}</small></span></a>
+        <p>{{ s|tr:"footer_about" }}</p>
+        <p class="ltr">{{ s.address }}</p>
+      </div>
+      <div>
+        <h4>{% T "Products" "المنتجات" %}</h4>
+        {% for c in nav_categories %}<p><a href="{{ c.get_url }}">{{ c|tr:"name" }}</a></p>{% endfor %}
+      </div>
+      <div>
+        <h4>{% T "Brands" "العلامات التجارية" %}</h4>
+        {% for b in nav_brands %}<p><a href="{{ b.get_url }}">{{ b.name }}</a></p>{% endfor %}
+      </div>
+      <div>
+        <h4>{% T "Contact" "تواصل معنا" %}</h4>
+        <p><a class="ltr" href="tel:{{ s.phone }}">{{ s.phone_display|default:s.phone }}</a></p>
+        {% if s.email %}<p><a class="ltr" href="mailto:{{ s.email }}">{{ s.email }}</a></p>{% endif %}
+        <p>{{ s|tr:"hours_short" }}</p>
+        <p><a href="{{ home_url }}#contractors">{% T "For contractors" "للمقاولين والمشاريع" %}</a></p>
+        <p><a href="{% lurl '/maintenance/' %}">{% T "Maintenance and parts" "الصيانة وقطع الغيار" %}</a></p>
+        <p><a href="{{ home_url }}#faq">{% T "FAQ" "أسئلة شائعة" %}</a></p>
+      </div>
+    </div>
+    <div class="copy-bar">
+      <span>© {% now "Y" %} {{ s.legal_name }}</span>
+      <span class="ltr">{{ s.domain_label }}</span>
+    </div>
+  </div>
+</footer>
+{% endwith %}
+<script src="{% static 'js/site.js' %}" defer></script>
+</body>
+</html>
