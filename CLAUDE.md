@@ -23,23 +23,23 @@
 ## Testing in the session: PostgreSQL 17 only
 Production runs PostgreSQL 17, so tests run on PostgreSQL 17 too. **SQLite is not used**: it hides bugs that only PostgreSQL shows (constraints, ordering, JSON, text search).
 
-At the start of every session, before any test (skip what is already installed):
+At the start of every session, start PostgreSQL 17 with Docker, using the same image as CI and production (`postgres:17-alpine`):
 ```bash
-sudo apt-get update
-sudo apt-get install -y postgresql-common
-sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
-sudo apt-get install -y postgresql-17
-sudo pg_ctlcluster 17 main start
-sudo -u postgres psql -c "CREATE USER opal WITH PASSWORD 'opal' CREATEDB;" -c "CREATE DATABASE opal OWNER opal;"
+docker run -d --name opal-pg -p 5432:5432 \
+  -e POSTGRES_USER=opal -e POSTGRES_PASSWORD=opal -e POSTGRES_DB=opal \
+  postgres:17-alpine
+until docker exec opal-pg pg_isready -U opal; do sleep 1; done
 pip install -r requirements.txt
 ```
+If Docker is unavailable, install `postgresql-17` from `apt.postgresql.org` instead. Do not use other PostgreSQL distributions (npm packages, embedded binaries).
+
 Then:
 ```bash
 export DEBUG=1 DATA_DIR=/tmp/data DATABASE_URL=postgres://opal:opal@localhost:5432/opal
 python manage.py test --noinput
 python manage.py makemigrations --check --dry-run
 ```
-Confirm the version with `psql --version` (must be 17.x). If PostgreSQL 17 cannot be installed in the session, **stop and tell Omar**; do not fall back to SQLite. The PR's GitHub Actions run (the `test` job in `deploy.yml`, PostgreSQL 17) must also be green before the PR is ready.
+Confirm the version through Django's own connection (`SELECT version()`), which must report 17.x. If PostgreSQL 17 cannot be installed in the session, **stop and tell Omar**; do not fall back to SQLite. The PR's GitHub Actions run (the `test` job in `deploy.yml`, PostgreSQL 17) must also be green before the PR is ready.
 
 ## Rules
 1. **Tests before every push, on PostgreSQL 17.** Both commands above must pass. Add tests for every new behaviour. The PR description states the PostgreSQL version the tests ran on.
