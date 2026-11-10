@@ -20,18 +20,29 @@
 - `notes.md`: client feedback, one line per note with type (content, structure, images), tool used, status.
 - `seed/opal.json` + `seed/images/`: initial content, loaded only into an empty database.
 
-## Testing in the session
+## Testing in the session: PostgreSQL 17 only
+Production runs PostgreSQL 17, so tests run on PostgreSQL 17 too. **SQLite is not used**: it hides bugs that only PostgreSQL shows (constraints, ordering, JSON, text search).
+
+At the start of every session, before any test (skip what is already installed):
 ```bash
+sudo apt-get update
+sudo apt-get install -y postgresql-common
+sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+sudo apt-get install -y postgresql-17
+sudo pg_ctlcluster 17 main start
+sudo -u postgres psql -c "CREATE USER opal WITH PASSWORD 'opal' CREATEDB;" -c "CREATE DATABASE opal OWNER opal;"
 pip install -r requirements.txt
-# Quick check on SQLite (no database server needed in the session):
-DEBUG=1 DATA_DIR=/tmp/data python manage.py test --noinput
-DEBUG=1 DATA_DIR=/tmp/data python manage.py makemigrations --check --dry-run
 ```
-If PostgreSQL is available in the session, also run the tests with
-`DATABASE_URL=postgres://...`. The PR's GitHub Actions run on PostgreSQL 17 is the final check; a PR is ready only when it is green.
+Then:
+```bash
+export DEBUG=1 DATA_DIR=/tmp/data DATABASE_URL=postgres://opal:opal@localhost:5432/opal
+python manage.py test --noinput
+python manage.py makemigrations --check --dry-run
+```
+Confirm the version with `psql --version` (must be 17.x). If PostgreSQL 17 cannot be installed in the session, **stop and tell Omar**; do not fall back to SQLite. The PR's GitHub Actions run (the `test` job in `deploy.yml`, PostgreSQL 17) must also be green before the PR is ready.
 
 ## Rules
-1. **Tests before every push.** Both commands above must pass. Add tests for every new behaviour. Nothing PostgreSQL-specific may break SQLite tests without a note in the PR.
+1. **Tests before every push, on PostgreSQL 17.** Both commands above must pass. Add tests for every new behaviour. The PR description states the PostgreSQL version the tests ran on.
 2. **Never without Omar's explicit approval in the task:** switching the main domain, setting `SITE_NOINDEX=0`, DNS changes, deleting anything, changing the deploy workflow's secrets or triggers.
 3. **Secrets:** never print, log or commit tokens, passwords or `DATABASE_URL` values. There are no secrets in the session and none are needed.
 4. **Migrations** must be safe on existing production data; data migrations get a test.
