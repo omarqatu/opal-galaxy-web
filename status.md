@@ -1,5 +1,5 @@
 # Opal Galaxy (Wagtail) — status.md
-**آخر تحديث: 8 نوفمبر 2026 · الإصدار: v0.1 (أول بناء ديناميكي)**
+**آخر تحديث: 10 نوفمبر 2026 · الإصدار: v0.1 (أول بناء ديناميكي)**
 
 ## المنجز
 - مشروع Wagtail 7.0 LTS / Django 5.2 LTS ينقل المعاينة الثابتة v0.7 تصميماً ومحتوى.
@@ -8,17 +8,20 @@
 - نموذج طلب السعر يعمل: يُحفظ في قاعدة البيانات (Admin → Quote requests) ويُرسل إلى n8n عبر `N8N_QUOTE_WEBHOOK`؛ honeypot ضد البوتات.
 - `noindex` افتراضي حتى اعتماد أحمد (`SITE_NOINDEX=0` لاحقاً).
 - إصلاحات مقارنة بالمعاينة الثابتة: زر اللغة كان مقصوصاً في هيدر الجوال؛ هامش "Other products".
-- 10 اختبارات آلية تمر على PostgreSQL 16؛ تشغيل الحاوية مُحاكى بالكامل (migrate → seed → admin → gunicorn).
+- 13 اختباراً آلياً تمر على PostgreSQL 17 (في الجلسة وفي CI)؛ تشغيل الحاوية مُحاكى بالكامل (migrate → seed → admin → gunicorn).
+
+- لوحة التحكم: قائمتا **Products** و**Brands** في القائمة الرئيسية (بدل Snippets)، مع الاسم بالإنجليزية والعربية لأنواع المنتجات، والمنشأ باللغتين للماركات.
+- `CLAUDE.md`: قواعد جلسات Claude Code؛ الاختبارات على PostgreSQL 17 عبر Docker.
+- `notes.md`: سجل ملاحظات العميل (فارغ).
 
 ## قرارات
-- PostgreSQL (لا SQLite).
+- PostgreSQL 17 (لا SQLite)، في الإنتاج والاختبارات.
 - ريبو جديد منفصل + staging منفصل؛ المعاينة الثابتة تبقى حتى الاعتماد.
 - المحتوى ثنائي اللغة بحقول `_en/_ar` جنباً إلى جنب في اللوحة (بدون wagtail-localize) لتبسيط الأتمتة.
 
 ## المتبقي
-1. نسخة PostgreSQL على السيرفر (تُؤكَّد قبل الإنشاء).
-2. Coolify: تطبيق جديد في مشروع opal + قاعدة PostgreSQL + volume `/app/data` + المتغيرات + دومين staging.
-3. Cloudflare: سجل الـ staging.
-4. أول Run workflow ثم فحص الموقع وتحويله proxied.
-5. مراجعة أحمد للموقع على staging ← تحويل الدومين الرئيسي و `SITE_NOINDEX=0`.
-6. صيغة الـ brief العامة (od-wagtail) مستخرجة من هذا المشروع.
+1. Coolify: تطبيق جديد في مشروع opal + قاعدة PostgreSQL + volume `/app/data` + المتغيرات + دومين staging.
+2. Cloudflare: سجل الـ staging.
+3. أول Run workflow ثم فحص الموقع وتحويله proxied.
+4. مراجعة أحمد للموقع على staging ← تحويل الدومين الرئيسي و `SITE_NOINDEX=0`.
+5. صيغة الـ brief العامة (od-wagtail) مستخرجة من هذا المشروع.

@@ -4,7 +4,6 @@ from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import FieldPanel, FieldRowPanel, InlinePanel, MultiFieldPanel
 from wagtail.models import Orderable
 from wagtail.search import index
-from wagtail.snippets.models import register_snippet
 
 from core.i18n import lang_url
 
@@ -113,6 +112,3 @@ class Supply(Orderable):
     def spec_list(self):
         return [s.strip() for s in self.specs.splitlines() if s.strip()]
 
-
-register_snippet(Brand)
-register_snippet(ProductCategory)

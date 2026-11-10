@@ -65,3 +65,34 @@ class SiteTests(TestCase):
         r = self.client.get("/sitemap.xml")
         self.assertContains(r, "https://opal-galaxy.com/ar/brands/coolex/")
         self.assertNotIn("X-Robots-Tag", self.client.get("/").headers)
+
+
+class CatalogAdminTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+        from django.contrib.auth import get_user_model
+        cls.admin = get_user_model().objects.create_superuser("admin", "admin@example.com", "pw")
+
+    def setUp(self):
+        self.client.force_login(self.admin)
+
+    def test_menu_has_products_and_brands(self):
+        r = self.client.get("/admin/")
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Products")
+        self.assertContains(r, "Brands")
+
+    def test_products_listing_shows_both_names(self):
+        from django.urls import reverse
+        r = self.client.get(reverse("wagtailsnippets_catalog_productcategory:list"))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Window units")
+        self.assertContains(r, "وحدات شباك")
+
+    def test_brands_listing_works(self):
+        from django.urls import reverse
+        r = self.client.get(reverse("wagtailsnippets_catalog_brand:list"))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Carrier")
+        self.assertContains(r, "الولايات المتحدة")
