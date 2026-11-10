@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16-alpine
+        image: postgres:17-alpine
         env: { POSTGRES_USER: opal, POSTGRES_PASSWORD: opal, POSTGRES_DB: opal }
         ports: ["5432:5432"]
         options: >-
