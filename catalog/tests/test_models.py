@@ -150,3 +150,26 @@ class SupplyFieldsTests(TestCase):
                 r = self.client.get(path)
                 self.assertNotContains(r, "Origin:")
                 self.assertNotContains(r, "المنشأ")
+
+
+class CategoryAdminDraftTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+        from django.contrib.auth import get_user_model
+        cls.admin = get_user_model().objects.create_superuser("admin", "admin@example.com", "pw")
+
+    def setUp(self):
+        self.client.force_login(self.admin)
+
+    def test_edit_view_offers_draft_publish_and_preview(self):
+        from django.urls import reverse
+        cat = ProductCategory.objects.get(slug="window")
+        r = self.client.get(reverse("wagtailsnippets_catalog_productcategory:edit", args=[cat.pk]))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Publish")
+        self.assertContains(r, "Save draft")
+        self.assertContains(r, reverse("wagtailsnippets_catalog_productcategory:preview_on_edit", args=[cat.pk]))
+        # Supply rows expose the new fields
+        self.assertContains(r, "source_type")
+        self.assertContains(r, "nominal_tons_min")
