@@ -20,9 +20,9 @@ class BrandViewSet(SnippetViewSet):
     menu_label = "Brands"
     menu_order = 110
     add_to_admin_menu = True
-    # Brand has a single `name` field (no `name_ar`); the listing shows it with the
-    # bilingual origin columns. An Arabic brand name needs a new field and migration.
-    list_display = ["name", "origin_en", "origin_ar", "slug", "sort_order"]
+    # Brand has a single `name` field (no `name_ar`). An Arabic brand name needs a new
+    # field and migration. Country of origin is not shown anywhere (client decision).
+    list_display = ["name", "slug", "sort_order"]
     search_fields = ["name"]
 
 

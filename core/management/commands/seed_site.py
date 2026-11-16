@@ -65,7 +65,7 @@ class Command(BaseCommand):
         brands = {}
         for i, b in enumerate(data["brands"]):
             obj = Brand(slug=b["slug"], name=b["name"], sort_order=i)
-            for f in ("origin", "line", "about"):
+            for f in ("line", "about"):
                 bi(obj, f, b.get(f))
             obj.save(); brands[b["slug"]] = obj
         for i, cat in enumerate(data["categories"]):

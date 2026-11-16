@@ -7,7 +7,7 @@
   <h1>{% if lang == 'ar' %}{{ brand.name }} من Opal Galaxy{% else %}{{ brand.name }} from Opal Galaxy{% endif %}</h1>
   <p class="lead">{{ brand|tr:"about" }}</p>
   <div class="cta"><a class="btn btn-accent" href="#contact">{% if lang == 'ar' %}اطلب سعر {{ brand.name }}{% else %}Get a {{ brand.name }} price{% endif %}</a><a class="btn btn-wa" href="https://wa.me/{{ settings.core.CompanySettings.whatsapp }}?text={% if lang == 'ar' %}{{ 'مرحباً، أريد عرض سعر لمنتجات '|add:brand.name|urlencode }}{% else %}{{ 'Hello, I would like a quote for '|add:brand.name|urlencode }}{% endif %}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% T "WhatsApp" "واتساب" %}</span></a></div>
-  <div class="meta"><span>{% T "Origin:" "المنشأ:" %} <b>{{ brand|tr:"origin" }}</b></span><span>{% if lang == 'ar' %}<b>{{ supplies|length }}</b> أنواع من المنتجات{% else %}<b>{{ supplies|length }}</b> product types{% endif %}</span></div>
+  <div class="meta"><span>{% if lang == 'ar' %}<b>{{ supplies|length }}</b> أنواع من المنتجات{% else %}<b>{{ supplies|length }}</b> product types{% endif %}</span></div>
 </div><div class="art"><div style="font-size:clamp(40px,7vw,84px);font-weight:700;letter-spacing:-.02em;color:var(--primary);line-height:1">{{ brand.name }}</div></div></div></section>
 
 <section style="background:#fff"><div class="wrap">

@@ -1,8 +1,11 @@
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
+from django.template.response import TemplateResponse
+from django.utils import translation
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import FieldPanel, FieldRowPanel, InlinePanel, MultiFieldPanel
-from wagtail.models import Orderable
+from wagtail.models import DraftStateMixin, Orderable, PreviewableMixin, RevisionMixin
 from wagtail.search import index
 
 from core.i18n import lang_url
@@ -22,8 +25,6 @@ def bi(name):
 class Brand(index.Indexed, models.Model):
     slug = models.SlugField(unique=True, help_text="Used in the URL: /brands/<slug>/")
     name = models.CharField(max_length=80)
-    origin_en = models.CharField(max_length=80, blank=True)
-    origin_ar = models.CharField(max_length=80, blank=True)
     line_en = models.CharField("Positioning line (EN)", max_length=200, blank=True)
     line_ar = models.CharField("Positioning line (AR)", max_length=200, blank=True)
     about_en = models.TextField(blank=True)
@@ -32,7 +33,7 @@ class Brand(index.Indexed, models.Model):
 
     panels = [
         FieldRowPanel([FieldPanel("name"), FieldPanel("slug"), FieldPanel("sort_order")]),
-        bi("origin"), bi("line"), bi("about"),
+        bi("line"), bi("about"),
     ]
     search_fields = [index.SearchField("name"), index.AutocompleteField("name")]
 
@@ -46,10 +47,21 @@ class Brand(index.Indexed, models.Model):
         return lang_url(f"/brands/{self.slug}/", lang)
 
     def categories(self):
-        return ProductCategory.objects.filter(supplies__brand=self).distinct()
+        return ProductCategory.objects.live().filter(supplies__brand=self).distinct()
+
+    def live_supplies(self):
+        """This brand's rows in published categories only (drafts never reach the public site)."""
+        return self.supplies.filter(category__live=True)
 
 
-class ProductCategory(index.Indexed, ClusterableModel):
+class ProductCategoryQuerySet(models.QuerySet):
+    def live(self):
+        return self.filter(live=True)
+
+
+class ProductCategory(PreviewableMixin, DraftStateMixin, RevisionMixin, index.Indexed, ClusterableModel):
+    """A product type. Edits are saved as draft revisions; the public site shows only the
+    published version (the database row), never a draft."""
     slug = models.SlugField(unique=True, help_text="Used in the URL: /products/<slug>/")
     name_en = models.CharField(max_length=120)
     name_ar = models.CharField(max_length=120, blank=True)
@@ -71,6 +83,9 @@ class ProductCategory(index.Indexed, ClusterableModel):
     ]
     search_fields = [index.SearchField("name_en"), index.SearchField("name_ar"),
                      index.AutocompleteField("name_en")]
+    _revisions = GenericRelation("wagtailcore.Revision", related_query_name="productcategory")
+
+    objects = ProductCategoryQuerySet.as_manager()
 
     class Meta:
         ordering = ["sort_order", "name_en"]
@@ -86,6 +101,30 @@ class ProductCategory(index.Indexed, ClusterableModel):
     def brands(self):
         return [s.brand for s in self.supplies.select_related("brand").order_by("brand__sort_order")]
 
+    @property
+    def revisions(self):
+        return self._revisions
+
+    # ---- preview of a draft in the admin, with the public category template
+    preview_modes = [("en", "English"), ("ar", "Arabic")]
+
+    def get_preview_template(self, request, mode_name):
+        return "catalog/category.html"
+
+    def get_preview_context(self, request, mode_name):
+        supplies = sorted(self.supplies.all(), key=lambda s: (s.brand.sort_order, s.brand.name))
+        return {"request": request, "page_kind": "category", "category": self, "supplies": supplies,
+                "all_categories": ProductCategory.objects.live()}
+
+    def serve_preview(self, request, mode_name):
+        # Render now, inside the language override: templates and context processors read
+        # the active language.
+        with translation.override("ar" if mode_name == "ar" else "en"):
+            response = TemplateResponse(request, self.get_preview_template(request, mode_name),
+                                        self.get_preview_context(request, mode_name))
+            response.render()
+        return response
+
 
 class KnowItem(Orderable):
     category = ParentalKey(ProductCategory, on_delete=models.CASCADE, related_name="know_items")
@@ -96,6 +135,14 @@ class KnowItem(Orderable):
     panels = [bi("title"), bi("text")]
 
 
+SOURCE_TYPES = [
+    ("manufacturer_catalogue", "Manufacturer catalogue"),
+    ("official_site", "Official site"),
+    ("distributor", "Distributor"),
+    ("unknown", "Unknown"),
+]
+
+
 class Supply(Orderable):
     """One cell of the product × brand matrix."""
     category = ParentalKey(ProductCategory, on_delete=models.CASCADE, related_name="supplies")
@@ -104,7 +151,16 @@ class Supply(Orderable):
     specs = models.TextField(blank=True, help_text="One spec per line (capacity, refrigerant, efficiency…)")
     pending = models.BooleanField("Models confirmed on quote", default=False,
                                   help_text="Show 'confirmed on the quote' instead of the spec line")
-    panels = [FieldPanel("brand"), FieldPanel("models_text"), FieldPanel("specs"), FieldPanel("pending")]
+    nominal_tons_min = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True,
+                                           help_text="Manufacturer's nominal TR class, as printed. Never calculated.")
+    nominal_tons_max = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True,
+                                           help_text="Manufacturer's nominal TR class, as printed. Never calculated.")
+    source = models.CharField(max_length=255, blank=True,
+                              help_text='Where the data comes from, e.g. "Carrier CLK Floor Stand Feb 2023, p.4"')
+    source_type = models.CharField(max_length=30, choices=SOURCE_TYPES, default="unknown")
+    panels = [FieldPanel("brand"), FieldPanel("models_text"), FieldPanel("specs"), FieldPanel("pending"),
+              FieldRowPanel([FieldPanel("nominal_tons_min"), FieldPanel("nominal_tons_max")]),
+              FieldRowPanel([FieldPanel("source"), FieldPanel("source_type")])]
 
     class Meta(Orderable.Meta):
         constraints = [models.UniqueConstraint(fields=["category", "brand"], name="one_supply_per_cell")]

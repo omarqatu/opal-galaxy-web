@@ -37,10 +37,6 @@
   {
    "slug": "carrier",
    "name": "Carrier",
-   "origin": {
-    "en": "United States",
-    "ar": "الولايات المتحدة"
-   },
    "line": {
     "en": "For commercial projects and multi-storey buildings",
     "ar": "للمشاريع التجارية والمباني متعددة الطوابق"
@@ -53,10 +49,6 @@
   {
    "slug": "o-general",
    "name": "O General",
-   "origin": {
-    "en": "Japan (Fujitsu General)",
-    "ar": "اليابان (Fujitsu General)"
-   },
    "line": {
     "en": "The villa favourite in the UAE",
     "ar": "الخيار الأكثر طلباً للفلل في الإمارات"
@@ -69,10 +61,6 @@
   {
    "slug": "midea",
    "name": "Midea",
-   "origin": {
-    "en": "China",
-    "ar": "الصين"
-   },
    "line": {
     "en": "The value choice for residential and commercial projects",
     "ar": "الخيار الاقتصادي للمشاريع السكنية والتجارية"
@@ -85,10 +73,6 @@
   {
    "slug": "mitsubishi-electric",
    "name": "Mitsubishi Electric",
-   "origin": {
-    "en": "Japan",
-    "ar": "اليابان"
-   },
    "line": {
     "en": "For hotels and buildings that need VRF and high efficiency",
     "ar": "للفنادق والمباني التي تتطلب أنظمة VRF وكفاءة عالية"
@@ -101,10 +85,6 @@
   {
    "slug": "super-general",
    "name": "Super General",
-   "origin": {
-    "en": "UAE",
-    "ar": "الإمارات"
-   },
    "line": {
     "en": "Economical and reliable for apartments and housing projects",
     "ar": "خيار اقتصادي وموثوق للشقق والمشاريع السكنية"
@@ -117,10 +97,6 @@
   {
    "slug": "westpoint",
    "name": "Westpoint",
-   "origin": {
-    "en": "Europe · UAE distribution",
-    "ar": "أوروبا · توزيع في الإمارات"
-   },
    "line": {
     "en": "An inverter-led range at volume pricing for residential projects",
     "ar": "تشكيلة يغلب عليها Inverter بأسعار الكميات للمشاريع السكنية"
@@ -133,10 +109,6 @@
   {
    "slug": "coolex",
    "name": "Coolex",
-   "origin": {
-    "en": "Kuwait",
-    "ar": "الكويت"
-   },
    "line": {
     "en": "Gulf-built, certified equipment for projects: ducted, package, chillers, precision cooling and VRF",
     "ar": "معدات خليجية الصنع ومعتمدة للمشاريع: مخفية ومجمّعة وشيلرات وتبريد دقيق وVRF"
