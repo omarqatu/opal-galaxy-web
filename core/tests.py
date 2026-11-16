@@ -95,4 +95,4 @@ class CatalogAdminTests(TestCase):
         r = self.client.get(reverse("wagtailsnippets_catalog_brand:list"))
         self.assertEqual(r.status_code, 200)
         self.assertContains(r, "Carrier")
-        self.assertContains(r, "الولايات المتحدة")
+        self.assertNotContains(r, "الولايات المتحدة")  # country of origin removed

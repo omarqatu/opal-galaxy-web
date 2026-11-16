@@ -19,7 +19,7 @@ def site_context(request):
         "ar_url": lang_url(base_path, "ar"),
         "base_path": base_path,
         "home_url": lang_url("/", lang),
-        "nav_categories": ProductCategory.objects.prefetch_related("supplies"),
+        "nav_categories": ProductCategory.objects.live().prefetch_related("supplies__brand"),
         "nav_brands": Brand.objects.all(),
         "site_noindex": settings.SITE_NOINDEX,
         "site_base_url": settings.SITE_BASE_URL or request.build_absolute_uri("/").rstrip("/"),

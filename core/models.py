@@ -131,17 +131,17 @@ class HomePage(RoutablePageMixin, Page):
 
     @path("products/<slug:slug>/")
     def product(self, request, slug):
-        category = get_object_or_404(ProductCategory, slug=slug)
+        category = get_object_or_404(ProductCategory.objects.live(), slug=slug)
         return self.render(request, template="catalog/category.html", context_overrides={
             "page_kind": "category", "category": category,
             "supplies": category.supplies.select_related("brand").order_by("brand__sort_order"),
-            "all_categories": ProductCategory.objects.all(),
+            "all_categories": ProductCategory.objects.live(),
         })
 
     @path("brands/<slug:slug>/")
     def brand(self, request, slug):
         brand = get_object_or_404(Brand, slug=slug)
-        supplies = brand.supplies.select_related("category").order_by("category__sort_order")
+        supplies = brand.live_supplies().select_related("category").order_by("category__sort_order")
         return self.render(request, template="catalog/brand.html", context_overrides={
             "page_kind": "brand", "brand": brand, "supplies": supplies,
             "all_brands": Brand.objects.all(),

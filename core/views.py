@@ -75,7 +75,7 @@ def robots_txt(request):
 def sitemap_xml(request):
     base = settings.SITE_BASE_URL or request.build_absolute_uri("/").rstrip("/")
     paths = ["/"]
-    paths += [f"/products/{c.slug}/" for c in ProductCategory.objects.all()]
+    paths += [f"/products/{c.slug}/" for c in ProductCategory.objects.live()]
     paths += [f"/brands/{b.slug}/" for b in Brand.objects.all()]
     paths += [f"/{p.slug}/" for p in ServicePage.objects.live()]
     return render(request, "sitemap.xml", {"base": base, "paths": paths,
