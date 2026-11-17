@@ -1,5 +1,5 @@
 # Opal Galaxy (Wagtail) — status.md
-**آخر تحديث: 16 نوفمبر 2026 · الإصدار: v0.2 (تجهيز استيراد المنتجات)**
+**آخر تحديث: 17 نوفمبر 2026 · الإصدار: v0.2 (تجهيز استيراد المنتجات)**
 
 ## المنجز
 - مشروع Wagtail 7.0 LTS / Django 5.2 LTS ينقل المعاينة الثابتة v0.7 تصميماً ومحتوى.
@@ -18,6 +18,7 @@
 - أنواع المنتجات بمسودات ونسخ ومعاينة؛ الموقع العام يعرض المنشور فقط.
 - صفوف الماركات فيها الأطنان الاسمية والمصدر ونوع المصدر.
 - أمر `import_catalogue` (تجربة افتراضياً، `--apply` = مسودات فقط، وملف مراجعة للعميل).
+- جرد الكتالوجات `data/inventory.csv`، وملف Super General `data/super-general.json`، والأسئلة المفتوحة `review/questions.md`.
 
 ## قرارات
 - PostgreSQL 17 (لا SQLite)، في الإنتاج والاختبارات.
@@ -25,7 +26,7 @@
 - المحتوى ثنائي اللغة بحقول `_en/_ar` جنباً إلى جنب في اللوحة (بدون wagtail-localize) لتبسيط الأتمتة.
 
 ## المتبقي
-- جرد الكتالوجات (`data/inventory.csv`) بعد تجهيز الملفات، ثم التجربة على Super General.
+- تجربة `import_catalogue` (dry run) على `data/super-general.json` في جلسة سحابية، ثم مراجعة العميل لـ `review/super-general-review.md` و`review/questions.md`.
 1. Coolify: تطبيق جديد في مشروع opal + قاعدة PostgreSQL + volume `/app/data` + المتغيرات + دومين staging.
 2. Cloudflare: سجل الـ staging.
 3. أول Run workflow ثم فحص الموقع وتحويله proxied.
