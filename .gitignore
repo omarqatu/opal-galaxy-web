@@ -1,5 +1,8 @@
 __pycache__/
 *.pyc
-data/
+# data/ is the local runtime DATA_DIR (database, media); only catalogue outputs are tracked
+data/*
+!data/inventory.csv
+!data/*.json
 staticfiles/
 .env

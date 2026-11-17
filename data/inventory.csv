@@ -1,0 +1,125 @@
+file,brand,category,document_type,edition_date,decision,reason
+ECAS-EQM-FMCC 20241110.pdf,carrier,,certificate,2021-11-11,skip,"certificate (ECAS/EQM): listed, not extracted. Valid until 10-Nov-2024"
+ECAS-EQM-FMCC-20271117.pdf,carrier,,certificate,2024-11-18,skip,"certificate (ECAS/EQM): listed, not extracted. Valid until 17-Nov-2027"
+EQM-SAMCO.pdf,carrier,,certificate,2026-08-26,skip,"certificate (EQM): listed, not extracted. Valid until 25-Aug-2029"
+42DC-DCD_tcm198-182411.pdf,carrier,chillers-ahu,product_data_catalogue,2014-09,skip,60 Hz document (42DC-DCD). Date: 42DC REV2 09 2014
+42ME-E19-1PD.pdf,carrier,chillers-ahu,product_data_catalogue,,use,Carrier chilled-water FCU catalogue; hold — awaiting client. No date printed inside
+42MEH -18.pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42Meh- Technical Data.pdf,carrier,chillers-ahu,catalogue_page,,use,"Carrier chilled-water FCU catalogue; hold — awaiting client. Page 11 of 42ME-E19-1PD, same content as MEH CHW UAE.pdf"
+42MEH-14.pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42MEH-16.pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42MEH_30S.pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42MEHD12SL (4).pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42MEHD14SL.pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42MEHD16 (6-12).pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42MEHD18SL.pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42MEHD24.pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42MEL-06SL.pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42MELD05SL.pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42MELD06SL.pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42MELD07SL.pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42MELD08SL.pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+42MELD10SL.pdf,carrier,chillers-ahu,fcu_selection_sheet,,skip,project FCU selection sheet
+IOM-TKS.pdf,carrier,chillers-ahu,iom_manual,,skip,"installation/operation manual (IOM), 42TKS fan coil"
+MEH CHW UAE.pdf,carrier,chillers-ahu,catalogue_page,,use,Carrier chilled-water FCU catalogue; hold — awaiting client. Page 11 of 42ME-E19-1PD (42MEH technical data)
+MEHD.pdf,carrier,chillers-ahu,catalogue_page,,use,Carrier chilled-water FCU catalogue; hold — awaiting client. Page 14 of 42ME-E19-1PD (42MEHD technical data)
+1. Brochure_Ducted R410A - MexMex.PDF,carrier,ducted,brochure,2018,use,"Ducted 38CKM / FB4CSL brochure, confirmed still sold. Date: © Carrier Corporation 2018"
+3. 38CKM_Outdoor- IOM_Top Discharge (2).pdf,carrier,ducted,iom_manual,2017,skip,installation/operation manual (IOM); exact duplicate of 3. 38CKM_Outdoor- IOM_Top Discharge.pdf (kept)
+3. 38CKM_Outdoor- IOM_Top Discharge.pdf,carrier,ducted,iom_manual,2017,skip,installation/operation manual (IOM)
+4. FB4CSL_Indoor-PD.PDF,carrier,ducted,product_data_catalogue,2017,use,"FB4CSL indoor Product Data (38CKM/FB4CSL ducted, confirmed still sold). Date: Copyright 2017"
+5. FB4CSL_Indoor- IOM.pdf,carrier,ducted,iom_manual,2017,skip,installation/operation manual (IOM)
+Carrier Satellite - T3 Inverter Ducted with top-discharge CDU (for UAE) 20240424.pdf,carrier,ducted,spec_sheet,,use,"Satellite T3 inverter ducted, UAE version (42QSM/38QST). No edition date printed inside"
+Carrier Satellite Ducted  - T3 Inverter(1).pdf,carrier,ducted,spec_sheet,,skip,duplicate (same content) of Carrier Satellite Ducted  - T3 Inverter.pdf (kept)
+Carrier Satellite Ducted  - T3 Inverter.pdf,carrier,ducted,spec_sheet,,reference,"Satellite T3 inverter ducted, generic version; the UAE version with top-discharge CDU is used. No date inside"
+ESMA - CARRIER INVERTER.pdf,carrier,ducted,certificate,,skip,"certificate (EQM schedule, scanned): listed, not extracted. Valid until 24-Aug-2026"
+IOM - 38CKM-X-Q-05SI - English.pdf,carrier,ducted,iom_manual,2020,skip,installation/operation manual (IOM)
+Product Data Book_Inv DSS_50Hz Region -Top dischareg CU-2024.5.29-Final.pdf,carrier,ducted,engineering_data_book,,use,"Engineer Data Book T3 R410A QSM/QST inverter ducted, EDB ST 0001 Rev 02. No calendar date inside (revision code only)"
+Service Manual for T3 Inverter Ducted (3).pdf,carrier,ducted,service_manual,2018-04-19,skip,service manual (also 60 Hz KSA). Date: code TM_..._180419
+2. CLK_floorstand new_50Hz -Oct 2020 (1).pdf,carrier,floor-standing,brochure,2020,skip,60 Hz document (CLK floor-stand brochure Oct 2020). Date: ©2020
+CLK Floor Stand - Brochure - Feb 2023.pdf,carrier,floor-standing,brochure,2023-02,use,"CLK floor stand 42SDL/42SFL, R410A; reference for floor-standing model names. Date: REV-2-2023-AE"
+English Manual.pdf,carrier,floor-standing,iom_manual,,skip,"owner's and installation manual (""English Manual"")"
+"QCC-QTD, FREE STANDING.pdf",carrier,floor-standing,certificate,2022-02-16,skip,"certificate (EQM/QCC): listed, not extracted. Valid until 15-Feb-2025"
+1. Brochure_Desert Master_KSA.pdf,carrier,package,brochure,2016,reference,KSA-only brochure (Desert Master); comparison only. Date: © Carrier Corporation 2016
+2. 3-5TR 50ZPM IOM.pdf,carrier,package,iom_manual,2016-06-02,skip,installation/operation manual (IOM)
+3. 3-5TR 50ZPM PD (1).pdf,carrier,package,product_data_catalogue,2016-06-26,reference,older edition of 50ZPM Product Data Catalog; newest is 50ZPM PDC 50Hz.pdf (2020-08-11)
+50TCM PDC 50Hz.pdf,carrier,package,product_data_catalogue,2024-01-25,use,50TCM Product Data Catalog. Date: version line 25-01-2024
+50TJM English PDC 50Hz V11_rev.pdf,carrier,package,product_data_catalogue,2024-10-12,use,50TJM Product Data Catalog. Date: version line 12-10-2024
+50ZPM PDC 50Hz.pdf,carrier,package,product_data_catalogue,2020-08-11,use,newest 50ZPM Product Data Catalog. Date: version line 11-08-2020
+6. 14.8-26.6TR 50TJM IOM (1).pdf,carrier,package,iom_manual,2013-06-22,skip,installation/operation manual (IOM)
+ESMA - PKG UNIT.pdf,carrier,package,certificate,2023-08-25,skip,"certificate (EQM/ESMA): listed, not extracted. Registration date 25-Aug-2023, valid until 24-Aug-2026"
+Carrier XPower VRF Brochure.pdf,carrier,vrf,brochure,,use,XPower VRF brochure. No date printed inside
+DB17-018_40VD___M-_S-JEE.pdf,carrier,vrf,engineering_data_book,2017-10,reference,"VRF slim duct 40VD___M Data Book DB17-018. Date: October, 2017. not extracted; question in review/questions.md"
+DB_DB17-004_00_EN_T.pdf,carrier,vrf,engineering_data_book,2017-09,reference,"VRF indoor 40VL___B Data Book DB17-004. Date: Sep, 2017. not extracted; question in review/questions.md"
+DB_DB17-016_00_EN_J.pdf,carrier,vrf,engineering_data_book,2017-10,reference,"VRF 2-way cassette 40VU___2 Data Book DB17-016. Date: October, 2017. not extracted; question in review/questions.md"
+DB_DB17-019_00_EN_J.pdf,carrier,vrf,engineering_data_book,2017-10,reference,"VRF floor standing 40VL___C Data Book DB17-019. Date: October, 2017. not extracted; question in review/questions.md"
+DB_DB17-020_00_EN_J.pdf,carrier,vrf,engineering_data_book,2017-10,reference,"VRF floor standing 40VL___R Data Book DB17-020. Date: October, 2017. not extracted; question in review/questions.md"
+DB_DB17-021_00_EN_J.pdf,carrier,vrf,engineering_data_book,2017-10,reference,"VRF floor standing 40VF___S Data Book DB17-021. Date: October, 2017. not extracted; question in review/questions.md"
+DB_DB22-004_02_EN_T.pdf,carrier,vrf,engineering_data_book,2023-10-12,use,VRF 4-way cassette 40VU___S Data Book DB22-004 Revision 02. Date: 231012
+DB_DB23-031_05_EN_T.pdf,carrier,vrf,engineering_data_book,2024-09-25,use,VRF concealed duct 40VD___S Data Book DB23-031 Revision 05. Date: 240925
+DB_DB23-032_05_EN_T.pdf,carrier,vrf,engineering_data_book,2024-09-25,use,VRF high static duct 40VD018H Data Book DB23-032 Revision 05. Date: 240925
+DB_DB23-035_04_EN_T.pdf,carrier,vrf,engineering_data_book,2024-10-03,use,VRF 1-way cassette Data Book DB23-035 Revision 04. Date: 241003
+DB_DB23-036_04_EN_T.pdf,carrier,vrf,engineering_data_book,2024-09-30,use,VRF 1-way cassette (big chassis) Data Book DB23-036 Revision 04. Date: 240930
+DB_DB23-037_02_EN_T.pdf,carrier,vrf,engineering_data_book,2024-04-06,use,VRF fresh air intake Data Book DB23-037 Revision 02. Date: 240406
+DB_DB24-002_01_EN_T.pdf,carrier,vrf,engineering_data_book,2024-04-25,use,VRF compact 4-way cassette Data Book DB24-002 Revision 01. Date: 240425
+Mini VRF EDB.pdf,carrier,vrf,engineering_data_book,2017-10,reference,"Mini VRF 38VS Engineering Data Book DB17-025. Date: October, 2017. not extracted; question in review/questions.md"
+SD VRF 7-9HP DB.pdf,carrier,vrf,engineering_data_book,,use,XPower VRF 7-9 HP outdoor Engineering Data Book EC24-004-01. No calendar date inside (revision code only)
+Carrier_Brochure_Inverter.pdf,carrier,wall,brochure,2020-12,use,"inverter high wall 42QHA/38QHA, UAE edition. Date: REV-12-2020-AE"
+Carrier_Brochure_ONOFF.pdf,carrier,wall,brochure,2021-08,reference,older edition of fixed-speed high wall brochure (REV-08-2021-AE); newest is KHG brochure_Feb 2026_compressed.pdf
+IOM- 38KHG 018-024 [English].pdf,carrier,wall,iom_manual,,skip,installation/operation manual (IOM)
+IOM-MB(KHB036 )----16122000011438.pdf,carrier,wall,iom_manual,2023-07-17,skip,owner's and installation manual (IOM)
+KHG brochure_Feb 2026_compressed.pdf,carrier,wall,brochure,2026-02,use,newest fixed-speed high wall brochure 42KHG/38KHG. Date: REV-02-2026-AE
+KHG WALL MOUNTED CHINA brochure (1).pdf,carrier,wall,brochure,2021-08,skip,"duplicate (same content, REV-08-2021-AE) of Carrier_Brochure_ONOFF.pdf (kept)"
+QHG Inverter Hi Walls - Brochure.pdf,carrier,wall,brochure,2024-07,reference,inverter high wall 42QHG; revision code REV-07-2024-SA marks a KSA edition and models end in VSA; question in review/questions.md
+WRAC Catalogue for UAE - 2021-Revised.pdf,carrier,window,brochure,,use,"Carrier WRAC 51KWF, UAE; confirmed still sold (2021 edition per client). No date printed inside"
+WRAC Catalogue for UAE.pdf,carrier,window,brochure,,skip,exact duplicate of WRAC Catalogue for UAE - 2021-Revised.pdf (kept)
+"ADQCC Certificate Scroll, Piston and Floor standing Models 23-Jul-2025.pdf",super-general,,certificate,2024-07-24,skip,"certificate (ADQCC): listed, not extracted. Expiry 23 July 2025"
+"ADQCC Certificate Split Rotary, Inv and Cassette models.pdf",super-general,,certificate,2024-07-15,skip,"certificate (ADQCC): listed, not extracted. Expiry 14 July 2025"
+SGCA2400i ESMA valid till 14-Jan-2025.pdf,super-general,cassette,certificate,2024-01-15,skip,"certificate (ESMA): listed, not extracted. Valid until 14/01/2025"
+SGCA2400i SGCA3600i SGCA4800i Specs.pdf,super-general,cassette,spec_sheet,,skip,duplicate (outdoor sheet only) of SGCA2400i SGCA3600i SGCA4800i Specs.xlsx (kept)
+SGCA2400i SGCA3600i SGCA4800i Specs.xlsx,super-general,cassette,spec_sheet,,use,manufacturer spec workbook SGCA2400i / SGCA3600i / SGCA4800i (indoor + outdoor sheets). No date inside
+SGCA36-00i.pdf,super-general,cassette,official_site printout,2026-11-04,use,supergeneral.com page SGCA36 00i; print date 04/11/2026
+ADQCC Certificate Ducted models.pdf,super-general,ducted,certificate,2024-07-03,skip,"certificate (ADQCC): listed, not extracted. Expiry 02 July 2025"
+SGDA6010HE.pdf,super-general,ducted,official_site printout,2025-04-25,use,supergeneral.com page SGDA6010HE; print date 25/04/2025
+SGFS120HE.pdf,super-general,floor-standing,official_site printout,2024-02-10,use,supergeneral.com page SGFS120HE; print date 10/02/2024
+SGFS36AE.pdf,super-general,floor-standing,official_site printout,2024-05-02,use,supergeneral.com page SGFS36AE; print date 02/05/2024
+SGFS48AE.pdf,super-general,floor-standing,official_site printout,2024-02-10,use,supergeneral.com page SGFS48AE; print date 10/02/2024
+SGFS60AE.pdf,super-general,floor-standing,official_site printout,2024-02-10,use,supergeneral.com page SGFS60AE; print date 10/02/2024
+Super General - Floor Stand (2).pdf,super-general,floor-standing,catalogue_page,2021,reference,"older edition: catalogue page SGFS24GE, SGFS36NE, SGFS48GE, SGFS60GE, superseded by 2024 sheets. Date: PDF document title only (""AIR CON CATALOGUE 2021"")"
+Super General Free Stand.pdf,super-general,floor-standing,official_site printout,2024-01-24,reference,"pages 2-3 duplicate SGFS48AE.pdf / SGFS60AE.pdf (kept); page 1 SGFS36NE (24/01/2024), superseded for the 33000 BTU class by SGFS36AE.pdf (02/05/2024); question in review/questions.md"
+SGS 316AE.pdf,super-general,wall,official_site printout,2026-09-29,use,supergeneral.com page SGS316AE; print date 9/29/26
+SGS 366GE.pdf,super-general,wall,catalogue_page,,skip,duplicate (same sheet) of SGS136G1 SGS195AE SGS256GE  316GE 366GE (2).pdf (kept)
+SGS-181i5.pdf,super-general,wall,official_site printout,2024-04-20,use,supergeneral.com page SGS 181i5; print date 20/04/2024
+SGS-241i5.pdf,super-general,wall,official_site printout,2024-07-15,use,supergeneral.com page SGS 241i5; print date 15/07/2024
+SGS121AE 181AE.pdf,super-general,wall,catalogue_page,2024,use,"manufacturer catalogue page: SGS181AE, SGS249AE, SGS317AE, SGS367AE, SGS121AE. Date: PDF document title only (""SG UAE Catalog Full range 2024"")"
+SGS121i5.pdf,super-general,wall,official_site printout,2025-01-09,use,supergeneral.com page SGS121i5; print date 09/01/2025
+SGS136G1 SGS195AE SGS256GE  316GE 366GE (2).pdf,super-general,wall,catalogue_page,,use,"manufacturer sheets SGS256GE, SGS316GE, SGS366GE, SGS136GE1. No date printed"
+SGS181-4GE.pdf,super-general,wall,official_site printout,2025-01-30,use,supergeneral.com page SGS181-4GE; print date 30/01/2025
+SGS181-4GE1.pdf,super-general,wall,official_site printout,2025-01-30,use,supergeneral.com page SGS181-4GE1; print date 30/01/2025
+SGS181AE.pdf,super-general,wall,official_site printout,2025-04-08,use,supergeneral.com page SGS181AE; print date 08/04/2025
+SGS191AE.pdf,super-general,wall,official_site printout,2023-09-18,use,supergeneral.com page SGS191AE; print date 18/09/2023
+SGS195AE.pdf,super-general,wall,official_site printout,2023-08-14,skip,duplicate (same printout) of page 2 of SUPER GENERAL SPLIT.pdf (kept)
+SGS197i.pdf,super-general,wall,official_site printout,2025-01-09,use,supergeneral.com page SGS197i; print date 09/01/2025
+SGS249AE.pdf,super-general,wall,official_site printout,2026-08-04,use,supergeneral.com page SGS249AE; print date 04/08/2026
+SGS256GE.pdf,super-general,wall,catalogue_page,,skip,duplicate (same sheet) of SGS136G1 SGS195AE SGS256GE  316GE 366GE (2).pdf (kept)
+SGS260CN.pdf,super-general,wall,official_site printout,2025-02-15,use,supergeneral.com page SGS260CN; print date 15/02/2025
+SGS316GE.pdf,super-general,wall,catalogue_page,,skip,duplicate (same sheet) of SGS136G1 SGS195AE SGS256GE  316GE 366GE (2).pdf (kept)
+SGS370CE.pdf,super-general,wall,official_site printout,2024-01-17,use,supergeneral.com page SGS370CE; print date 17/01/2024
+SGS370CN.pdf,super-general,wall,official_site printout,2025-09-16,use,supergeneral.com page SGS370CN; print date 16/09/2025
+SGS370HE.pdf,super-general,wall,official_site printout,2024-01-17,use,supergeneral.com page SGS370HE; print date 17/01/2024
+Super General 2.5 tr.pdf,super-general,wall,catalogue_page,,skip,duplicate (same SGS316GE sheet) of SGS136G1 SGS195AE SGS256GE  316GE 366GE (2).pdf (kept)
+SUPER GENERAL SPLIT I TON.pdf,super-general,wall,official_site printout,2023-10-27,skip,duplicate (SGS121NE page) of SUPER GENERAL SPLIT.pdf (kept)
+Super General Split Units.pdf,super-general,wall,official_site printout,2023-10-27,skip,"duplicate: page 1 = SUPER GENERAL SPLIT.pdf (kept), page 2 = SGS366GE sheet in SGS136G1 SGS195AE SGS256GE  316GE 366GE (2).pdf"
+SUPER GENERAL SPLIT.pdf,super-general,wall,official_site printout,2023-10-27,use,"supergeneral.com pages SGS121NE (27/10/2023), SGS195AE (14/08/2023), SGS365NE (18/10/2023); pages 3-4 repeat the SGS256GE/SGS316GE sheets"
+2023 EER WINDOW CATALOG.pdf,super-general,window,catalogue_page,2023,use,"SGA19AE, SGA25AE, SGA19-42AE, SGA25-42AE. Date: PDF document title only (""2023 EER WINDOW CATALOG""). Page 2 heading 'Split Air Conditioner' is a template error (SGA = window)"
+SGA - 18i.docx,super-general,window,spec_sheet,,skip,duplicate (same sheet as image) of SGA-18i.pdf (kept)
+SGA-18i.pdf,super-general,window,spec_sheet,,use,manufacturer spec sheet SGA18i (primary source). No date printed
+SGA18-41HE.pdf,super-general,window,official_site printout,2024-04-04,use,supergeneral.com page SGA18-41HE; print date 04/04/2024
+SGA19AE.pdf,super-general,window,official_site printout,2024-04-30,use,supergeneral.com page SGA19AE; print date 30/04/2024
+SGA24i.pdf,super-general,window,official_site printout,2025-04-08,use,supergeneral.com page SGA24i; print date 08/04/2025
+SGA25AE.pdf,super-general,window,official_site printout,2023-10-21,use,supergeneral.com page SGA25AE; print date 21/10/2023
+Super General  - Window - 2 Ton.pdf,super-general,window,official_site printout,2024-02-16,use,supergeneral.com page SGA248HE; print date 16/02/2024
+Super general Window.pdf,super-general,window,catalogue_page,2023,skip,duplicate (page 1 of the same catalogue) of 2023 EER WINDOW CATALOG.pdf (kept)
+WhatsApp Image 2026-11-08 at 10.23.33 AM.jpeg,super-general,window,photo_of_spec_sheet,,skip,duplicate (photo of the same SGA18i sheet) of SGA-18i.pdf (kept)
+4. 120X&120X2 Wired Controller Introduction （带功能列表）-Thermostats Catalogue.pdf,unknown,vrf,controller_catalogue,2019-08-30,skip,thermostat / wired controller catalogue (120X)
+Aurora inverter error code20220928.pdf,unknown,wall,error_code_guide,2022-03-16,skip,error-code guide. Date: PDF document title code ..._220316
+High EER on-off Aurora troubleshooting.pdf,unknown,wall,troubleshooting_guide,2020-09-29,skip,troubleshooting guide. Date: PDF document title code ..._200929
