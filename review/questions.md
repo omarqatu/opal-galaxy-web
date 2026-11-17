@@ -12,5 +12,6 @@ One line per question: question · file(s) · why it matters. Files are in the c
 | 6 | Are the Super General SGDI inverter ducted units and SGDA 1810 / 2410 / 3010 / 3610 / 4810 still sold? | none (shown on the site today); only SGDA6010HE.pdf exists | No manufacturer file; the import keeps only SGDA6010HE on the ducted row. |
 | 7 | Are SGS121NE, SGS195AE, SGS191AE and SGS365NE still sold? | SUPER GENERAL SPLIT.pdf, SGS191AE.pdf (supergeneral.com printouts, Aug–Oct 2023) | Oldest documents in the wall-mounted row; SGS121NE (11630 Btu/h) sets the bottom of the range below 12000. |
 | 8 | Are SGA19-42AE and SGA25-42AE separate models still sold alongside SGA19AE and SGA25AE? | 2023 EER WINDOW CATALOG.pdf | Same printed values as SGA19AE / SGA25AE; listed on the window row from this catalogue only. |
+| 9 | The current window row says '5-year warranty'. The import removes it because no manufacturer file states it. Does Opal offer this warranty, and on what document is it based? | none (shown on the site today: "5-year compressor warranty (SE series)") | Removed by the import unless a document supports it. |
 
 Cassette and ducted rows are on hold until questions 5–6 are answered.

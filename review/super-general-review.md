@@ -1,7 +1,7 @@
 # Super General: catalogue review
 
 - File: `super-general.json`
-- Run: 2026-11-17 23:49 · Dry run (nothing written to the site)
+- Run: 2026-11-17 23:52 · Dry run (nothing written to the site)
 - Every line below is a value on the site that differs from the manufacturer's document. The document wins; please confirm each line.
 
 ## Changes
