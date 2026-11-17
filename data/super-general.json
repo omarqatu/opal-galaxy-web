@@ -46,7 +46,8 @@
       "tons_stated_in_source": false,
       "source": "Super General SGCA2400i SGCA3600i SGCA4800i spec workbook (indoor and outdoor sheets); supergeneral.com page SGCA36 00i, 04/11/2026",
       "source_type": "manufacturer_catalogue",
-      "note": "From the workbook: SGCA2400i 23800 T1 / 21200 T3; SGCA3600i 33600 (8100-43400) T1 / 29000 T3; SGCA4800i 42500 (19000-54800) T1 / 38400 T3; heating capacity given for all three. Only 50 Hz values used. The supergeneral.com page (04/11/2026) prints the 36k model as 'SGCA36 00i' with the same values; the workbook name SGCA3600i is used. Climate type T3 is printed on that page. Fixed-speed SGCA3600HE and SGCA4800SE on the site have no file; see review/questions.md."
+      "note": "From the workbook: SGCA2400i 23800 T1 / 21200 T3; SGCA3600i 33600 (8100-43400) T1 / 29000 T3; SGCA4800i 42500 (19000-54800) T1 / 38400 T3; heating capacity given for all three. Only 50 Hz values used. The supergeneral.com page (04/11/2026) prints the 36k model as 'SGCA36 00i' with the same values; the workbook name SGCA3600i is used. Climate type T3 is printed on that page. Fixed-speed SGCA3600HE and SGCA4800SE on the site have no file; see review/questions.md. On hold until questions 5–6 in review/questions.md are answered.",
+      "hold": true
     },
     {
       "category": "ducted",
@@ -61,7 +62,8 @@
       "tons_stated_in_source": false,
       "source": "Super General: supergeneral.com page SGDA6010HE, 25/04/2025",
       "source_type": "official_site",
-      "note": "Only model supported by a manufacturer file. The SGDI inverter series and SGDA 1810 / 2410 / 3010 / 3610 / 4810 on the site have no file; see review/questions.md."
+      "note": "Only model supported by a manufacturer file. The SGDI inverter series and SGDA 1810 / 2410 / 3010 / 3610 / 4810 on the site have no file; see review/questions.md. On hold until questions 5–6 in review/questions.md are answered.",
+      "hold": true
     },
     {
       "category": "floor-standing",
