@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "brand": "super-general",
+  "rows": [
+    {
+      "category": "window",
+      "models": "Rotary: SGA19AE · SGA19-42AE · SGA18-41HE · SGA25AE · SGA25-42AE · Inverter: SGA18i · SGA24i · Reciprocating: SGA248HE",
+      "specs": [
+        "Rated T1 capacity 17400 – 24000 Btu/h",
+        "Rotary, inverter (SGA18i, SGA24i) or reciprocating (SGA248HE) compressor",
+        "Climate type T3 · 220-240V, 50Hz",
+        "Refrigerant R410a · R22 on SGA248HE"
+      ],
+      "confirmed_on_quote": false,
+      "tons_stated_in_source": false,
+      "source": "Super General: supergeneral.com pages SGA19AE, SGA18-41HE, SGA25AE, SGA248HE, SGA24i (2023–2025); 2023 EER Window Catalog; SGA18i sheet",
+      "source_type": "official_site",
+      "note": "Per model, newest document: SGA19AE 30/04/2024 (17400 / ESMA 14500); SGA18-41HE 04/04/2024 (18000); SGA25AE 21/10/2023 (21500 / ESMA 19100); SGA248HE 16/02/2024 (24000, reciprocating, R22); SGA24i 08/04/2025 (21000 / T3 17000, inverter); SGA18i manufacturer sheet SGA-18i.pdf (18000 / ESMA 15000, inverter), same sheet also received as a WhatsApp photo and a .docx. SGA19-42AE and SGA25-42AE from 2023 EER WINDOW CATALOG.pdf, page 2; its heading 'Split Air Conditioner' is a template error (SGA = window). SGA24AE on the site has no file; SGA25AE replaces it. Sheets print the refrigerant as R410a. No ton values are printed in any file."
+    },
+    {
+      "category": "wall",
+      "models": "Rotary: SGS121NE · SGS121AE · SGS136GE1 · SGS181AE · SGS181-4GE · SGS181-4GE1 · SGS195AE · SGS249AE · SGS256GE · SGS316GE · SGS317AE · SGS365NE · SGS367AE · Twin rotary: SGS316AE · SGS366GE · Inverter: SGS121i5 · SGS 181i5 · SGS197i (heat & cool) · SGS 241i5 · Reciprocating: SGS191AE · SGS260CN · SGS370CN · SGS370CE · SGS370HE",
+      "specs": [
+        "Rated T1 capacity 11630 – 36000 Btu/h",
+        "Rotary, twin rotary, inverter or reciprocating compressor · climate type T3",
+        "Refrigerant R410a · R22 on SGS370CE and SGS370HE",
+        "220-240V, 50Hz",
+        "Heat & cool: SGS197i"
+      ],
+      "confirmed_on_quote": false,
+      "tons_stated_in_source": false,
+      "source": "Super General: supergeneral.com split pages (2023–2026); SG UAE Catalog Full range 2024 page; split rotary sheets SGS256GE/316GE/366GE/136GE1",
+      "source_type": "official_site",
+      "note": "Per model, newest document (rated T1 Btu/h): SGS121NE 27/10/2023 (11630); SGS121AE 2024 catalogue (12500 / T3 11000); SGS121i5 09/01/2025 (12000); SGS136GE1 sheet (12000 / ESMA 10400); SGS181AE 08/04/2025 (18000 / ESMA 16002); SGS181-4GE 30/01/2025 (18000); SGS181-4GE1 30/01/2025 (18000 / T3 16400); SGS 181i5 20/04/2024 (18000); SGS195AE 14/08/2023 (18000 / ESMA 16000); SGS197i 09/01/2025 (18000 / T3 16000); SGS191AE 18/09/2023 (20000 / ESMA 16500); SGS249AE 04/08/2026 (22000 / ESMA 19000); SGS 241i5 15/07/2024 (23000); SGS256GE sheet (23200 / ESMA 20000); SGS260CN 15/02/2025 (24500 / T3 20000); SGS316GE sheet (28000 / ESMA 25000); SGS317AE 2024 catalogue (28000 / T3 25000); SGS316AE 29/09/2026 (31400 / T3 27200); SGS366GE sheet (31400 / ESMA 27200); SGS367AE 2024 catalogue (32000 / T3 27500); SGS365NE 18/10/2023 (33000); SGS370CN 16/09/2025 (35300 / T3 28000); SGS370CE 17/01/2024 (36000 / ESMA 28500, R22); SGS370HE 17/01/2024 (36000, R22). Model names as printed in each sheet title (SGS 181i5 and SGS 241i5 are printed with a space). The range starts at 11630 (SGS121NE, printed value), not 12000; see review/questions.md. No ton values are printed in any file."
+    },
+    {
+      "category": "cassette",
+      "models": "Inverter: SGCA2400i · SGCA3600i · SGCA4800i (cooling and heating)",
+      "specs": [
+        "Rated T1 cooling 23800 – 42500 Btu/h",
+        "Rated T3 cooling 21200 – 38400 Btu/h",
+        "Inverter, rotary compressor · climate type T3",
+        "Refrigerant R410A"
+      ],
+      "confirmed_on_quote": false,
+      "tons_stated_in_source": false,
+      "source": "Super General SGCA2400i SGCA3600i SGCA4800i spec workbook (indoor and outdoor sheets); supergeneral.com page SGCA36 00i, 04/11/2026",
+      "source_type": "manufacturer_catalogue",
+      "note": "From the workbook: SGCA2400i 23800 T1 / 21200 T3; SGCA3600i 33600 (8100-43400) T1 / 29000 T3; SGCA4800i 42500 (19000-54800) T1 / 38400 T3; heating capacity given for all three. Only 50 Hz values used. The supergeneral.com page (04/11/2026) prints the 36k model as 'SGCA36 00i' with the same values; the workbook name SGCA3600i is used. Climate type T3 is printed on that page. Fixed-speed SGCA3600HE and SGCA4800SE on the site have no file; see review/questions.md. On hold until questions 5–6 in review/questions.md are answered.",
+      "hold": true
+    },
+    {
+      "category": "ducted",
+      "models": "Fixed speed: SGDA6010HE",
+      "specs": [
+        "Rated T1 capacity 60000 Btu/h",
+        "Scroll compressor · climate type T3",
+        "Refrigerant R410a",
+        "380-415V, 50Hz, 3Ph"
+      ],
+      "confirmed_on_quote": false,
+      "tons_stated_in_source": false,
+      "source": "Super General: supergeneral.com page SGDA6010HE, 25/04/2025",
+      "source_type": "official_site",
+      "note": "Only model supported by a manufacturer file. The SGDI inverter series and SGDA 1810 / 2410 / 3010 / 3610 / 4810 on the site have no file; see review/questions.md. On hold until questions 5–6 in review/questions.md are answered.",
+      "hold": true
+    },
+    {
+      "category": "floor-standing",
+      "models": "Rotary: SGFS36AE · Scroll: SGFS48AE · SGFS60AE · SGFS120HE",
+      "specs": [
+        "Rated T1 capacity 33000 – 120000 Btu/h",
+        "Rotary (SGFS36AE) or scroll compressor · climate type T3",
+        "Refrigerant R410a",
+        "SGFS36AE 220-240V, 1Ph, 50Hz",
+        "SGFS48AE, SGFS60AE 380-415V, 3Ph, 50Hz",
+        "SGFS120HE indoor 220-240V, 1Ph, outdoor 380-415V, 3Ph, 50Hz"
+      ],
+      "confirmed_on_quote": false,
+      "tons_stated_in_source": false,
+      "source": "Super General: supergeneral.com pages SGFS36AE (02/05/2024), SGFS48AE, SGFS60AE, SGFS120HE (10/02/2024)",
+      "source_type": "official_site",
+      "note": "New row. Per model, newest document: SGFS36AE 02/05/2024 (33000 / ESMA 29200); SGFS48AE 10/02/2024 (48000 / ESMA 41000); SGFS60AE 10/02/2024 (54000 / ESMA 48000); SGFS120HE 10/02/2024 (120000). SGFS48GE and SGFS60GE (2021 catalogue) are older models of the same capacity. SGFS36NE (24/01/2024) has the same capacity as the newer SGFS36AE and is not listed; SGFS24GE appears only in the 2021 catalogue. Both are in review/questions.md."
+    }
+  ]
+}
