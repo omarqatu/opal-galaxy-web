@@ -1,5 +1,5 @@
 # Opal Galaxy (Wagtail) — status.md
-**آخر تحديث: 17 نوفمبر 2026 · الإصدار: v0.2 (تجهيز استيراد المنتجات)**
+**آخر تحديث: 20 نوفمبر 2026 · الإصدار: v0.3 (أول ماركة مستوردة: Super General)**
 
 ## المنجز
 - مشروع Wagtail 7.0 LTS / Django 5.2 LTS ينقل المعاينة الثابتة v0.7 تصميماً ومحتوى.
@@ -19,6 +19,7 @@
 - صفوف الماركات فيها الأطنان الاسمية والمصدر ونوع المصدر.
 - أمر `import_catalogue` (تجربة افتراضياً، `--apply` = مسودات فقط، وملف مراجعة للعميل).
 - جرد الكتالوجات `data/inventory.csv`، وملف Super General `data/super-general.json`، والأسئلة المفتوحة `review/questions.md`.
+- Super General منشورة على staging من الكتالوج: الشباك والجداري وصف عمودي جديد (الكاسيت والمخفي معلّقان حتى إجابة العميل).
 
 ## قرارات
 - PostgreSQL 17 (لا SQLite)، في الإنتاج والاختبارات.
@@ -26,9 +27,8 @@
 - المحتوى ثنائي اللغة بحقول `_en/_ar` جنباً إلى جنب في اللوحة (بدون wagtail-localize) لتبسيط الأتمتة.
 
 ## المتبقي
-- تجربة `import_catalogue` (dry run) على `data/super-general.json` في جلسة سحابية، ثم مراجعة العميل لـ `review/super-general-review.md` و`review/questions.md`.
-1. Coolify: تطبيق جديد في مشروع opal + قاعدة PostgreSQL + volume `/app/data` + المتغيرات + دومين staging.
-2. Cloudflare: سجل الـ staging.
-3. أول Run workflow ثم فحص الموقع وتحويله proxied.
-4. مراجعة أحمد للموقع على staging ← تحويل الدومين الرئيسي و `SITE_NOINDEX=0`.
-5. صيغة الـ brief العامة (od-wagtail) مستخرجة من هذا المشروع.
+- Super General: تعديل يدوي لنص الماركة ونطاقات السعة الثلاثة، وإرسال `review/super-general-review.md` و`review/questions.md` للعميل، ثم الكاسيت والمخفي بعد إجابة السؤالين 5 و6.
+- Carrier: الاستخراج على السيرفر إلى `data/carrier.json`، ثم التجربة وطلب الدمج.
+- ملفات الكتالوج لبقية الماركات (O General، Midea، Mitsubishi Electric، Westpoint، Coolex) غير موجودة في الجرد بعد.
+1. مراجعة أحمد للموقع على staging ← تحويل الدومين الرئيسي و `SITE_NOINDEX=0`.
+2. صيغة الـ brief العامة (od-wagtail) مستخرجة من هذا المشروع.
