@@ -25,4 +25,4 @@ One line per question: question · file(s) · why it matters. Files are in the c
 
 Cassette and ducted rows are on hold until questions 5–6 are answered.
 
-Carrier: the 42ME chilled water fan coil row is held until question 18 is answered.
+Carrier: the wall, ducted and floor-standing rows are held until questions 10–14 are answered, and the 42ME chilled water fan coil row until question 18 is answered.
