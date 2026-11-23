@@ -267,10 +267,12 @@ class HomePage(RoutablePageMixin, Page):
         return self.render(request, context_overrides={"page_kind": "home"})
 
     @staticmethod
-    def _draft_context(request, kind, slug, premium):
-        """Draft copy for review: only on a redesigned page, only with ?draft=1, only for a reviewer."""
-        if premium and request.GET.get("draft") == "1" and preview.may_preview(request):
-            return {"draft_mode": True, "demo": preview.demo_for(kind, slug, current_lang())}
+    def _draft_context(request, kind, slug):
+        """Draft copy for review: only where a draft exists, only with ?draft=1, only for a reviewer."""
+        if request.GET.get("draft") == "1" and preview.may_preview(request):
+            demo = preview.demo_for(kind, slug, current_lang())
+            if demo:
+                return {"draft_mode": True, "demo": demo}
         return {"draft_mode": False, "demo": {}}
 
     def render(self, request, *args, **kwargs):
@@ -283,10 +285,8 @@ class HomePage(RoutablePageMixin, Page):
     @path("products/<slug:slug>/")
     def product(self, request, slug):
         category = get_object_or_404(ProductCategory.objects.live(), slug=slug)
-        premium = category.slug in preview.PREMIUM_CATEGORIES
-        return self.render(request, template="catalog/category_premium.html" if premium else "catalog/category.html",
-                           context_overrides={
-            **self._draft_context(request, "category", category.slug, premium),
+        return self.render(request, template="catalog/category.html", context_overrides={
+            **self._draft_context(request, "category", category.slug),
             "page_kind": "category", "category": category,
             "supplies": category.supplies.select_related("brand").order_by("brand__sort_order"),
             "all_categories": ProductCategory.objects.live(),
@@ -296,10 +296,8 @@ class HomePage(RoutablePageMixin, Page):
     def brand(self, request, slug):
         brand = get_object_or_404(Brand, slug=slug)
         supplies = brand.live_supplies().select_related("category").order_by("category__sort_order")
-        premium = brand.slug in preview.PREMIUM_BRANDS
-        return self.render(request, template="catalog/brand_premium.html" if premium else "catalog/brand.html",
-                           context_overrides={
-            **self._draft_context(request, "brand", brand.slug, premium),
+        return self.render(request, template="catalog/brand.html", context_overrides={
+            **self._draft_context(request, "brand", brand.slug),
             "page_kind": "brand", "brand": brand, "supplies": supplies,
             "all_brands": Brand.objects.all(),
         })

@@ -7,6 +7,23 @@ from django.test import TestCase, TransactionTestCase
 
 from catalog.models import Brand, ProductCategory, Supply
 
+def shown_text(response):
+    """The page as a reader gets it: tags removed, whitespace collapsed."""
+    import html
+    import re
+    markup = re.sub(r"</?(?:span|b|i)\b[^>]*>", "", response.content.decode())   # inline wrappers add no space
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", markup)))
+
+
+def model_pieces(models_text):
+    """The pieces of a stored models string as the panels lay them out (cut at " · " and after "Label:")."""
+    import re
+    out = []
+    for part in re.split(r" · |\.\s+(?=[A-Z][\\w &/()\\-]{1,40}:\s)", models_text):
+        out.extend(x.strip() for x in re.split(r"(?<=:)\s", part, maxsplit=1) if x.strip())
+    return out
+
+
 
 class MigrationKeepsContentTests(TransactionTestCase):
     """0002 must not change any visible catalogue content (only the brand origin goes)."""
@@ -109,7 +126,9 @@ class PublicSiteShowsOnlyPublishedTests(TestCase):
         for path in ("/products/window/", "/brands/super-general/"):
             with self.subTest(path=path):
                 r = self.client.get(path)
-                self.assertContains(r, self.published_models)
+                text = shown_text(r)
+                for piece in model_pieces(self.published_models):
+                    self.assertIn(piece, text)
                 self.assertNotContains(r, "UNPUBLISHED-CHANGE-42")
 
     def test_publishing_the_revision_makes_it_public(self):

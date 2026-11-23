@@ -1,8 +1,10 @@
 # Internal pages — draft copy for review
 
-Proposed wording for the two reference pages. **Draft, not site content.** None of it is saved in the database or published.
+Proposed wording for two pages (Carrier brand, VRF systems category). **Draft, not site content.** None of it is saved in the database or published.
 
-How to see it: sign in to the Wagtail admin on staging, then open a reference page with `?draft=1` added to its address. The drafts appear under a "Draft content for review" banner, each one outlined and tagged. A visitor who is not signed in (or has no admin access) gets the normal page even with `?draft=1`. In local development the preview is open.
+Since the rollout every brand and category page uses the same templates; only the two pages below have draft texts, and `?draft=1` changes nothing on any other page.
+
+How to see it: sign in to the Wagtail admin on staging, then open one of the two pages with `?draft=1` added to its address. The drafts appear under a "Draft content for review" banner, each one outlined and tagged. A visitor who is not signed in (or has no admin access) gets the normal page even with `?draft=1`. In local development the preview is open.
 
 To use a text: edit it as you see fit and enter it in Wagtail Admin in the field named in the last column. When all texts are entered, the `DEMO` block in `catalog/preview.py` is deleted.
 
@@ -29,9 +31,11 @@ To confirm before publishing: "as Carrier publishes them for the Gulf" is true f
 
 None.
 
-## Content seen on the reference pages that needs Omar's attention (not changed)
+## Content seen on the pages that needs Omar's attention (not changed)
 
 - Carrier rows that are not from the imported catalogue still print tons in their specification lines ("1 – 3 ton", "1 – 15 ton", "2 – 4 ton", "3 – 5 ton"). They are catalogue rows on hold and are shown as stored.
 - "4 – 80 HP per system" is the stored VRF range; it is shown as stored on both pages.
 - The current Carrier introduction and positioning line (see above).
 - No manufacturer logo is uploaded for any brand; the pages show brand names in type.
+- Rollout: rows outside the imported catalogues (O General, Midea, Coolex, Westpoint, older Carrier rows) print tons, MBH, °C and °F in their specification lines exactly as stored ("Inverter 1.5 – 5 ton (18 – 60 MBH)", "rated to 125 °F"). Nothing was converted; the unit audit stays with Omar.
+- Rollout: Daikin, LG, SKM and Trane have no catalogue rows. Their pages show the "confirmed on the quote" panel with the quotation button and no equipment list.

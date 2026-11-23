@@ -548,15 +548,13 @@ class InternalPagesTests(TestCase):
             self.assertNotIn(banned, body)
         self.assertIn("سياسة الخصوصية", self.client.get("/ar/privacy/").content.decode())
 
-    def test_category_page_has_no_counts_and_keeps_catalogue_rows_verbatim(self):
+    def test_category_page_has_no_counts_and_keeps_data_left_to_right(self):
         en = self.client.get("/products/wall/").content.decode()
         ar = self.client.get("/ar/products/wall/").content.decode()
         for html in (en, ar):
             self.assertNotIn("Available from <b>", html)
             self.assertNotIn("علامات تجارية</span>", html)
-            for s in Supply.objects.filter(category__slug="wall"):
-                self.assertIn(s.models_text.replace("&", "&amp;"), html)
-        self.assertIn('<div class="supply-row__data" dir="ltr" lang="en">', ar)
+        self.assertIn('<div class="tech__data" dir="ltr" lang="en">', ar)
         self.assertNotIn("wall mounted split", en)   # the old lower-cased button text
         self.assertIn("Request a quote for this equipment", en)
 
@@ -1055,13 +1053,79 @@ class PremiumInternalPagesTests(TestCase):
     def setUpTestData(cls):
         call_command("seed_site", verbosity=0)
 
-    def test_only_the_two_reference_pages_use_the_new_templates(self):
-        from catalog import preview
-        self.assertEqual((preview.PREMIUM_BRANDS, preview.PREMIUM_CATEGORIES), ({"carrier"}, {"vrf"}))
-        self.assertTemplateUsed(self.client.get("/brands/carrier/"), "catalog/brand_premium.html")
-        self.assertTemplateUsed(self.client.get("/ar/products/vrf/"), "catalog/category_premium.html")
-        self.assertTemplateUsed(self.client.get("/brands/midea/"), "catalog/brand.html")
-        self.assertTemplateUsed(self.client.get("/products/wall/"), "catalog/category.html")
+    def test_every_brand_and_category_page_uses_the_premium_templates(self):
+        import os, re
+        from django.conf import settings
+        self.assertFalse(os.path.exists(settings.BASE_DIR / "templates/catalog/brand_premium.html"))
+        self.assertFalse(os.path.exists(settings.BASE_DIR / "templates/includes/supply_row.html"))
+        pages = [(f"/brands/{b.slug}/", b.live_supplies().count()) for b in Brand.objects.all()]
+        pages += [(f"/products/{c.slug}/", c.supplies.count()) for c in ProductCategory.objects.live()]
+        self.assertGreaterEqual(len(pages), 20)
+        for path, rows in pages:
+            for prefix, direction in (("", "ltr"), ("/ar", "rtl")):
+                with self.subTest(path=prefix + path):
+                    response = self.client.get(prefix + path)
+                    self.assertEqual(response.status_code, 200)
+                    html = response.content.decode()
+                    self.assertIn(f'dir="{direction}"', html.split("<head>")[0])
+                    self.assertEqual(html.count("<h1"), 1)
+                    self.assertEqual(html.count('<details class="tech"'), rows)       # one panel per catalogue row
+                    self.assertEqual(html.count('class="tech__data" dir="ltr" lang="en"'), rows)
+                    self.assertEqual('class="empty-state"' in html, rows == 0 and path.startswith("/brands/"))
+                    self.assertIn('id="quote"', html)
+                    self.assertIn('class="cta-band"', html)
+                    self.assertNotIn('href="#"', html)
+                    self.assertNotIn("supply-row", html)
+                    self.assertNotIn("product types", html)
+                    ids = set(re.findall(r'id="([^"]+)"', html))
+                    for anchor in set(re.findall(r'href="#([^"]+)"', html)):
+                        self.assertIn(anchor, ids)
+
+    def test_every_catalogue_row_is_shown_verbatim_on_both_of_its_pages(self):
+        import re
+        from core.templatetags.opal import model_groups
+        norm = lambda t: re.sub(r"\s+", " ", t)
+        cache = {}
+        for row in Supply.objects.filter(category__live=True).select_related("brand", "category"):
+            for path in (f"/brands/{row.brand.slug}/", f"/ar/products/{row.category.slug}/"):
+                if path not in cache:
+                    cache[path] = self.text_of(self.client.get(path).content.decode())
+                with self.subTest(row=f"{row.brand.slug}/{row.category.slug}", path=path):
+                    # the items of a row, joined again with the catalogue separator, give back the stored models
+                    rebuilt = norm(" · ".join(item for _l, items in model_groups(row) for item in items))
+                    for item in (i for _l, items in model_groups(row) for i in items):
+                        self.assertIn(norm(item), cache[path])
+                    stored = norm(row.models_text)
+                    for piece in rebuilt.split(" · "):
+                        self.assertIn(piece, stored)
+                    if not row.pending:
+                        for line in row.spec_list():
+                            self.assertIn(norm(line), cache[path])
+
+    def test_fragments_that_continue_an_item_stay_with_it(self):
+        from core.templatetags.opal import mark_ids, model_groups
+        g = lambda text: model_groups(Supply(models_text=text))
+        self.assertEqual(g("High Ambient Desert Master: 50ZPM 36 · 48 · 60 · 50TCM A07 · D08 · D09 · 50TJM 18 · 22"),
+                         [("High Ambient Desert Master", ["50ZPM 36 · 48 · 60", "50TCM A07 · D08 · D09", "50TJM 18 · 22"])])
+        self.assertEqual(g("Split 18,000 · 24,000 · 30,000 · 36,000 BTU"), [("", ["Split 18,000 · 24,000 · 30,000 · 36,000 BTU"])])
+        self.assertEqual(g("Inverter: SGCA 3600i · 4800i (cool & heat) · Fixed speed: SGCA-HE (SGCA3600HE)"),
+                         [("Inverter", ["SGCA 3600i · 4800i (cool & heat)"]), ("Fixed speed", ["SGCA-HE (SGCA3600HE)"])])
+        self.assertEqual(g("side discharge 38VS007168HCMM · 38VS008168HCMM · 39HQM"),      # full identifiers stay separate
+                         [("", ["side discharge 38VS007168HCMM", "38VS008168HCMM", "39HQM"])])
+        self.assertEqual(g("IVCF Series"), [("", ["IVCF Series"])])
+        self.assertEqual(g(""), [])
+        for refrigerant in ("R410A", "R-410A", "R407C", "R-134A", "R32", "R22"):
+            self.assertNotIn("tech__id", mark_ids(f"scroll {refrigerant} unit"))
+        self.assertIn("tech__id", mark_ids("ASGA 18 – 36 FUTD / R410A 38QHA/42QHA"))
+
+    def test_admin_preview_of_a_category_renders_with_the_new_template(self):
+        category = ProductCategory.objects.get(slug="ducted")
+        for mode, direction in (("en", "ltr"), ("ar", "rtl")):
+            response = category.make_preview_request(preview_mode=mode)
+            self.assertEqual(response.status_code, 200)
+            html = response.content.decode()
+            self.assertIn(f'dir="{direction}"', html.split("<head>")[0])
+            self.assertEqual(html.count('<details class="tech"'), category.supplies.count())
 
     @staticmethod
     def text_of(markup):
@@ -1136,10 +1200,7 @@ class PremiumInternalPagesTests(TestCase):
             self.assertIn(figure, stored)     # every BTU figure on the page is one the catalogue states
 
     def test_brand_without_rows_gets_an_empty_state_not_invented_content(self):
-        from catalog import preview
-        from unittest import mock
-        with mock.patch.object(preview, "PREMIUM_BRANDS", {"carrier", "lg"}):
-            page = self.client.get("/brands/lg/").content.decode()
+        page = self.client.get("/brands/lg/").content.decode()
         self.assertIn('class="empty-state"', page)
         self.assertIn("Models and capacities are confirmed on the quote.", page)
         self.assertNotIn('class="tech"', page)

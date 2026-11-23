@@ -10,7 +10,7 @@
       <h4 class="tech__heading"><span class="tech__heading-icon" aria-hidden="true">{% include "includes/icons/grid.svg" %}</span>{% translate "Series and models" %}</h4>
       <div class="tech__data" dir="ltr" lang="en">{% for label, items in row|model_groups %}
         <div class="tech__series">
-          {% if label %}<p class="tech__series-name">{{ label }}</p>{% endif %}
+          {% if label %}<p class="tech__series-name">{{ label }}<span class="visually-hidden">:</span></p>{% endif %}
           <ul class="tech__models">{% for item in items %}<li>{{ item|mark_ids }}</li>{% endfor %}</ul>
         </div>{% endfor %}
       </div>

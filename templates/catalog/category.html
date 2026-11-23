@@ -1,23 +1,70 @@
-{% extends "base.html" %}{% load i18n opal %}
+{% extends "base.html" %}{% load i18n opal wagtailimages_tags %}
 {% block title %}{% if lang == 'ar' %}{{ category|tr:"name" }} — Opal Galaxy، دبي{% else %}{{ category.name_en }} — Opal Galaxy, Dubai{% endif %}{% endblock %}
 {% block description %}{{ category|tr:"lead" }}{% endblock %}
 {% block content %}
-{% with t=settings.core.SiteCopy %}
+{% with s=settings.core.CompanySettings t=settings.core.SiteCopy %}
+{% include "catalog/includes/draft_banner.html" %}
 {% include "includes/crumbs.html" with parent_href=home_url|add:"#products" parent_label=t|tr:"nav_products" current_label=category|tr:"name" %}
-{% if lang == 'ar' %}{% include "includes/page_hero.html" with title=category|tr:"name" lead=category|tr:"lead" primary_label=t|tr:"cat_cta" wa_text="مرحباً، أريد عرض سعر: "|add:category.name_ar meta=category.capacity_range art_cat=category.slug %}{% else %}{% include "includes/page_hero.html" with title=category|tr:"name" lead=category|tr:"lead" primary_label=t|tr:"cat_cta" wa_text="Hello, I would like a quote for: "|add:category.name_en meta=category.capacity_range art_cat=category.slug %}{% endif %}
 
-{% if category.know_items.all %}<section class="section"><div class="container">
+{# 1 — category hero #}
+<section class="page-hero"><div class="container split split--wide-start">
+  <div class="page-hero__copy">
+    <h1>{{ category|tr:"name" }}</h1>
+    {% if demo.intro %}<p class="lead is-draft">{{ demo.intro }}</p>{% else %}<p class="lead">{{ category|tr:"lead" }}</p>{% endif %}
+    <div class="page-hero__cta">
+      <a class="btn btn-accent" href="#contact">{{ t|tr:"cat_cta" }}</a>
+      <a class="btn btn-wa" href="https://wa.me/{{ s.whatsapp }}?text={% if lang == 'ar' %}{{ "مرحباً، أريد عرض سعر: "|add:category.name_ar|urlencode }}{% else %}{{ "Hello, I would like a quote for: "|add:category.name_en|urlencode }}{% endif %}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% translate "WhatsApp" %}</span></a>
+    </div>
+    {% if category|card_range %}<p class="page-hero__meta"><span class="tech__label">{% translate "Capacity" %}</span> <span class="ltr">{{ category|card_range }}</span></p>{% endif %}
+  </div>
+  <div class="page-hero__art" aria-hidden="true">{% if category.image %}{% image category.image max-360x360 format-webp as ci %}<span class="page-hero__photo"><img src="{{ ci.url }}" alt="" width="{{ ci.width }}" height="{{ ci.height }}"></span>{% else %}{% cat_icon category.slug %}{% endif %}</div>
+</div></section>
+
+{# 2 — brands offering this category: an index into the page #}
+<section class="section section--tint"><div class="container">
+  <div class="section-head"><div><h2>{{ t|tr:"cat_brands_title" }}</h2><p class="lead">{{ t|tr:"cat_brands_lead" }}</p></div></div>
+  <ul class="brand-wall brand-wall--index">{% for sp in supplies %}
+    <li><a class="brand-tile" href="#brand-{{ sp.brand.slug }}"{% if sp.brand.logo %} aria-label="{{ sp.brand.name }}"{% endif %}><span class="brand-tile__mark">{% if sp.brand.logo %}{% image sp.brand.logo max-320x120 format-webp as lg %}<img src="{{ lg.url }}" alt="{{ sp.brand.name }}" width="{{ lg.width }}" height="{{ lg.height }}" loading="lazy">{% else %}{{ sp.brand.name }}{% endif %}</span></a></li>{% endfor %}
+  </ul>
+</div></section>
+
+{# 3 — confirmed series, models and specifications, one panel per brand #}
+<section class="section section--white"><div class="container">
+  <div class="tech-list">{% for sp in supplies %}
+    {% include "catalog/includes/tech_panel.html" with row=sp anchor="brand-"|add:sp.brand.slug head=sp.brand.name head_url=sp.brand.get_url sub="" pending_text=t|tr:"cat_pending" link_label=t|tr:"cat_brand_link"|fmt:sp.brand.name logo=sp.brand.logo %}
+  {% empty %}<div class="empty-state"><p>{{ t|tr:"cat_pending" }}</p></div>{% endfor %}</div>
+</div></section>
+
+{# 4 — selection information #}
+{% if category.know_items.all %}<section class="section section--tint"><div class="container">
   <div class="section-head"><div><h2>{{ t|tr:"cat_know_title" }}</h2></div></div>
   <div class="grid grid--3">{% for k in category.know_items.all %}<div class="card" data-reveal><h3>{{ k|tr:"title" }}</h3><p>{{ k|tr:"text" }}</p></div>{% endfor %}</div>
 </div></section>{% endif %}
 
-<section class="section section--white section--ruled"><div class="container">
-  <div class="section-head"><div><h2>{{ t|tr:"cat_brands_title" }}</h2><p class="lead">{{ t|tr:"cat_brands_lead" }}</p></div></div>
-  <div class="supply-list">{% for s in supplies %}
-    {% include "includes/supply_row.html" with row=s head=s.brand.name head_url=s.brand.get_url pending_text=t|tr:"cat_pending" link_label=t|tr:"cat_brand_link"|fmt:s.brand.name %}
-  {% endfor %}</div>
-  <h3 class="chips-title">{{ t|tr:"cat_other" }}</h3>
-  <div class="chips">{% for x in all_categories %}<a href="{{ x.get_url }}"{% if x.pk == category.pk %} class="cur" aria-current="page"{% endif %}>{{ x|tr:"name" }}</a>{% endfor %}</div>
+{# 5 — quotation #}
+<section class="section section--white"><div class="container">
+  <div class="cta-band">
+    <div>
+      <h2>{{ t|tr:"quote_title" }}</h2>
+      <p>{{ s|tr:"quote_reply" }}</p>
+    </div>
+    <div class="cta-band__actions">
+      <a class="btn btn-accent" href="#contact">{{ t|tr:"cat_cta" }}</a>
+      <a class="btn btn-outline on-dark" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{{ t|tr:"quote_whatsapp" }}</span></a>
+    </div>
+  </div>
+</div></section>
+
+{# 6 — related equipment categories #}
+<section class="section section--tint section--ruled"><div class="container">
+  <div class="section-head"><div><h2>{{ t|tr:"cat_other" }}</h2></div></div>
+  <ul class="cat-cards">{% for c in all_categories %}{% if c.pk != category.pk %}
+    <li><a class="cat-card" href="{{ c.get_url }}">
+      <span class="cat-card__art">{% if c.image %}{% image c.image max-240x240 format-webp as ci %}<img src="{{ ci.url }}" alt="" width="{{ ci.width }}" height="{{ ci.height }}" loading="lazy">{% else %}{% cat_icon c.slug %}{% endif %}</span>
+      <span class="cat-card__body"><span class="cat-card__name">{{ c|tr:"name" }}</span>{% if c|card_range %}<span class="cat-card__range"><span class="cat-card__label">{% translate "Capacity" %}</span><span class="ltr">{{ c|card_range }}</span></span>{% endif %}</span>
+      <span class="cat-card__go icon-dir" aria-hidden="true">{% include "includes/icons/arrow.svg" %}</span>
+    </a></li>{% endif %}{% endfor %}
+  </ul>
 </div></section>
 {% endwith %}
 {% endblock %}

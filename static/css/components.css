@@ -336,24 +336,20 @@ footer .logo svg{width:66px;height:45px}
 @media (max-width:860px){.page-hero__art{display:none}}
 
 /* catalogue rows: manufacturer data, always left-to-right */
-.supply-list{border-block-start:1px solid var(--line)}
-.supply-row{display:grid;grid-template-columns:minmax(0,13rem) minmax(0,1fr) auto;gap:var(--s-3) var(--s-6);align-items:start;padding-block:var(--s-5);border-block-end:1px solid var(--line)}
-.supply-row h3{margin:0;font-size:var(--fs-h4)}
-.supply-row h3 a{color:var(--navy);text-decoration:none;border-block-end:2px solid var(--cyan)}
-.supply-row h3 a:hover{border-color:var(--navy)}
-.supply-row__sub{margin:var(--s-2) 0 0;color:var(--muted);font-size:var(--fs-small)}
-.supply-row__data{grid-column:2;text-align:left;font-size:var(--fs-small);min-inline-size:0}
-.supply-row__models{margin:0;font-weight:500;color:var(--navy);overflow-wrap:anywhere;max-inline-size:none}
-.supply-row__specs{list-style:none;margin:var(--s-3) 0 0;padding:0;display:grid;gap:2px;color:var(--muted);font-variant-numeric:tabular-nums}
-.supply-row__specs li{padding-inline-start:.875rem;position:relative}
-.supply-row__specs li::before{content:"";position:absolute;inset-inline-start:0;inset-block-start:.7em;inline-size:.375rem;block-size:1px;background:var(--cyan-ink)}
-.supply-row__pending{grid-column:2;margin:0;color:var(--muted);font-size:var(--fs-small)}
-.supply-row__go{grid-column:3;grid-row:1;white-space:nowrap;font-size:var(--fs-small)}
-@media (max-width:860px){
-  .supply-row{grid-template-columns:minmax(0,1fr)}
-  .supply-row__data,.supply-row__pending,.supply-row__go{grid-column:1;grid-row:auto}
-  .supply-row__go{justify-self:start}
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .chips-title{margin-block:var(--s-7) var(--s-3)}
 .chips{margin-block-start:0}
 .chips a{border-radius:var(--radius-s);transition:border-color var(--t-fast) var(--ease)}
@@ -660,8 +656,8 @@ h4{font-size:var(--fs-h4)}
 .page-hero h1{font-size:var(--fs-h1)}
 .prose h2{font-size:var(--fs-h3)}
 .site-footer h2{font-size:var(--fs-small);font-weight:600;letter-spacing:0}
-.card h3,.cap-grid h3,.check-list h3,.timeline h3,.supply-row h3,.cta-band h3{font-size:var(--fs-h4)}
-.card p,.cap-grid p,.timeline p,.service-row__text,.supply-row__data{font-size:var(--fs-small)}
+.card h3,.cap-grid h3,.check-list h3,.timeline h3,.cta-band h3{font-size:var(--fs-h4)}
+.card p,.cap-grid p,.timeline p,.service-row__text{font-size:var(--fs-small)}
 .btn{font-size:var(--fs-ui)}
 .btn-sm{font-size:var(--fs-small)}
 .btn-lg{font-size:var(--fs-body)}
