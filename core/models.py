@@ -1,7 +1,7 @@
 from django.db import models
 from django.shortcuts import get_object_or_404
 from modelcluster.fields import ParentalKey
-from wagtail.admin.panels import FieldPanel, InlinePanel, MultiFieldPanel
+from wagtail.admin.panels import FieldPanel, FieldRowPanel, InlinePanel, MultiFieldPanel
 from wagtail.contrib.routable_page.models import RoutablePageMixin, path
 from wagtail.contrib.settings.models import BaseGenericSetting, register_setting
 from wagtail.models import Orderable, Page
@@ -255,6 +255,15 @@ class HomePage(RoutablePageMixin, Page):
         MultiFieldPanel([bi("seo_title"), bi("meta_description")], heading="Bilingual SEO"),
     ]
 
+    HOME_GALLERY_LIMIT = 8
+
+    def approved_gallery(self):
+        """Photos a visitor may see: approved ones only, in the editor's order."""
+        return self.gallery.filter(approved_for_publication=True)
+
+    def home_gallery(self):
+        return list(self.approved_gallery()[:self.HOME_GALLERY_LIMIT])
+
     def home_faqs(self):
         """Questions shown on the home page; every question stays on the FAQ page."""
         return [f for f in self.faqs.all() if f.featured]
@@ -372,7 +381,41 @@ class GalleryItem(_Bi):
     caption_ar = models.CharField(max_length=120, blank=True)
     subcaption_en = models.CharField(max_length=120, blank=True)
     subcaption_ar = models.CharField(max_length=120, blank=True)
-    panels = [FieldPanel("image"), bi("alt"), bi("caption"), bi("subcaption")]
+    category = models.ForeignKey("core.GalleryCategory", null=True, blank=True, on_delete=models.SET_NULL,
+                                 related_name="photos", help_text="Optional. Managed under Snippets → Gallery categories.")
+    featured = models.BooleanField("Featured photo", default=False,
+                                   help_text="Shown larger in the gallery. Only the first two featured photos lead.")
+    approved_for_publication = models.BooleanField(
+        "Approved for publication", default=False,
+        help_text="The photo appears on the site only when this is ticked and the page is published. "
+                  "Tick it after checking that the photo shows no identifiable face or vehicle number plate, "
+                  "or that permission was given or the photo was redacted.")
+    panels = [FieldPanel("image"), bi("alt"), bi("caption"), bi("subcaption"),
+              FieldRowPanel([FieldPanel("category"), FieldPanel("featured")]),
+              FieldPanel("approved_for_publication")]
+
+
+class GalleryCategory(models.Model):
+    """A group of gallery photos (for example installations or maintenance). Created and edited in the admin."""
+    name_en = models.CharField("Name (EN)", max_length=80)
+    name_ar = models.CharField("Name (AR)", max_length=80, blank=True)
+    slug = models.SlugField(unique=True, help_text="Used in the gallery address, e.g. installations")
+    sort_order = models.PositiveIntegerField(default=0, help_text="Lower numbers come first")
+
+    panels = [bi("name"), FieldRowPanel([FieldPanel("slug"), FieldPanel("sort_order")])]
+
+    class Meta:
+        ordering = ["sort_order", "name_en"]
+        verbose_name = "Gallery category"
+        verbose_name_plural = "Gallery categories"
+
+    def __str__(self):
+        return self.name_en
+
+    @classmethod
+    def with_approved_photos(cls):
+        """Only categories that have at least one approved photo are offered to visitors."""
+        return cls.objects.filter(photos__approved_for_publication=True).distinct()
 
 
 class FaqItem(_Bi):
@@ -430,6 +473,7 @@ CONTENT_KINDS = [
     ("text", "Text only (About, Privacy Policy)"),
     ("faq", "Text, then every question from the home page"),
     ("contact", "Text, then the company's contact details"),
+    ("gallery", "Text, then the gallery of approved photos"),
 ]
 
 

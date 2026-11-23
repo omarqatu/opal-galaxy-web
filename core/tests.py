@@ -5,6 +5,12 @@ from catalog.models import Brand, ProductCategory, Supply
 from core.models import QuoteRequest
 
 
+def approve_gallery():
+    """What Omar does in the admin: tick "Approved for publication" on the photos."""
+    from core.models import GalleryItem
+    GalleryItem.objects.update(approved_for_publication=True)
+
+
 class SiteTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -307,6 +313,7 @@ class HomeRedesignTests(TestCase):
         self.assertEqual(HomeFact.objects.count(), 3)        # the records themselves are kept
 
     def test_gallery_links_open_the_photo_without_javascript(self):
+        approve_gallery()
         html = self.client.get("/").content.decode()
         self.assertEqual(html.count("data-lightbox"), 8)
         self.assertRegex(html, r'<a class="frame" href="/media/images/[^"]+" data-lightbox')
@@ -691,6 +698,7 @@ class PremiumHomeTests(TestCase):
         self.assertContains(self.client.get("/"), "Edited eyebrow")
 
     def test_illustration_is_not_presented_as_a_project(self):
+        approve_gallery()
         from core.models import HomePage
         home = HomePage.objects.get()
         self.assertNotIn(home.hero_image_id, list(home.gallery.values_list("image_id", flat=True)))
@@ -853,6 +861,7 @@ class RefinementTests(TestCase):
         self.assertIn('id="quote"', html)   # the existing quotation form the buttons lead to
 
     def test_gallery_leads_with_two_photos_and_holds_only_project_photos(self):
+        approve_gallery()
         from core.models import HomePage
         home = HomePage.objects.get()
         titles = [g.image.title for g in home.gallery.all()]
@@ -1280,3 +1289,165 @@ class PremiumInternalPagesTests(TestCase):
         self.assertIn('href="#brand-carrier"', vrf)
         self.assertIn('id="brand-carrier"', vrf)
         self.assertNotIn(" ton", vrf.split('class="cat-cards"')[1].split("</ul>")[0])
+
+
+class GalleryApprovalTests(TestCase):
+    """PR A of the field gallery: categories, featured photos and per-photo approval."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def home(self):
+        from core.models import HomePage
+        return HomePage.objects.get()
+
+    def gallery_html(self):
+        html = self.client.get("/").content.decode()
+        return html.split('id="gallery"')[1].split("</ul>")[0] if 'id="gallery"' in html else ""
+
+    def test_existing_photos_are_kept_and_none_is_approved_automatically(self):
+        from core.models import GalleryCategory, GalleryItem
+        from wagtail.images.models import Image
+        self.assertEqual(GalleryItem.objects.count(), 8)
+        self.assertEqual(GalleryItem.objects.filter(approved_for_publication=True).count(), 0)
+        self.assertEqual(GalleryItem.objects.filter(featured=True).count(), 0)
+        self.assertEqual(GalleryItem.objects.exclude(category=None).count(), 0)
+        self.assertEqual(GalleryCategory.objects.count(), 0)          # categories are created in the admin only
+        for g in GalleryItem.objects.select_related("image"):
+            self.assertTrue(g.image.file.storage.exists(g.image.file.name))   # original files are still there
+        self.assertTrue(Image.objects.filter(pk=self.home().hero_image_id).exists())
+
+    def test_new_photos_are_unapproved_by_default(self):
+        from core.models import GalleryItem
+        self.assertFalse(GalleryItem._meta.get_field("approved_for_publication").default)
+        g = GalleryItem(page=self.home(), image=self.home().gallery.first().image, sort_order=99)
+        g.save()
+        self.assertFalse(g.approved_for_publication)
+
+    def test_home_gallery_is_hidden_until_photos_are_approved(self):
+        html = self.client.get("/").content.decode()
+        self.assertEqual(self.client.get("/").status_code, 200)
+        self.assertNotIn('id="projects"', html)
+        self.assertNotIn("data-lightbox", html)
+        self.assertNotIn('id="lightbox"', html)
+        for path in ("/", "/ar/"):
+            self.assertNotIn('href="#projects"', self.client.get(path).content.decode())   # nothing points at the hidden section
+
+    def test_only_approved_photos_are_shown_in_the_editors_order(self):
+        home = self.home()
+        items = list(home.gallery.all())
+        for g in (items[5], items[0], items[3]):
+            g.approved_for_publication = True
+            g.save()
+        self.assertEqual([g.pk for g in home.home_gallery()], [items[0].pk, items[3].pk, items[5].pk])
+        gallery = self.gallery_html()
+        self.assertEqual(gallery.count("data-lightbox"), 3)
+        self.assertEqual(gallery.count('class="is-lead"'), 2)
+        shown = [gallery.index(items[i].alt_en) for i in (0, 3, 5)]
+        self.assertEqual(shown, sorted(shown))
+        for i in (1, 2, 4, 6, 7):
+            self.assertNotIn(items[i].alt_en, gallery)
+        arabic = self.client.get("/ar/").content.decode()
+        self.assertEqual(arabic.split('id="gallery"')[1].split("</ul>")[0].count("data-lightbox"), 3)
+        # Reordering in the admin changes the order on the page.
+        items[5].sort_order, items[0].sort_order = items[0].sort_order, items[5].sort_order
+        items[5].save(); items[0].save()
+        self.assertEqual([g.pk for g in home.home_gallery()], [items[5].pk, items[3].pk, items[0].pk])
+
+    def test_home_shows_at_most_eight_approved_photos(self):
+        from core.models import GalleryItem
+        home = self.home()
+        first = home.gallery.first()
+        for n in range(3):
+            GalleryItem.objects.create(page=home, image=first.image, sort_order=20 + n, alt_en=f"Extra photo {n}")
+        approve_gallery()
+        self.assertEqual(home.approved_gallery().count(), 11)
+        self.assertEqual(len(home.home_gallery()), 8)
+        gallery = self.gallery_html()
+        self.assertEqual(gallery.count("data-lightbox"), 8)
+        self.assertNotIn("Extra photo", gallery)
+
+    def test_withdrawing_approval_removes_the_photo_but_keeps_the_record(self):
+        from core.models import GalleryItem
+        approve_gallery()
+        g = self.home().gallery.all()[2]
+        self.assertIn(g.alt_en, self.gallery_html())
+        GalleryItem.objects.filter(pk=g.pk).update(approved_for_publication=False)
+        self.assertNotIn(g.alt_en, self.gallery_html())
+        self.assertEqual(GalleryItem.objects.count(), 8)
+
+    def test_approval_through_the_page_editor_draft_then_publish(self):
+        """Ticking the box in a draft changes nothing until the home page is published."""
+        home = self.home()
+        first = home.gallery.first()
+        before = (first.caption_en, first.caption_ar, first.alt_en, first.alt_ar, first.image_id)
+        draft = home.latest_revision.as_object() if home.latest_revision else home
+        target = next(g for g in draft.gallery.all() if g.pk == first.pk)
+        target.approved_for_publication = True
+        revision = draft.save_revision()
+        self.assertEqual(self.gallery_html(), "")                    # still a draft
+        revision.publish()
+        gallery = self.gallery_html()
+        self.assertEqual(gallery.count("data-lightbox"), 1)
+        first.refresh_from_db()
+        self.assertTrue(first.approved_for_publication)
+        self.assertEqual((first.caption_en, first.caption_ar, first.alt_en, first.alt_ar, first.image_id), before)
+        self.assertEqual(self.home().gallery.count(), 8)             # the other seven are kept, unapproved
+
+    def test_a_revision_saved_before_the_new_fields_publishes_without_losing_photos(self):
+        """Revisions stored before this change have no approval key; publishing one keeps every photo, unapproved."""
+        home = self.home()
+        revision = home.save_revision()
+        for entry in revision.content["gallery"]:
+            for key in ("approved_for_publication", "featured", "category"):
+                entry.pop(key, None)
+        revision.save()
+        revision.publish()
+        self.assertEqual(self.home().gallery.count(), 8)
+        self.assertEqual(self.home().approved_gallery().count(), 0)
+
+    def test_categories_featured_and_ordering(self):
+        from core.models import GalleryCategory, GalleryItem
+        maintenance = GalleryCategory.objects.create(name_en="Maintenance", name_ar="الصيانة", slug="maintenance", sort_order=2)
+        installs = GalleryCategory.objects.create(name_en="HVAC Installations", name_ar="تركيبات التكييف",
+                                                  slug="installations", sort_order=1)
+        empty = GalleryCategory.objects.create(name_en="Field Operations", slug="field-operations", sort_order=0)
+        self.assertEqual(list(GalleryCategory.objects.all()), [empty, installs, maintenance])
+        items = list(self.home().gallery.all())
+        GalleryItem.objects.filter(pk=items[0].pk).update(category=installs, featured=True, approved_for_publication=True)
+        GalleryItem.objects.filter(pk=items[1].pk).update(category=installs, approved_for_publication=True)
+        GalleryItem.objects.filter(pk=items[2].pk).update(category=maintenance)        # not approved
+        # Only categories holding an approved photo are offered to visitors.
+        self.assertEqual(list(GalleryCategory.with_approved_photos()), [installs])
+        self.assertEqual(self.home().approved_gallery().filter(featured=True).count(), 1)
+        # Deleting a category never deletes its photos.
+        installs.delete()
+        self.assertEqual(GalleryItem.objects.count(), 8)
+        self.assertIsNone(GalleryItem.objects.get(pk=items[0].pk).category)
+        self.assertTrue(GalleryItem.objects.get(pk=items[0].pk).approved_for_publication)
+
+    def test_admin_offers_the_new_controls(self):
+        from django.contrib.auth import get_user_model
+        get_user_model().objects.create_superuser("omar", "o@example.com", "pw")
+        self.client.login(username="omar", password="pw")
+        edit = self.client.get(f"/admin/pages/{self.home().pk}/edit/")
+        self.assertEqual(edit.status_code, 200)
+        html = edit.content.decode()
+        for name in ("gallery-0-approved_for_publication", "gallery-0-featured", "gallery-0-category",
+                     "gallery-0-caption_en", "gallery-0-caption_ar", "gallery-0-alt_en", "gallery-0-alt_ar",
+                     "gallery-0-ORDER"):
+            self.assertIn(name, html)
+        self.assertEqual(self.client.get("/admin/snippets/core/gallerycategory/").status_code, 200)
+        add = self.client.post("/admin/snippets/core/gallerycategory/add/",
+                               {"name_en": "Maintenance", "name_ar": "الصيانة", "slug": "maintenance", "sort_order": 1})
+        self.assertEqual(add.status_code, 302)
+        from core.models import GalleryCategory
+        self.assertEqual(GalleryCategory.objects.get().name_ar, "الصيانة")
+
+    def test_gallery_page_type_exists_but_no_page_is_created(self):
+        from core.models import CONTENT_KINDS, ContentPage
+        self.assertIn("gallery", dict(CONTENT_KINDS))
+        self.assertFalse(ContentPage.objects.filter(kind="gallery").exists())
+        self.assertEqual(self.client.get("/gallery/").status_code, 404)
+
