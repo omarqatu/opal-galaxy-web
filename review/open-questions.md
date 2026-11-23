@@ -137,9 +137,9 @@ Every text below has its own Arabic field in the admin and can be edited there; 
 
 Admin display note: Arabic fields in the admin are laid out left-to-right, so a full stop at the end of an Arabic sentence appears at the wrong end while editing. The public site shows it correctly. The fields can be given right-to-left direction in the admin in a later phase.
 
-Terminology decisions needed from Omar before Phase 3 (they affect every page):
+Terminology decisions (Omar, 23 Nov 2026) — applied to all new copy, and to the existing texts above in Phase 3 through a guarded migration:
 
-1. Ducts: "مجاري التكييف" everywhere (recommended, matches the service name) or "مجاري الهواء".
-2. Trade terms: keep the transliterations the market uses ("شيلرات", "فان كويل", "كاسيت") or use Arabic equivalents.
-3. Technical Latin terms (Inverter, Rotary, Scroll, VRF, BMS): keep in Latin with an Arabic noun before them (recommended), or translate.
-4. Temperature style: "46 °م" (recommended) everywhere.
+1. Ducts: "مجاري التكييف" everywhere (L4, L5, L6).
+2. Trade terms stay as the market uses them: "شيلرات", "فان كويل", "كاسيت" (L3: the Arabic category name becomes "شيلرات ووحدات مناولة الهواء وفان كويل"; L24 keeps "فان كويل").
+3. Technical Latin terms (Inverter, Rotary, Scroll, VRF, BMS) stay in Latin, with an Arabic noun before them (L10, L20, L22, L24).
+4. Temperatures: the number with "°م" only, without the words "درجة حرارة" or "مئوية" (L11). To confirm with Omar: this is how "بدون درجة حرارة" was understood; the alternative reading is to drop temperature figures from the Arabic texts altogether.
