@@ -45,3 +45,9 @@ def cat_icon(slug):
 @register.filter
 def brand_ids(category):
     return " ".join(s.brand.slug for s in category.supplies.all())
+
+
+@register.filter
+def slugpath(slug):
+    """'maintenance' → '/maintenance/' for {% lurl %}."""
+    return f"/{slug}/"

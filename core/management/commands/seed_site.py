@@ -132,6 +132,13 @@ class Command(BaseCommand):
         else:
             Site.objects.create(hostname="localhost", port=80, root_page=home, is_default_site=True,
                                 site_name=data["company"]["legal_name"])
+        # seed/opal.json holds the original content; bring it to the current copy exactly the way an
+        # existing site gets it (the guarded content migrations).
+        import importlib
+        from django.apps import apps as live_apps
+        for name in ("core.migrations.0003_redesign_home_content",):
+            importlib.import_module(name).apply_content(live_apps, None)
+
         self.stdout.write(self.style.SUCCESS(
             f"Seeded: {Brand.objects.count()} brands, {ProductCategory.objects.count()} categories, "
             f"{Supply.objects.count()} matrix cells, {Image.objects.count()} images."))
