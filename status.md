@@ -1,5 +1,5 @@
 # Opal Galaxy (Wagtail) — status.md
-**آخر تحديث: 20 نوفمبر 2026 · الإصدار: v0.3 (أول ماركة مستوردة: Super General)**
+**آخر تحديث: 23 نوفمبر 2026 · الإصدار: v0.4 (إعادة التصميم: المرحلة 1)**
 
 ## المنجز
 - مشروع Wagtail 7.0 LTS / Django 5.2 LTS ينقل المعاينة الثابتة v0.7 تصميماً ومحتوى.
@@ -20,6 +20,10 @@
 - أمر `import_catalogue` (تجربة افتراضياً، `--apply` = مسودات فقط، وملف مراجعة للعميل).
 - جرد الكتالوجات `data/inventory.csv`، وملف Super General `data/super-general.json`، والأسئلة المفتوحة `review/questions.md`.
 - Super General منشورة على staging من الكتالوج: الشباك والجداري وصف عمودي جديد (الكاسيت والمخفي معلّقان حتى إجابة العميل).
+
+- إعادة التصميم (فرع `feature/premium-redesign`) — المرحلة 1، أساس التصميم: design tokens من ألوان الشعار، خطّا IBM Plex Sans وIBM Plex Sans Arabic مستضافان ذاتياً (لا Google Fonts)، مكوّنات قابلة لإعادة الاستخدام (`static/css/components.css`)، أيقونات خطية لفئات المعدات، صفحتا 404 و500 باللغتين، التسميات الثابتة عبر نظام ترجمة Django (`locale/ar`)، وصفحة مرجع التصميم `/styleguide/` على staging فقط.
+- أربع ماركات جديدة بالاسم فقط: SKM وLG وDaikin وTrane (migration `catalog 0003`)؛ نصوصها يكتبها عمر من اللوحة.
+- `review/open-questions.md`: الأسئلة المفتوحة لصاحب العمل، مرتبة حسب الصفحة.
 
 ## قرارات
 - PostgreSQL 17 (لا SQLite)، في الإنتاج والاختبارات.

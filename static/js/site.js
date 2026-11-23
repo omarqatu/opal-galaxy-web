@@ -32,12 +32,36 @@
   function filterUnits() {
     if (!unit || !brand || unit.value) return;
     var b = brand.value;
+    var supplies = function (o) { return o.dataset.brands !== undefined && o.dataset.brands.split(' ').indexOf(b) !== -1; };
+    // A brand with no catalogue rows yet must not empty the product list.
+    var known = Array.prototype.some.call(unit.options, supplies);
     Array.prototype.forEach.call(unit.options, function (o) {
-      o.hidden = !!(b && b !== 'other' && o.dataset.brands !== undefined && o.dataset.brands.split(' ').indexOf(b) === -1);
+      o.hidden = !!(known && b && b !== 'other' && o.dataset.brands !== undefined && !supplies(o));
     });
   }
   if (unit) { unit.addEventListener('change', filterBrands); filterBrands(); }
   if (brand) { brand.addEventListener('change', filterUnits); filterUnits(); }
+
+  // Header: a quiet shadow once the page has scrolled.
+  var header = document.getElementById('site-header');
+  if (header) {
+    var onScroll = function () { header.classList.toggle('is-scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  }
+
+  // Scroll reveal. Content is visible by default; CSS hides [data-reveal] only when the
+  // "js" class is set and the visitor has not asked for reduced motion.
+  var targets = document.querySelectorAll('[data-reveal]');
+  if (targets.length) {
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+      Array.prototype.forEach.call(targets, function (t) { io.observe(t); });
+    } else {
+      Array.prototype.forEach.call(targets, function (t) { t.classList.add('is-in'); });
+    }
+  }
 
   // Remove ?sent= from the address bar once the notice is shown.
   if (/[?&]sent=/.test(location.search) && history.replaceState) {

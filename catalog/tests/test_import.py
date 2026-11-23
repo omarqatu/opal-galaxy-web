@@ -148,7 +148,7 @@ class ImportCatalogueTests(TestCase):
     def test_unknown_brand_and_category(self):
         self.assertRejected([row(category="spaceship")], "unknown category slug 'spaceship'", brand="nope")
         self.assertRejected([row()], "Unknown brand slug 'nope'", brand="nope")
-        self.assertEqual(Brand.objects.count(), 7)
+        self.assertEqual(Brand.objects.count(), 11)
         self.assertEqual(ProductCategory.objects.count(), 10)
 
     def test_models_and_source_required(self):

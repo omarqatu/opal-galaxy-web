@@ -1,4 +1,4 @@
-{% load static opal wagtailcore_tags %}<!DOCTYPE html>
+{% load static i18n opal wagtailcore_tags %}<!DOCTYPE html>
 <html lang="{{ lang }}" dir="{{ dir }}">
 <head>
 <meta charset="utf-8">
@@ -12,21 +12,25 @@
 <link rel="alternate" hreflang="ar" href="{{ site_base_url }}{{ ar_url }}">
 <link rel="alternate" hreflang="x-default" href="{{ site_base_url }}{{ en_url }}">
 <link rel="icon" type="image/svg+xml" href="{% static 'img/opal-galaxy-logo-v1.svg' %}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js')</script>
+{% if lang == 'ar' %}<link rel="preload" as="font" type="font/woff2" crossorigin href="{% static 'fonts/ibm-plex-sans-arabic-400-normal.woff2' %}">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{% static 'fonts/ibm-plex-sans-arabic-600-normal.woff2' %}">
+{% else %}<link rel="preload" as="font" type="font/woff2" crossorigin href="{% static 'fonts/ibm-plex-sans-latin-400-normal.woff2' %}">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{% static 'fonts/ibm-plex-sans-latin-600-normal.woff2' %}">
+{% endif %}<link rel="stylesheet" href="{% static 'css/tokens.css' %}">
 <link rel="stylesheet" href="{% static 'css/site.css' %}">
 <link rel="stylesheet" href="{% static 'css/additions.css' %}">
-</head>
+<link rel="stylesheet" href="{% static 'css/components.css' %}">
+{% block head_extra %}{% endblock %}</head>
 <body>
-<a class="skip" href="#app">{% T "Skip to content" "انتقل إلى المحتوى" %}</a>
-<header>
+<a class="skip" href="#app">{% translate "Skip to content" %}</a>
+<header id="site-header">
   <div class="wrap nav">
     <a class="logo" href="{{ home_url }}" aria-label="Opal Galaxy">
       {% include "includes/logo.svg" %}
       <span><b>{{ settings.core.CompanySettings.short_name }}</b><small>{{ settings.core.CompanySettings|tr:"tagline" }}</small></span>
     </a>
-    <button class="burger" aria-label="{% T 'Main menu' 'القائمة الرئيسية' %}" aria-expanded="false" id="burger">{% include "includes/burger.svg" %}</button>
+    <button class="burger" aria-label="{% translate 'Main menu' %}" aria-expanded="false" aria-controls="menu" id="burger">{% include "includes/burger.svg" %}</button>
     <ul class="menu" id="menu">
       <li><a href="{{ home_url }}#products">{% T "Products" "المنتجات" %}</a></li>
       <li><a href="{{ home_url }}#brands">{% T "Brands" "العلامات التجارية" %}</a></li>
@@ -36,21 +40,21 @@
       <li><a href="#contact">{% T "Contact" "تواصل معنا" %}</a></li>
     </ul>
     <div class="tools">
-      <a class="lang" href="{{ other_lang_url }}" hreflang="{{ other_lang }}" lang="{{ other_lang }}" aria-label="{% T 'Switch to Arabic' 'Switch to English' %}">{% if lang == 'ar' %}EN{% else %}عربي{% endif %}</a>
-      <a class="btn btn-wa" href="https://wa.me/{{ settings.core.CompanySettings.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% T "WhatsApp" "واتساب" %}</span></a>
+      <a class="lang" href="{{ other_lang_url }}" hreflang="{{ other_lang }}" lang="{{ other_lang }}" aria-label="{% if lang == 'ar' %}Switch to English{% else %}التحويل إلى العربية{% endif %}">{% if lang == 'ar' %}EN{% else %}العربية{% endif %}</a>
+      <a class="btn btn-wa" href="https://wa.me/{{ settings.core.CompanySettings.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% translate "WhatsApp" %}</span></a>
     </div>
   </div>
 </header>
 
 <main id="top">
   <div id="app">{% block content %}{% endblock %}</div>
-  {% include "includes/contact.html" %}
+  {% block quote_form %}{% include "includes/contact.html" %}{% endblock %}
 </main>
 
 {% with s=settings.core.CompanySettings %}
-<div class="mbar" id="mbar" aria-label="{% T 'Quick actions' 'إجراءات سريعة' %}">
-  <a class="call" href="tel:{{ s.phone }}">{% include "includes/phone.svg" %}<span>{% T "Call" "اتصال" %}</span></a>
-  <a class="wa" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% T "WhatsApp" "واتساب" %}</span></a>
+<div class="mbar" id="mbar" aria-label="{% translate 'Quick actions' %}">
+  <a class="call" href="tel:{{ s.phone }}">{% include "includes/phone.svg" %}<span>{% translate "Call" %}</span></a>
+  <a class="wa" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% translate "WhatsApp" %}</span></a>
   <a class="quote" href="#contact"><span>{% T "Request a quote" "طلب عرض سعر" %}</span></a>
 </div>
 
