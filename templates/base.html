@@ -81,54 +81,68 @@
   <a class="quote" href="#contact"><span>{{ t|tr:"nav_quote" }}</span></a>
 </div>
 
-<footer class="site-footer">
+<footer class="site-footer foot">
   <div class="container container--wide">
-    <div class="site-footer__top">
-      <div class="site-footer__brand">
-        <a class="logo" href="{{ home_url }}"><img src="{% static 'img/opal-galaxy-logo-v1-reversed.svg' %}" alt="" width="88" height="60" loading="lazy"><span><b>{{ s.short_name }}</b><small>{{ s|tr:"tagline" }}</small></span></a>
+    <div class="foot__lead">
+      <div class="foot__brand">
+        <a class="logo" href="{{ home_url }}" aria-label="{{ s.short_name }}"><img src="{% static 'img/opal-galaxy-logo-v1-reversed.svg' %}" alt="" width="88" height="60" loading="lazy"><span><b>{{ s.short_name }}</b><small>{{ s|tr:"tagline" }}</small></span></a>
         <p>{{ s|tr:"footer_about" }}</p>
+      </div>
+      <div class="foot__actions">
         <a class="btn btn-wa" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{{ t|tr:"footer_whatsapp" }}</span></a>
+        <a class="btn btn-outline on-dark" href="#contact">{{ t|tr:"nav_quote" }}</a>
         <ul class="social" aria-label="{% translate 'Social media' %}">{% for name, url in s.social_links %}
           <li>{% if url %}<a href="{{ url }}" target="_blank" rel="noopener" aria-label="{{ name|capfirst }}">{% include "includes/icons/social.html" %}</a>{% else %}<span title="{{ name|capfirst }}">{% include "includes/icons/social.html" %}</span>{% endif %}</li>{% endfor %}
         </ul>
       </div>
-      <nav class="site-footer__col" aria-label="{{ t|tr:'footer_products' }}">
-        <h2>{{ t|tr:"footer_products" }}</h2>
+    </div>
+
+    <div class="foot__cols">
+      <details class="foot__group" open>
+        <summary><h2>{{ t|tr:"footer_products" }}</h2>{% include "includes/icons/chevron.svg" %}</summary>
         <ul>{% for c in nav_categories %}<li><a href="{{ c.get_url }}">{{ c|tr:"name" }}</a></li>{% endfor %}</ul>
-      </nav>
-      <nav class="site-footer__col" aria-label="{{ t|tr:'footer_brands' }}">
-        <h2>{{ t|tr:"footer_brands" }}</h2>
-        <ul class="site-footer__brands">{% for b in nav_brands %}<li><a href="{{ b.get_url }}">{{ b.name }}</a></li>{% endfor %}</ul>
-      </nav>
-      <nav class="site-footer__col" aria-label="{{ t|tr:'footer_services' }}">
-        <h2>{{ t|tr:"footer_services" }}</h2>
-        <ul>
-          {% for sp in service_pages %}<li><a href="{% lurl sp.slug|slugpath %}">{{ sp|tr:"title" }}</a></li>{% endfor %}
-          <li><a href="{{ home_url }}#contractors">{{ t|tr:"nav_contractors" }}</a></li>
-          <li><a href="{{ home_url }}#install">{{ t|tr:"nav_services" }}</a></li>
-        </ul>
-        <h2>{{ t|tr:"footer_company" }}</h2>
-        <ul>
-          {% if about_url %}<li><a href="{{ about_url }}">{{ t|tr:"nav_about" }}</a></li>{% endif %}
-          <li><a href="{% if faq_url %}{{ faq_url }}{% else %}{{ home_url }}#faq{% endif %}">{{ t|tr:"footer_faq" }}</a></li>
-          {% if contact_url %}<li><a href="{{ contact_url }}">{{ t|tr:"nav_contact" }}</a></li>{% endif %}
-          {% if privacy_url %}<li><a href="{{ privacy_url }}">{{ t|tr:"footer_privacy" }}</a></li>{% endif %}
-        </ul>
-      </nav>
-      <div class="site-footer__col">
+      </details>
+      <details class="foot__group foot__group--two" open>
+        <summary><h2>{{ t|tr:"footer_brands" }}</h2>{% include "includes/icons/chevron.svg" %}</summary>
+        <ul>{% for b in nav_brands %}<li><a href="{{ b.get_url }}">{{ b.name }}</a></li>{% endfor %}</ul>
+      </details>
+      <div class="foot__stack">
+        <details class="foot__group" open>
+          <summary><h2>{{ t|tr:"footer_services" }}</h2>{% include "includes/icons/chevron.svg" %}</summary>
+          <ul>
+            {% for sp in service_pages %}<li><a href="{% lurl sp.slug|slugpath %}">{{ sp|tr:"title" }}</a></li>{% endfor %}
+            <li><a href="{{ home_url }}#contractors">{{ t|tr:"nav_contractors" }}</a></li>
+            <li><a href="{{ home_url }}#install">{{ t|tr:"nav_services" }}</a></li>
+          </ul>
+        </details>
+        <details class="foot__group" open>
+          <summary><h2>{{ t|tr:"footer_company" }}</h2>{% include "includes/icons/chevron.svg" %}</summary>
+          <ul>
+            {% if about_url %}<li><a href="{{ about_url }}">{{ t|tr:"nav_about" }}</a></li>{% endif %}
+            <li><a href="{% if faq_url %}{{ faq_url }}{% else %}{{ home_url }}#faq{% endif %}">{{ t|tr:"footer_faq" }}</a></li>
+            {% if contact_url %}<li><a href="{{ contact_url }}">{{ t|tr:"nav_contact" }}</a></li>{% endif %}
+          </ul>
+        </details>
+      </div>
+      <div class="foot__contact">
         <h2>{{ t|tr:"footer_contact" }}</h2>
-        <ul>
-          <li><a class="ltr" href="tel:{{ s.phone }}">{{ s.phone_display|default:s.phone }}</a></li>
-          {% if s.email %}<li><a class="ltr" href="mailto:{{ s.email }}">{{ s.email }}</a></li>{% endif %}
-          <li><span class="ltr">{{ s.address }}</span></li>
+        <ul class="foot__icons">
+          <li><span class="foot__ico">{% include "includes/phone.svg" %}</span><a class="ltr" href="tel:{{ s.phone }}">{{ s.phone_display|default:s.phone }}</a></li>
+          <li><span class="foot__ico">{% include "includes/wa.svg" %}</span><a href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener">{% translate "WhatsApp" %}</a></li>
+          {% if s.email %}<li><span class="foot__ico">{% include "includes/icons/mail.svg" %}</span><a class="ltr" href="mailto:{{ s.email }}">{{ s.email }}</a></li>{% endif %}
+          {% if s.address %}<li><span class="foot__ico">{% include "includes/icons/pin.svg" %}</span><span class="ltr">{{ s.address }}</span></li>{% endif %}
+          {% if s.hours_short_en %}<li><span class="foot__ico">{% include "includes/icons/clock.svg" %}</span><span><span class="visually-hidden">{{ t|tr:"footer_hours" }}: </span>{{ s|tr:"hours_short" }}</span></li>{% endif %}
         </ul>
-        <h2>{{ t|tr:"footer_hours" }}</h2>
-        <ul><li>{{ s|tr:"hours_short" }}</li></ul>
       </div>
     </div>
-    <div class="copy-bar">
+
+    <div class="foot__bar">
       <span>© {% now "Y" %} {{ s.legal_name }}</span>
-      <span class="ltr">{{ s.domain_label }}</span>
+      <ul class="foot__meta">
+        {% if s.domain_label %}<li><span class="ltr">{{ s.domain_label }}</span></li>{% endif %}
+        {% if privacy_url %}<li><a href="{{ privacy_url }}">{{ t|tr:"footer_privacy" }}</a></li>{% endif %}
+        <li><a href="{{ other_lang_url }}" hreflang="{{ other_lang }}" lang="{{ other_lang }}">{% if lang == 'ar' %}English{% else %}العربية{% endif %}</a></li>
+      </ul>
     </div>
   </div>
 </footer>

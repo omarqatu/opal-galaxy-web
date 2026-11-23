@@ -80,10 +80,14 @@
 
   /* motion */
   --ease:cubic-bezier(.2,.7,.2,1);
-  --t-fast:.15s;--t:.25s;--t-slow:.5s;
+  --t-fast:.15s;--t:.25s;--t-slow:.4s;   /* the only three durations */
+  --stagger:60ms;                        /* delay between items revealed together */
+  --lift:-2px;                           /* hover rise of cards and tiles */
+  --zoom:1.03;                           /* hover zoom of images */
+  --reveal-y:8px;                        /* distance a revealed item travels */
 
   --header-h:84px;
 }
 /* Arabic: no negative tracking, no letter-spaced labels, a little more line height */
 :root:lang(ar){--tracking-display:0;--tracking-label:0;--lh-tight:1.3;--lh-heading:1.4;--lh-body:1.85;--measure:56ch}
-@media (prefers-reduced-motion:reduce){:root{--t-fast:0s;--t:0s;--t-slow:0s}}
+@media (prefers-reduced-motion:reduce){:root{--t-fast:0s;--t:0s;--t-slow:0s;--stagger:0s;--lift:0px;--zoom:1;--reveal-y:0px}}
