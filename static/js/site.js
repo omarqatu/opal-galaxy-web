@@ -113,6 +113,19 @@
     if (phone.addEventListener) phone.addEventListener('change', syncGroups);
   }
 
+  // Technical panels on brand and category pages: all open by default (and without JavaScript);
+  // on phones only the first stays open so a long page is easy to scan.
+  var panels = document.querySelectorAll('.tech');
+  if (panels.length > 1 && window.matchMedia('(max-width: 640px)').matches && !location.hash) {
+    Array.prototype.forEach.call(panels, function (t, i) { if (i > 0) t.removeAttribute('open'); });
+  }
+  // A link to a panel (#cat-vrf, #brand-carrier) opens it.
+  var openTarget = function () {
+    var t = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
+    if (t && t.classList.contains('tech')) t.setAttribute('open', '');
+  };
+  window.addEventListener('hashchange', openTarget); openTarget();
+
   // Gallery viewer. Without JavaScript each photo is a plain link to the larger image.
   var box = document.getElementById('lightbox'), links = document.querySelectorAll('[data-lightbox]');
   if (box && links.length && typeof box.showModal === 'function') {

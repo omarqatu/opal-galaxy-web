@@ -549,15 +549,15 @@ class InternalPagesTests(TestCase):
         self.assertIn("سياسة الخصوصية", self.client.get("/ar/privacy/").content.decode())
 
     def test_category_page_has_no_counts_and_keeps_catalogue_rows_verbatim(self):
-        en = self.client.get("/products/vrf/").content.decode()
-        ar = self.client.get("/ar/products/vrf/").content.decode()
+        en = self.client.get("/products/wall/").content.decode()
+        ar = self.client.get("/ar/products/wall/").content.decode()
         for html in (en, ar):
             self.assertNotIn("Available from <b>", html)
             self.assertNotIn("علامات تجارية</span>", html)
-            for s in Supply.objects.filter(category__slug="vrf"):
+            for s in Supply.objects.filter(category__slug="wall"):
                 self.assertIn(s.models_text.replace("&", "&amp;"), html)
         self.assertIn('<div class="supply-row__data" dir="ltr" lang="en">', ar)
-        self.assertNotIn("vrf systems", en)   # the old lower-cased button text
+        self.assertNotIn("wall mounted split", en)   # the old lower-cased button text
         self.assertIn("Request a quote for this equipment", en)
 
     def test_brand_page_texts_come_from_site_texts(self):
@@ -1046,3 +1046,121 @@ class FooterAndMotionTests(TestCase):
             self.assertIn(".js ", rule)     # hidden only when the script has marked the page
         hero = self.client.get("/").content.decode().split('class="hero-x"')[1].split("</section>")[0]
         self.assertNotIn("data-reveal", hero)
+
+
+class PremiumInternalPagesTests(TestCase):
+    """Reference designs for the brand and category templates (Carrier, VRF systems)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def test_only_the_two_reference_pages_use_the_new_templates(self):
+        from catalog import preview
+        self.assertEqual((preview.PREMIUM_BRANDS, preview.PREMIUM_CATEGORIES), ({"carrier"}, {"vrf"}))
+        self.assertTemplateUsed(self.client.get("/brands/carrier/"), "catalog/brand_premium.html")
+        self.assertTemplateUsed(self.client.get("/ar/products/vrf/"), "catalog/category_premium.html")
+        self.assertTemplateUsed(self.client.get("/brands/midea/"), "catalog/brand.html")
+        self.assertTemplateUsed(self.client.get("/products/wall/"), "catalog/category.html")
+
+    def test_catalogue_text_is_printed_verbatim_in_both_languages(self):
+        import html as htmllib
+        from core.templatetags.opal import model_groups
+        for path, rows in (("/brands/carrier/", Supply.objects.filter(brand__slug="carrier", category__live=True)),
+                           ("/ar/products/vrf/", Supply.objects.filter(category__slug="vrf"))):
+            page = htmllib.unescape(self.client.get(path).content.decode())
+            for row in rows:
+                for _label, items in model_groups(row):
+                    for item in items:
+                        self.assertIn(item, page)
+                if not row.pending:
+                    for line in row.spec_list():
+                        self.assertIn(line, page)
+        self.assertIn('<div class="tech__data" dir="ltr" lang="en">', self.client.get("/ar/products/vrf/").content.decode())
+
+    def test_model_groups_only_split_at_the_catalogue_separators(self):
+        from core.templatetags.opal import model_groups, spec_rows
+        row = Supply(models_text="Outdoor: XPower 38VT008 – 38VT020 (8 – 20 HP) · side discharge 38VS007 · "
+                                 "Indoor: 4-way cassette 40VU___S-4S-TEE1 · concealed duct 40VD007S",
+                     specs="XPower 38VT: cooling 22.4 – 56.0 kW (76,000 – 190,000 Btu/h) per module\nRefrigerant R410A")
+        self.assertEqual(model_groups(row), [
+            ("Outdoor", ["XPower 38VT008 – 38VT020 (8 – 20 HP)", "side discharge 38VS007"]),
+            ("Indoor", ["4-way cassette 40VU___S-4S-TEE1", "concealed duct 40VD007S"])])
+        chillers = Supply(models_text="Air cooled: AquaForce® 30XA · AquaSnap® 30RB. Water cooled: AquaEdge® 19MV · "
+                                      "Global Chiller 30HXC. AHU: Airovision™ 39HQ")
+        self.assertEqual([g[0] for g in model_groups(chillers)], ["Air cooled", "Water cooled", "AHU"])
+        self.assertEqual(model_groups(Supply(models_text="IVCF Series")), [("", ["IVCF Series"])])
+        for every in (row, chillers):       # nothing is added: every item is a slice of the stored text
+            for _label, items in model_groups(every):
+                for item in items:
+                    self.assertIn(item, every.models_text)
+        self.assertEqual([r["btu"] for r in spec_rows(row)], [True, False])   # flagged, not converted
+        self.assertEqual([r["text"] for r in spec_rows(row)], row.spec_list())
+
+    def test_vrf_page_derives_nothing_from_hp(self):
+        import re
+        page = self.client.get("/products/vrf/").content.decode()
+        stored = " ".join(s.specs + " " + s.models_text for s in Supply.objects.filter(category__slug="vrf"))
+        stored += " " + " ".join(ProductCategory.objects.values_list("capacity_range", flat=True))
+        body = page.split('id="app"')[1].split('id="contact"')[0]
+        for figure in set(re.findall(r"[\\d,]{4,}\\s*(?:BTU|Btu)[/\\w]*", body)):
+            self.assertIn(figure, stored)     # every BTU figure on the page is one the catalogue states
+
+    def test_brand_without_rows_gets_an_empty_state_not_invented_content(self):
+        from catalog import preview
+        from unittest import mock
+        with mock.patch.object(preview, "PREMIUM_BRANDS", {"carrier", "lg"}):
+            page = self.client.get("/brands/lg/").content.decode()
+        self.assertIn('class="empty-state"', page)
+        self.assertIn("Models and capacities are confirmed on the quote.", page)
+        self.assertNotIn('class="tech"', page)
+        self.assertNotIn("cat-index", page)
+
+    def test_draft_copy_is_shown_only_on_request_on_staging_and_never_saved(self):
+        from django.test import override_settings
+        from catalog import preview
+        before = (Brand.objects.get(slug="carrier").about_en, Brand.objects.get(slug="carrier").line_ar,
+                  ProductCategory.objects.get(slug="vrf").lead_en)
+        draft_en = preview.DEMO[("brand", "carrier")]["intro"]["en"]
+        draft_ar = preview.DEMO[("category", "vrf")]["intro"]["ar"]
+        plain = self.client.get("/brands/carrier/").content.decode()
+        self.assertNotIn(draft_en, plain)
+        self.assertNotIn("draft-banner", plain)
+        self.assertIn(before[0][:60], plain)                       # the CMS text is what is published
+        with override_settings(SITE_NOINDEX=True):
+            page = self.client.get("/brands/carrier/?draft=1").content.decode()
+            self.assertIn(draft_en, page)
+            self.assertIn('class="draft-banner"', page)
+            self.assertIn("is-draft", page)
+            self.assertIn(draft_ar, self.client.get("/ar/products/vrf/?draft=1").content.decode())
+            self.assertNotIn("draft-banner", self.client.get("/brands/midea/?draft=1").content.decode())
+        with override_settings(SITE_NOINDEX=False):                # an indexed site never shows drafts
+            self.assertNotIn(draft_en, self.client.get("/brands/carrier/?draft=1").content.decode())
+        self.assertEqual(before, (Brand.objects.get(slug="carrier").about_en, Brand.objects.get(slug="carrier").line_ar,
+                                  ProductCategory.objects.get(slug="vrf").lead_en))
+
+    def test_draft_copy_states_no_specification_or_commercial_claim(self):
+        import re
+        from catalog import preview
+        for page in preview.DEMO.values():
+            for texts in page.values():
+                for text in texts.values():
+                    self.assertIsNone(re.search(r"\\d", text), text)   # no figure of any kind
+                    for banned in ("authoris", "authoriz", "warranty", "certif", "in stock", "delivery", "price",
+                                   "معتمد", "ضمان", "شهادة", "مخزون", "توصيل", "أسعار"):
+                        self.assertNotIn(banned, text.lower())
+
+    def test_reference_pages_keep_routes_links_and_quote_form(self):
+        import re
+        for path in ("/brands/carrier/", "/ar/products/vrf/"):
+            page = self.client.get(path).content.decode()
+            self.assertEqual(page.count("<h1"), 1)
+            self.assertIn('id="quote"', page)
+            self.assertNotIn('href="#"', page)
+            ids = set(re.findall(r'id="([^"]+)"', page))
+            for anchor in set(re.findall(r'href="#([^"]+)"', page)):
+                self.assertIn(anchor, ids)
+        vrf = self.client.get("/products/vrf/").content.decode()
+        self.assertIn('href="#brand-carrier"', vrf)
+        self.assertIn('id="brand-carrier"', vrf)
+        self.assertNotIn(" ton", vrf.split('class="cat-cards"')[1].split("</ul>")[0])

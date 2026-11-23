@@ -1,0 +1,78 @@
+{% extends "base.html" %}{% load i18n opal wagtailimages_tags %}
+{% block title %}{% if lang == 'ar' %}مكيفات {{ brand.name }} من Opal Galaxy، دبي{% else %}{{ brand.name }} air conditioning from Opal Galaxy, Dubai{% endif %}{% endblock %}
+{% block description %}{{ brand|tr:"about"|default:brand.name }}{% endblock %}
+{% block content %}
+{% with s=settings.core.CompanySettings t=settings.core.SiteCopy %}
+{% include "catalog/includes/draft_banner.html" %}
+{% include "includes/crumbs.html" with parent_href=home_url|add:"#brands" parent_label=t|tr:"nav_brands" current_label=brand.name %}
+
+{# 1 — compact hero with the brand name (or its approved logo) #}
+<section class="page-hero page-hero--brand"><div class="container split split--wide-start">
+  <div class="page-hero__copy">
+    {% if demo.line or brand.line_en %}<p class="page-hero__kicker{% if demo.line %} is-draft{% endif %}">{% if demo.line %}{{ demo.line }}{% else %}{{ brand|tr:"line" }}{% endif %}</p>{% endif %}
+    <h1>{{ t|tr:"brand_title"|fmt:brand.name }}</h1>
+    {% if demo.intro %}<p class="lead is-draft">{{ demo.intro }}</p>{% elif brand.about_en %}<p class="lead">{{ brand|tr:"about" }}</p>{% endif %}
+    <div class="page-hero__cta">
+      <a class="btn btn-accent" href="#contact">{{ t|tr:"brand_cta"|fmt:brand.name }}</a>
+      <a class="btn btn-wa" href="https://wa.me/{{ s.whatsapp }}?text={% if lang == 'ar' %}{{ "مرحباً، أريد عرض سعر لمنتجات "|add:brand.name|urlencode }}{% else %}{{ "Hello, I would like a quote for "|add:brand.name|urlencode }}{% endif %}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% translate "WhatsApp" %}</span></a>
+    </div>
+  </div>
+  <div class="page-hero__art page-hero__art--brand">
+    {% if brand.logo %}{% image brand.logo max-480x200 format-webp as lg %}<img src="{{ lg.url }}" alt="{{ brand.name }}" width="{{ lg.width }}" height="{{ lg.height }}">{% else %}<span class="page-hero__wordmark" aria-hidden="true">{{ brand.name }}</span>{% endif %}
+  </div>
+</div></section>
+
+{% if supplies %}
+{# 2 — equipment categories offered: a quick index into the page #}
+<section class="section section--tint"><div class="container">
+  <div class="section-head"><div><h2>{% translate "Equipment categories" %}</h2></div></div>
+  <ul class="cat-index">{% for sp in supplies %}
+    <li><a class="cat-index__item" href="#cat-{{ sp.category.slug }}">
+      <span class="cat-index__art">{% if sp.category.image %}{% image sp.category.image max-160x160 format-webp as ci %}<img src="{{ ci.url }}" alt="" width="{{ ci.width }}" height="{{ ci.height }}" loading="lazy">{% else %}{% cat_icon sp.category.slug %}{% endif %}</span>
+      <span class="cat-index__name">{{ sp.category|tr:"name" }}</span>
+    </a></li>{% endfor %}
+  </ul>
+</div></section>
+
+{# 3 — confirmed series, models and specifications, one panel per category #}
+<section class="section section--white"><div class="container">
+  <div class="section-head"><div><h2>{{ t|tr:"brand_supply_title"|fmt:brand.name }}</h2><p class="lead">{{ t|tr:"brand_note" }}</p></div></div>
+  <div class="tech-list">{% for sp in supplies %}
+    {% include "catalog/includes/tech_panel.html" with row=sp anchor="cat-"|add:sp.category.slug head=sp.category|tr:"name" head_url=sp.category.get_url sub=sp.category|card_range pending_text=t|tr:"brand_pending" link_label=t|tr:"brand_cat_link" logo=None %}
+  {% endfor %}</div>
+</div></section>
+{% else %}
+{# a brand with no catalogue rows yet #}
+<section class="section section--white"><div class="container">
+  <div class="empty-state">
+    <span class="empty-state__icon" aria-hidden="true">{% include "includes/icons/doc.svg" %}</span>
+    <h2>{{ t|tr:"brand_supply_title"|fmt:brand.name }}</h2>
+    <p>{{ t|tr:"brand_pending" }}</p>
+    <a class="btn btn-primary" href="#contact">{{ t|tr:"brand_cta"|fmt:brand.name }}</a>
+  </div>
+</div></section>
+{% endif %}
+
+{# 4 — project quotation #}
+<section class="section section--tint"><div class="container">
+  <div class="cta-band">
+    <div>
+      <h2{% if demo.cta_title %} class="is-draft"{% endif %}>{% if demo.cta_title %}{{ demo.cta_title }}{% else %}{{ t|tr:"quote_title" }}{% endif %}</h2>
+      <p{% if demo.cta_text %} class="is-draft"{% endif %}>{% if demo.cta_text %}{{ demo.cta_text }}{% else %}{{ s|tr:"quote_reply" }}{% endif %}</p>
+    </div>
+    <div class="cta-band__actions">
+      <a class="btn btn-accent" href="#contact">{{ t|tr:"brand_cta"|fmt:brand.name }}</a>
+      <a class="btn btn-outline on-dark" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{{ t|tr:"quote_whatsapp" }}</span></a>
+    </div>
+  </div>
+</div></section>
+
+{# 5 — other brands #}
+<section class="section section--white section--ruled"><div class="container">
+  <div class="section-head"><div><h2>{{ t|tr:"brand_other" }}</h2></div></div>
+  <ul class="brand-wall">{% for x in all_brands %}{% if x.pk != brand.pk %}
+    <li><a class="brand-tile" href="{{ x.get_url }}"{% if x.logo %} aria-label="{{ x.name }}"{% endif %}><span class="brand-tile__mark">{% if x.logo %}{% image x.logo max-320x120 format-webp as lg %}<img src="{{ lg.url }}" alt="{{ x.name }}" width="{{ lg.width }}" height="{{ lg.height }}" loading="lazy">{% else %}{{ x.name }}{% endif %}</span></a></li>{% endif %}{% endfor %}
+  </ul>
+</div></section>
+{% endwith %}
+{% endblock %}

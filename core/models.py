@@ -6,8 +6,11 @@ from wagtail.contrib.routable_page.models import RoutablePageMixin, path
 from wagtail.contrib.settings.models import BaseGenericSetting, register_setting
 from wagtail.models import Orderable, Page
 
+from django.conf import settings
+
+from catalog import preview
 from catalog.models import Brand, ProductCategory, bi
-from .i18n import tr
+from .i18n import current_lang, tr
 
 
 # ---------------------------------------------------------------- settings
@@ -263,10 +266,20 @@ class HomePage(RoutablePageMixin, Page):
     def home(self, request):
         return self.render(request, context_overrides={"page_kind": "home"})
 
+    @staticmethod
+    def _draft_context(request, kind, slug, premium):
+        """Draft copy for review: only on a redesigned page, only with ?draft=1, never on an indexed site."""
+        if premium and settings.SITE_NOINDEX and request.GET.get("draft") == "1":
+            return {"draft_mode": True, "demo": preview.demo_for(kind, slug, current_lang())}
+        return {"draft_mode": False, "demo": {}}
+
     @path("products/<slug:slug>/")
     def product(self, request, slug):
         category = get_object_or_404(ProductCategory.objects.live(), slug=slug)
-        return self.render(request, template="catalog/category.html", context_overrides={
+        premium = category.slug in preview.PREMIUM_CATEGORIES
+        return self.render(request, template="catalog/category_premium.html" if premium else "catalog/category.html",
+                           context_overrides={
+            **self._draft_context(request, "category", category.slug, premium),
             "page_kind": "category", "category": category,
             "supplies": category.supplies.select_related("brand").order_by("brand__sort_order"),
             "all_categories": ProductCategory.objects.live(),
@@ -276,7 +289,10 @@ class HomePage(RoutablePageMixin, Page):
     def brand(self, request, slug):
         brand = get_object_or_404(Brand, slug=slug)
         supplies = brand.live_supplies().select_related("category").order_by("category__sort_order")
-        return self.render(request, template="catalog/brand.html", context_overrides={
+        premium = brand.slug in preview.PREMIUM_BRANDS
+        return self.render(request, template="catalog/brand_premium.html" if premium else "catalog/brand.html",
+                           context_overrides={
+            **self._draft_context(request, "brand", brand.slug, premium),
             "page_kind": "brand", "brand": brand, "supplies": supplies,
             "all_brands": Brand.objects.all(),
         })

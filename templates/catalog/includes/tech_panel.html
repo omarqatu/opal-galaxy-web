@@ -1,0 +1,34 @@
+{% load i18n opal %}{# One catalogue row as a readable panel. Models and specifications are printed exactly as stored. #}
+<details class="tech" id="{{ anchor }}" open>
+  <summary class="tech__head">
+    <span class="tech__title">{% if logo %}{% load wagtailimages_tags %}{% image logo max-240x80 format-webp as lg %}<img src="{{ lg.url }}" alt="{{ head }}" width="{{ lg.width }}" height="{{ lg.height }}" loading="lazy">{% else %}{{ head }}{% endif %}</span>
+    {% if sub %}<span class="tech__sub"><span class="tech__label">{% translate "Capacity" %}</span><span class="ltr">{{ sub }}</span></span>{% endif %}
+    <span class="tech__toggle" aria-hidden="true">{% include "includes/icons/chevron.svg" %}</span>
+  </summary>
+  <div class="tech__body">
+    {% if row.pending %}
+    <div class="tech__col">
+      <h4>{% translate "Series and models" %}</h4>
+      <div class="tech__data" dir="ltr" lang="en">{% for label, items in row|model_groups %}
+        {% if label %}<p class="tech__group">{{ label }}</p>{% endif %}
+        <ul class="tech__models">{% for item in items %}<li>{{ item }}</li>{% endfor %}</ul>{% endfor %}
+      </div>
+    </div>
+    <div class="tech__col"><p class="tech__pending">{{ pending_text }}</p></div>
+    {% else %}
+    <div class="tech__col">
+      <h4>{% translate "Series and models" %}</h4>
+      <div class="tech__data" dir="ltr" lang="en">{% for label, items in row|model_groups %}
+        {% if label %}<p class="tech__group">{{ label }}</p>{% endif %}
+        <ul class="tech__models">{% for item in items %}<li>{{ item }}</li>{% endfor %}</ul>{% endfor %}
+      </div>
+    </div>
+    <div class="tech__col">
+      <h4>{% translate "Specifications" %}</h4>
+      {% if row.spec_list %}<ul class="tech__specs" dir="ltr" lang="en">{% for spec in row|spec_rows %}<li{% if spec.btu %} class="is-capacity"{% endif %}>{{ spec.text }}</li>{% endfor %}</ul>
+      {% else %}<p class="tech__pending">{{ pending_text }}</p>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+  <p class="tech__foot"><a class="link-arrow" href="{{ head_url }}">{{ link_label }}{% include "includes/icons/arrow.svg" %}</a></p>
+</details>
