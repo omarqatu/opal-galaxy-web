@@ -1143,21 +1143,6 @@
   },
   "gallery": [
    {
-    "image": "gal-1.jpg",
-    "alt": {
-     "en": "Rooftop package units on a commercial building",
-     "ar": "وحدات مجمّعة على سطح مبنى تجاري"
-    },
-    "caption": {
-     "en": "O General 5 ton",
-     "ar": "O General 5 ton"
-    },
-    "subcaption": {
-     "en": "Commercial rooftop",
-     "ar": "سطح مبنى تجاري"
-    }
-   },
-   {
     "image": "gal-2.jpg",
     "alt": {
      "en": "Two inverter condensers beside a villa",
@@ -1165,7 +1150,7 @@
     },
     "caption": {
      "en": "Twin Inverter units",
-     "ar": "وحدتان Inverter"
+     "ar": "وحدتان بتقنية Inverter"
     },
     "subcaption": {
      "en": "Private villa",
@@ -1185,6 +1170,21 @@
     "subcaption": {
      "en": "Commercial compound",
      "ar": "مجمّع تجاري"
+    }
+   },
+   {
+    "image": "gal-1.jpg",
+    "alt": {
+     "en": "Rooftop package units on a commercial building",
+     "ar": "وحدات مجمّعة على سطح مبنى تجاري"
+    },
+    "caption": {
+     "en": "O General 5 ton",
+     "ar": "O General 5 ton"
+    },
+    "subcaption": {
+     "en": "Commercial rooftop",
+     "ar": "سطح مبنى تجاري"
     }
    },
    {

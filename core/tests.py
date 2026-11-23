@@ -8,8 +8,7 @@ from core.models import QuoteRequest
 def approve_gallery():
     """What Omar does in the admin: approve the photos and mark them for the homepage in their order."""
     from django.db.models import F
-    from core.models import FieldPhoto, GalleryItem
-    GalleryItem.objects.update(approved_for_publication=True)          # the retired rows, kept for reference
+    from core.models import FieldPhoto
     FieldPhoto.objects.exclude(sort_order=None).update(approved_for_publication=True, show_on_homepage=True,
                                                        home_order=F("sort_order") + 1)
     FieldPhoto.objects.filter(sort_order=None).update(approved_for_publication=True)
@@ -425,7 +424,7 @@ class HomeContentMigrationTests(TestCase):
         self.assertEqual(home.hero_title_en, "Air conditioning, supplied at project scale")
         self.assertEqual(CompanySettings.load().email, "opalgalaxyac@gmail.com")
         faqs_before = list(home.faqs.values_list("question_en", "answer_ar"))
-        gallery_before = list(home.gallery.values_list("image_id", "caption_en"))
+        gallery_before = [(p.image_id, p.title_en) for p in field_photos()]
         self.apply()
         home = HomePage.objects.get()
         draft = home.get_latest_revision_as_object()
@@ -444,7 +443,7 @@ class HomeContentMigrationTests(TestCase):
         self.assertEqual(home.services.get(icon="parts").link_page.slug, "maintenance")
         self.assertEqual(CompanySettings.load().email, "info@opalgalaxy.ae")
         self.assertEqual(list(home.faqs.values_list("question_en", "answer_ar")), faqs_before)
-        self.assertEqual(list(home.gallery.values_list("image_id", "caption_en")), gallery_before)
+        self.assertEqual([(p.image_id, p.title_en) for p in field_photos()], gallery_before)
         self.assertEqual(home.about_text_en.count("licensed air-conditioning trading company"), 1)
 
     def test_edited_texts_lists_and_images_are_never_overwritten(self):
@@ -710,7 +709,7 @@ class PremiumHomeTests(TestCase):
         approve_gallery()
         from core.models import HomePage
         home = HomePage.objects.get()
-        self.assertNotIn(home.hero_image_id, list(home.gallery.values_list("image_id", flat=True)))
+        self.assertNotIn(home.hero_image_id, [p.image_id for p in field_photos()])
         self.assertEqual(home.hero_caption_en, "")
         gallery = self.client.get("/").content.decode().split('id="gallery"')[1].split("</ul>")[0]
         self.assertNotIn("hero-rooftop", gallery)
@@ -873,7 +872,7 @@ class RefinementTests(TestCase):
         approve_gallery()
         from core.models import HomePage
         home = HomePage.objects.get()
-        titles = [g.image.title for g in home.gallery.all()]
+        titles = [g.image.title for g in field_photos()]
         self.assertEqual(titles[:2], ["Gallery: Two inverter condensers beside a villa",
                                       "Gallery: Crane lifting a package unit onto a roof"])
         self.assertEqual(len(titles), 8)
@@ -887,41 +886,7 @@ class RefinementTests(TestCase):
         self.assertNotIn("hero-rooftop", gallery)
         self.assertIn('class="lightbox__count"', html)
         # Captions are the stored ones (the operator edits them in the admin).
-        self.assertIn(home.gallery.first().caption_en, gallery)
-
-
-class GalleryOrderMigrationTests(TestCase):
-    """core 0008 reorders the gallery only while it is in its original order."""
-
-    def apply(self):
-        import importlib
-        from django.apps import apps
-        importlib.import_module("core.migrations.0008_gallery_lead_photos").apply_content(apps, None)
-
-    def test_original_order_is_reordered_once_with_captions_intact(self):
-        from core.models import HomePage
-        call_command("seed_site", verbosity=0)
-        home = HomePage.objects.get()
-        before = {g.image.title: (g.caption_en, g.caption_ar, g.alt_en) for g in home.gallery.all()}
-        self.apply()
-        home = HomePage.objects.get()
-        for obj in (home, home.get_latest_revision_as_object()):
-            order = [g.image.title for g in obj.gallery.all()]
-            self.assertEqual(order[:3], ["Gallery: Two inverter condensers beside a villa",
-                                         "Gallery: Crane lifting a package unit onto a roof",
-                                         "Gallery: Rooftop package units on a commercial building"])
-        self.assertEqual({g.image.title: (g.caption_en, g.caption_ar, g.alt_en) for g in home.gallery.all()}, before)
-
-    def test_an_edited_gallery_is_left_alone(self):
-        from core.models import GalleryItem, HomePage
-        call_command("seed_site", verbosity=0)
-        home = HomePage.objects.get()
-        last = home.gallery.order_by("-sort_order").first()
-        GalleryItem.objects.filter(pk=last.pk).update(sort_order=-1)      # the operator moved a photo first
-        order = list(GalleryItem.objects.filter(page=home).order_by("sort_order", "pk").values_list("pk", flat=True))
-        self.apply()
-        self.assertEqual(list(GalleryItem.objects.filter(page=home).order_by("sort_order", "pk")
-                              .values_list("pk", flat=True)), order)
+        self.assertIn(field_photos()[0].title_en, gallery)
 
 
 class DesignSystemTests(TestCase):
@@ -1676,65 +1641,110 @@ class FieldPhotoTests(TestCase):
         self.assertTrue(any("LIMIT 24" in q for q in photo_selects))
         self.assertFalse([q for q in photo_selects if "LIMIT" not in q and "EXISTS" not in q and "DISTINCT" not in q])
 
-    # ------------------------------------------------------------ transition
-    def test_gallery_rows_are_kept_and_each_has_exactly_one_photo(self):
-        from core.models import FieldPhoto, GalleryItem
-        self.assertEqual(GalleryItem.objects.count(), 8)
-        for item in GalleryItem.objects.all():
-            photo = FieldPhoto.objects.get(legacy_item_id=item.pk)
-            self.assertEqual(photo.image_id, item.image_id)
-            self.assertEqual((photo.title_en, photo.title_ar, photo.caption_en, photo.caption_ar, photo.alt_en, photo.alt_ar),
-                             (item.caption_en, item.caption_ar, item.subcaption_en, item.subcaption_ar, item.alt_en, item.alt_ar))
-
-    def test_the_final_copy_brings_photos_up_to_date_and_marks_the_home_selection(self):
-        """What core 0011 does on an existing site: the old editor's last state wins, once."""
-        import importlib
-        from django.apps import apps
-        from core.models import FieldPhoto, GalleryCategory, GalleryItem, HomePage
-        from wagtail.images.models import Image
-        category = GalleryCategory.objects.create(name_en="Maintenance", slug="maintenance")
-        items = list(GalleryItem.objects.order_by("sort_order"))
-        GalleryItem.objects.update(approved_for_publication=True)
-        GalleryItem.objects.filter(pk=items[1].pk).update(caption_ar="عنوان محدّث", category=category, featured=True)
-        added = GalleryItem.objects.create(page=HomePage.objects.get(), image=items[0].image, sort_order=40,
-                                           alt_en="Added in the old editor", approved_for_publication=True)
-        images = Image.objects.count()
-        importlib.import_module("core.migrations.0011_field_photos_switch").final_copy(apps, None)
-        self.assertEqual(FieldPhoto.objects.count(), 9)
-        self.assertEqual(Image.objects.count(), images)                              # no image or file duplicated
-        updated = FieldPhoto.objects.get(legacy_item_id=items[1].pk)
-        self.assertEqual((updated.title_ar, updated.category, updated.featured), ("عنوان محدّث", category, True))
-        on_home = FieldPhoto.objects.filter(show_on_homepage=True).order_by("home_order")
-        self.assertEqual([p.legacy_item_id for p in on_home], [i.pk for i in items])   # the eight the home page showed
-        self.assertFalse(FieldPhoto.objects.get(legacy_item_id=added.pk).show_on_homepage)
-        self.assertEqual(self.home_html().count("data-lightbox"), 8)
-        importlib.import_module("core.migrations.0011_field_photos_switch").final_copy(apps, None)   # running it again
-        self.assertEqual(FieldPhoto.objects.count(), 9)
-        self.assertEqual(GalleryItem.objects.count(), 9)                             # the old rows are all still there
-
-    def test_after_the_switch_the_copy_never_overwrites_or_withdraws_a_photo(self):
-        from io import StringIO
-        from core.models import FieldPhoto, GalleryItem
-        photo = FieldPhoto.objects.exclude(legacy_item_id=None).first()
-        FieldPhoto.objects.filter(pk=photo.pk).update(title_en="Edited in the new area", approved_for_publication=True)
-        GalleryItem.objects.exclude(pk=photo.legacy_item_id).first().delete()        # an old row disappears
-        before = list(FieldPhoto.objects.order_by("pk").values_list("pk", "title_en", "approved_for_publication", "updated"))
-        out = StringIO()
-        call_command("sync_field_photos", stdout=out)
-        self.assertIn("created 0, updated 0", out.getvalue())
-        self.assertEqual(list(FieldPhoto.objects.order_by("pk").values_list("pk", "title_en", "approved_for_publication", "updated")), before)
-
-    def test_the_old_editor_is_gone_from_the_home_page_and_revisions_still_publish(self):
-        from core.models import GalleryItem, HomePage
+    # ------------------------------------------------------------ the legacy gallery is gone
+    def test_legacy_model_table_editor_and_command_are_removed(self):
+        import core.models
+        from django.core.management import get_commands
+        from django.db import connection
+        from core.models import HomePage
+        self.assertFalse(hasattr(core.models, "GalleryItem"))
+        self.assertNotIn("core_galleryitem", connection.introspection.table_names())
+        self.assertIn("core_fieldphoto", connection.introspection.table_names())
+        self.assertIn("core_gallerycategory", connection.introspection.table_names())
+        self.assertNotIn("sync_field_photos", get_commands())
+        self.assertFalse(hasattr(HomePage.objects.get(), "gallery"))
         self.login(superuser=True)
         home = HomePage.objects.get()
         html = self.client.get(f"/admin/pages/{home.pk}/edit/").content.decode()
         self.assertNotIn("gallery-0-", html)
         self.assertNotIn("Gallery photos", html)
         self.assertIn("projects_title_en", html)                                     # the section's texts stay editable
-        home.save_revision().publish()                                               # a revision still holding the old rows
-        self.assertEqual(GalleryItem.objects.count(), 8)
+
+    def test_a_home_page_revision_that_still_holds_the_old_rows_publishes_cleanly(self):
+        from core.models import FieldPhoto, HomePage
+        approve_gallery()
+        home = HomePage.objects.get()
+        revision = home.save_revision()
+        revision.content["gallery"] = [{"pk": 1, "sort_order": 0, "image": FieldPhoto.objects.first().image_id, "page": home.pk,
+                                        "alt_en": "Old row", "caption_en": "Old", "approved_for_publication": True}]
+        revision.save()
+        revision.publish()
         self.assertEqual(self.client.get("/").status_code, 200)
+        self.assertEqual(self.home_html().count("data-lightbox"), 8)
+        self.assertEqual(FieldPhoto.objects.count(), 8)
+        self.login(superuser=True)
+        self.assertEqual(self.client.get(f"/admin/pages/{home.pk}/edit/").status_code, 200)
+
+    def test_seeded_photos_keep_their_images_texts_and_order(self):
+        from core.models import FieldPhoto
+        photos = field_photos()
+        self.assertEqual([p.image.title for p in photos][:3], ["Gallery: Two inverter condensers beside a villa",
+                                                               "Gallery: Crane lifting a package unit onto a roof",
+                                                               "Gallery: Rooftop package units on a commercial building"])
+        self.assertEqual((photos[0].title_en, photos[0].caption_en), ("Twin Inverter units", "Private villa"))
+        self.assertTrue(all(p.title_ar and p.alt_ar for p in photos))
+        self.assertEqual(len({p.image_id for p in photos}), 8)
+        for p in photos:
+            self.assertTrue(p.image.file.storage.exists(p.image.file.name))
+
+    def test_removal_migration_archives_the_rows_and_leaves_everything_else(self):
+        """Run 0012 for real: back to 0011, put rows in the old table, forward again."""
+        import json
+        import tempfile
+        from pathlib import Path
+        from django.db import connection
+        from django.db.migrations.executor import MigrationExecutor
+        from django.test import override_settings
+        from core.models import FieldPhoto, GalleryCategory
+        from wagtail.images.models import Image
+        category = GalleryCategory.objects.create(name_en="Maintenance", name_ar="الصيانة", slug="maintenance")
+        photos = field_photos()
+        FieldPhoto.objects.filter(pk=photos[0].pk).update(legacy_item_id=501, category=category, approved_for_publication=True)
+        before = (list(FieldPhoto.objects.order_by("pk").values()), list(GalleryCategory.objects.values()),
+                  list(Image.objects.order_by("pk").values_list("pk", "file")))
+        files = [p.image.file.name for p in photos]
+        executor = MigrationExecutor(connection)
+        executor.migrate([("core", "0011_field_photos_switch")])
+        old = executor.loader.project_state([("core", "0011_field_photos_switch")]).apps
+        Item, Home = old.get_model("core", "GalleryItem"), old.get_model("core", "HomePage")
+        home = Home.objects.get()
+        Item.objects.create(pk=501, page=home, image_id=photos[0].image_id, sort_order=0, alt_en="Kept alt", alt_ar="نص بديل",
+                            caption_en="Kept title", caption_ar="عنوان", subcaption_en="Kept caption", subcaption_ar="تعليق",
+                            category_id=category.pk, featured=True, approved_for_publication=True)
+        Item.objects.create(pk=502, page=home, image_id=photos[1].image_id, sort_order=1, alt_en="No photo for this one")
+        connection.cursor().execute("SET CONSTRAINTS ALL IMMEDIATE")   # the test inserted rows in this same transaction
+        with tempfile.TemporaryDirectory() as tmp, override_settings(DATA_DIR=Path(tmp)):
+            executor = MigrationExecutor(connection)
+            executor.migrate([("core", "0012_remove_legacy_gallery")])
+            archives = list((Path(tmp) / "archive").glob("legacy-gallery-items-*.json"))
+            self.assertEqual(len(archives), 1)
+            rows = json.loads(archives[0].read_text(encoding="utf-8"))["rows"]
+        self.assertEqual([r["id"] for r in rows], [501, 502])
+        self.assertEqual((rows[0]["caption_ar"], rows[0]["subcaption_ar"], rows[0]["alt_ar"], rows[0]["category_id"],
+                          rows[0]["featured"], rows[0]["approved_for_publication"], rows[0]["image_id"]),
+                         ("عنوان", "تعليق", "نص بديل", category.pk, True, True, photos[0].image_id))
+        self.assertEqual((rows[0]["field_photo_id"], rows[1]["field_photo_id"]), (photos[0].pk, None))
+        self.assertNotIn("core_galleryitem", connection.introspection.table_names())
+        self.assertEqual((list(FieldPhoto.objects.order_by("pk").values()), list(GalleryCategory.objects.values()),
+                          list(Image.objects.order_by("pk").values_list("pk", "file"))), before)
+        for name in files:
+            self.assertTrue(Image.objects.first().file.storage.exists(name))
+
+    def test_removal_migration_stops_if_the_archive_cannot_be_written(self):
+        from pathlib import Path
+        from django.db import connection
+        from django.db.migrations.executor import MigrationExecutor
+        from django.test import override_settings
+        photos = field_photos()
+        executor = MigrationExecutor(connection)
+        executor.migrate([("core", "0011_field_photos_switch")])
+        old = executor.loader.project_state([("core", "0011_field_photos_switch")]).apps
+        old.get_model("core", "GalleryItem").objects.create(page=old.get_model("core", "HomePage").objects.get(),
+                                                            image_id=photos[0].image_id, sort_order=0)
+        connection.cursor().execute("SET CONSTRAINTS ALL IMMEDIATE")
+        with override_settings(DATA_DIR=Path("/proc/nonexistent/place")):
+            with self.assertRaises(OSError):
+                MigrationExecutor(connection).migrate([("core", "0012_remove_legacy_gallery")])
 
     # ------------------------------------------------------------ admin area
     def test_listing_filters_searches_and_paginates(self):
@@ -1881,7 +1891,7 @@ class FieldPhotoTests(TestCase):
                                                                         "collection": collection.pk},
                                         HTTP_X_REQUESTED_WITH="XMLHttpRequest")
             self.assertTrue(response.json()["success"], response.json())
-        new = FieldPhoto.objects.filter(legacy_item_id=None)
+        new = FieldPhoto.objects.filter(image__collection=collection)
         self.assertEqual(new.count(), 3)
         self.assertEqual(Image.objects.count(), len(before) + 3)                     # one image per file, no copies
         for photo in new:

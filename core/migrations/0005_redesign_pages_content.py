@@ -186,7 +186,10 @@ def add_page(apps, model_name, home, slug, title, fields):
 def fix_language(apps):
     Revision = apps.get_model("wagtailcore", "Revision")
     for app, model, field, old, new in FIXES:
-        Model = apps.get_model(app, model)
+        try:
+            Model = apps.get_model(app, model)
+        except LookupError:   # a model retired since (GalleryItem, removed in 0012): nothing left to correct
+            continue
         for obj in Model.objects.filter(**{f"{field}__contains": old}):
             value = getattr(obj, field)
             if old in new and new in value:   # the old phrase is part of the new one: already corrected

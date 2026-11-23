@@ -7,7 +7,7 @@ or removed. No schema change. Reversing does nothing.
 """
 from django.db import migrations
 
-from core import gallery
+from . import _legacy_gallery as gallery
 
 
 def final_copy(apps, schema_editor):

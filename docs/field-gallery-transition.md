@@ -1,30 +1,27 @@
-# Field gallery: transition from the home page gallery to standalone field photos
+# Field gallery
 
-Decision (Omar, 23 Nov 2026): the gallery moves to a native Wagtail model, `FieldPhoto`, with its own admin area, bulk upload, filters and pagination. The inline "Gallery photos" editor on the home page is retired once the replacement is complete and verified.
-
-## Where things stand
+The gallery is a native Wagtail feature built on one model, `FieldPhoto`, managed under **Field gallery** in the admin. The former home page gallery (`GalleryItem`) was copied into it and then removed.
 
 | Step | Content | State |
 |---|---|---|
-| PR 1 | `FieldPhoto` model, Field gallery admin area, approval permission, guarded copy of the existing rows | merged |
-| PR 2 | Bulk upload, bulk actions, paginated public gallery (24 per page), **the switch** | this PR |
-| PR 3 | Removal of `GalleryItem` and its table | only after Omar's explicit approval |
+| PR 1 (#19) | `FieldPhoto` model, admin area, approval permission, first copy of the old rows | merged |
+| PR 2 (#20) | Bulk upload, bulk actions, paginated public gallery, the switch (`core 0011`: final copy, then a row-by-row check that stops the deploy on any difference) | merged |
+| PR 3 | Removal of `GalleryItem`, its table and the transition code (`core 0012`) | this PR |
 
-## How the gallery works after PR 2
+## How it works
 
-- The home page and the gallery page read `FieldPhoto`. A photo is public only when "Approved for publication" is ticked.
-- The home page shows up to eight approved photos that have "Show on homepage", lowest "Homepage order" first.
-- The gallery lists manual numbers first (lowest first), then the rest newest first, 24 per page.
-- Photos are managed only under **Field gallery** in the admin. The "Gallery photos" panel is gone from the home page editor.
-- `GalleryItem` rows remain in the database, complete and unused.
+- A photo is public only when "Approved for publication" is ticked.
+- Home page: up to eight approved photos with "Show on homepage", lowest "Homepage order" first.
+- Gallery page: photos with a manual number first (lowest first), then the rest newest first; 24 per page; category filter.
+- The image file exists once, in Wagtail Images. A photo record cannot lose its image: an image in use cannot be deleted.
 
 ### Adding photos
 
-1. Field gallery → Upload photos. This opens Wagtail's multi-file uploader with the "Field gallery" collection selected (the collection is created on first use).
+1. Field gallery → Upload photos. Wagtail's multi-file uploader opens with the "Field gallery" collection selected.
 2. Drop or choose any number of files. Each becomes one image and one field photo, unapproved, not featured, not on the home page.
-3. Field gallery → Photos, filter "Approved for publication: no". Open a photo to add alt text, title and caption in both languages and the category; or tick several and use the bar at the bottom: Approve, Withdraw approval, Show on home, Remove from home, Set category.
+3. Field gallery → Photos, filter "Approved for publication: no". Open a photo to add alt text, title, caption and category, or tick several and use the bar at the bottom: Approve, Withdraw approval, Show on home, Remove from home, Set category.
 
-Upload rules are Wagtail's: AVIF, GIF, JPG, PNG and WEBP, 10 MB per file, a pixel-count limit, duplicate detection. Leave the collection on "Field gallery"; an image uploaded to another collection is an ordinary library image and gets no field photo.
+Upload rules are Wagtail's: AVIF, GIF, JPG, PNG and WEBP, 10 MB per file, a pixel-count limit, duplicate detection. Keep the collection on "Field gallery"; an image uploaded elsewhere is an ordinary library image and gets no field photo.
 
 ### Permissions
 
@@ -36,52 +33,39 @@ Upload rules are Wagtail's: AVIF, GIF, JPG, PNG and WEBP, 10 MB per file, a pixe
 
 Superusers have all of them. No group is given `approve_fieldphoto` automatically.
 
-## The copy from the old gallery
+## What PR 3 removed
 
-`core/gallery.py: sync_field_photos()` copies `GalleryItem` rows into `FieldPhoto`. Migration `core 0011` ran it one last time in full (creating missing photos and bringing existing ones up to date) and stops the deploy if the two tables then differ. Since then it only creates a photo for a row that has none and never overwrites or withdraws a photo.
-
-| Old field | New field |
+| Kind | Removed |
 |---|---|
-| image (same Wagtail image record) | image |
-| alt_en / alt_ar | alt_en / alt_ar |
-| caption_en / caption_ar | title_en / title_ar |
-| subcaption_en / subcaption_ar | caption_en / caption_ar |
-| category, featured, approved_for_publication | same names |
-| sort_order | sort_order (manual order) |
-| first eight approved rows, in order | show_on_homepage, home_order 1–8 |
-| row id | legacy_item_id (unique) |
+| Database table | `core_galleryitem` |
+| Model | `core.GalleryItem` (and with it the `HomePage.gallery` relation) |
+| Management command | `sync_field_photos` |
+| Module | `core/gallery.py`, moved to `core/migrations/_legacy_gallery.py`: migrations 0010 and 0011 still need it to run on an empty database; nothing else imports it |
+| Seed | `seed_site` creates field photos directly; `seed/opal.json` lists the photos in their final order and carries the one Arabic caption correction that migrations 0005 and 0008 used to apply to the old rows |
 
-Guarantees, all covered by tests:
+Kept: every `FieldPhoto` and `GalleryCategory` record, every Wagtail image record and file, and `FieldPhoto.legacy_item_id` (the id a photo had in the old gallery).
 
-- **No duplicates.** A row is matched by `legacy_item_id`, which is unique in the database. Running the step again creates nothing new.
-- **No file is copied.** The photo points at the same image record.
-- **Nothing is deleted.** A row removed from the old gallery leaves its mirror in place, unapproved and off the home page.
-- **`GalleryItem`, images and files are never written to.**
-- Photos created in the new area (no `legacy_item_id`) are never touched.
+Old home page revisions still contain the former gallery rows inside their stored JSON. Wagtail ignores them (tested); they are not removed.
 
-It runs in three places: migration `core 0010` (applied automatically by `entrypoint.sh` on start), `seed_site` on an empty database, and the command below.
+## Archive written by `core 0012`
 
-## Commands
+Before dropping the table, the migration writes every remaining row to
 
-```bash
-python manage.py sync_field_photos --check
 ```
-Prints the row counts of both tables and fails if any row differs.
-
-```bash
-python manage.py sync_field_photos --dry-run
+<DATA_DIR>/archive/legacy-gallery-items-<UTC date-time>.json
 ```
-Reports what a run would create or update and writes nothing.
 
-```bash
-python manage.py sync_field_photos
-```
-Brings the mirrors up to date.
+`DATA_DIR` is `/app/data` in the container, the persistent volume that is backed up daily with the images. Each row holds all thirteen columns plus `field_photo_id`, the photo it became (empty if that photo was deleted in the new area since). If the file cannot be written and read back, the migration stops and the table is not dropped. On a database with no old rows no file is written.
 
-## Rollback and recovery
+## Recovery
 
-- **Back to the previous image:** the `GalleryItem` rows are untouched, so the previous image shows the old gallery and the old editor exactly as they were at the switch. `FieldPhoto` rows stay in their table, ignored by the older code, and are picked up again on the next deploy of this version.
-- **Photos uploaded after the switch** exist only as images and field photos. They survive a rollback (the table is not dropped) but are not shown by the older code.
-- **If `core 0011` stops the deploy** with "field photos do not match the gallery rows", nothing has been switched in the database: the migration is rolled back and `entrypoint.sh` stops, so the new container does not start. The message names the differing rows. Redeploy the previous image while the difference is looked at.
-- **Database:** the regular backup taken before each deploy remains the last resort.
-- The old table is dropped only in PR 3, after Omar's explicit approval.
+| Situation | What to do |
+|---|---|
+| A text or setting of an old photo is needed | Read it from the archive file; nothing has to be restored. |
+| The deploy stops in `core 0012` | Nothing was dropped (the migration runs in one transaction). The previous container image still works with the database as it is. |
+| Field photos are damaged after the deploy | Restore the daily database backup taken before the deploy (S3, bucket `omardigital`, database `opalDB`). Image files are not affected by this PR. |
+| The old table itself is wanted back | `python manage.py migrate core 0011` recreates it empty; its rows can be re-entered from the archive file. The site no longer reads it. |
+
+Rolling back to the image of PR 2 after `0012` has run is **not** a working state: that code expects the table. Use the database backup together with the older image, or stay on the current one.
+
+**Before deploying PR 3:** confirm that last night's backup of `opalDB` succeeded (the confirmation email), or take a manual backup. The roadmap still lists a test restore as not done; the archive file exists so that this removal does not depend on one.

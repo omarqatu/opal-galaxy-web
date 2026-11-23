@@ -1,9 +1,7 @@
-"""Transition from the home page's inline gallery (GalleryItem) to standalone field photos (FieldPhoto).
+"""Support code for migrations 0010 and 0011 only (the file name starts with "_" so Django does not load it as a migration).
 
-Until the switch, GalleryItem is what the site shows and what Omar edits. FieldPhoto rows that carry a
-legacy_item_id are mirrors of those rows: sync_field_photos() creates the missing ones and brings the
-existing ones up to date. It never creates a second copy of a row, never touches GalleryItem, images
-or files, and never deletes anything. See docs/field-gallery-transition.md.
+It copied the rows of the former home page gallery (GalleryItem) into FieldPhoto. GalleryItem was
+removed in 0012; nothing outside these two migrations uses this module.
 """
 HOME_LIMIT = 8
 
