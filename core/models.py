@@ -141,12 +141,18 @@ class HomePage(RoutablePageMixin, Page):
     meta_description_en = models.TextField(blank=True)
     meta_description_ar = models.TextField(blank=True)
 
-    hero_title_en = models.CharField(max_length=160)
+    hero_title_en = models.CharField(max_length=160, help_text="Put *asterisks* around the words to show in the accent colour")
     hero_title_ar = models.CharField(max_length=160, blank=True)
     hero_lead_en = models.TextField(blank=True)
     hero_lead_ar = models.TextField(blank=True)
     hero_image = models.ForeignKey("wagtailimages.Image", null=True, blank=True,
                                    on_delete=models.SET_NULL, related_name="+")
+    hero_eyebrow_en = models.CharField(max_length=120, blank=True, default="HVAC supply · Installation · Project support",
+                                       help_text="Small line above the headline")
+    hero_eyebrow_ar = models.CharField(max_length=120, blank=True, default="توريد أنظمة التكييف · التركيب · دعم المشاريع")
+    hero_image_mobile = models.ForeignKey("wagtailimages.Image", null=True, blank=True, on_delete=models.SET_NULL,
+                                          related_name="+", help_text="Optional crop for phones (about 4:3). "
+                                                                      "Empty: the main image is used.")
     hero_alt_en = models.CharField(max_length=200, blank=True)
     hero_alt_ar = models.CharField(max_length=200, blank=True)
     hero_caption_en = models.CharField(max_length=120, blank=True)
@@ -216,10 +222,12 @@ class HomePage(RoutablePageMixin, Page):
                                  related_name="+", help_text="Empty: no button is shown")
 
     content_panels = Page.content_panels + [
-        MultiFieldPanel([bi("hero_title"), bi("hero_lead"), FieldPanel("hero_image"), bi("hero_alt"),
+        MultiFieldPanel([bi("hero_eyebrow"), bi("hero_title"), bi("hero_lead"), FieldPanel("hero_image"),
+                         FieldPanel("hero_image_mobile"), bi("hero_alt"),
                          bi("hero_caption"), bi("hero_subcaption"), bi("hero_cta_primary"),
                          bi("hero_cta_secondary")], heading="Hero"),
-        InlinePanel("facts", heading="Facts strip", label="Fact"),
+        InlinePanel("highlights", heading="Highlights under the hero", label="Highlight"),
+        InlinePanel("facts", heading="Facts (kept for reference; not shown on the home page)", label="Fact"),
         MultiFieldPanel([bi("products_title"), bi("products_lead")], heading="Products section"),
         MultiFieldPanel([bi("brands_title"), bi("brands_lead")], heading="Brands section"),
         MultiFieldPanel([bi("contractors_title"), bi("contractors_lead"), bi("contractors_cta"),
@@ -302,6 +310,15 @@ SERVICE_ICONS = [
     ("supply", "Equipment supply"), ("install", "Installation"), ("parts", "Maintenance and spare parts"),
     ("duct-cleaning", "Duct cleaning"), ("quote", "Project quotations"), ("project", "Project support"),
 ]
+
+
+class HomeHighlight(_Bi):
+    """Short service highlight shown under the hero."""
+    page = ParentalKey(HomePage, on_delete=models.CASCADE, related_name="highlights")
+    icon = models.CharField(max_length=20, choices=SERVICE_ICONS, blank=True)
+    title_en = models.CharField(max_length=80)
+    title_ar = models.CharField(max_length=80, blank=True)
+    panels = [FieldPanel("icon"), bi("title")]
 
 
 class HomeService(_Bi):

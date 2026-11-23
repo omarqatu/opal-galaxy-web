@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#0B1A2B">
 <title>{% block title %}{% endblock %}</title>
 <meta name="description" content="{% block description %}{% endblock %}">
 {% if site_noindex %}<meta name="robots" content="noindex, nofollow">{% endif %}
@@ -28,27 +29,33 @@
 <header id="site-header" class="site-header">
   <div class="container container--wide nav">
     <a class="logo" href="{{ home_url }}" aria-label="{{ s.short_name }}">
-      {% include "includes/logo.svg" %}
+      <img src="{% static 'img/opal-galaxy-logo-v1-reversed.svg' %}" alt="" width="73" height="50">
       <span><b>{{ s.short_name }}</b><small>{{ s|tr:"tagline" }}</small></span>
     </a>
-    <button class="burger" aria-label="{% translate 'Main menu' %}" aria-expanded="false" aria-controls="menu" id="burger">{% include "includes/burger.svg" %}</button>
     <nav aria-label="{% translate 'Main menu' %}">
     <ul class="menu" id="menu">
-      <li><a href="{{ home_url }}#products">{{ t|tr:"nav_products" }}</a></li>
-      <li><a href="{{ home_url }}#brands">{{ t|tr:"nav_brands" }}</a></li>
+      <li><a href="{{ home_url }}"{% if page_kind == 'home' %} aria-current="page"{% endif %}>{% translate "Home" %}</a></li>
+      <li class="has-sub"><a href="{{ home_url }}#products">{{ t|tr:"nav_products" }}{% include "includes/icons/chevron.svg" %}</a>
+        <ul class="submenu">{% for c in nav_categories %}<li><a href="{{ c.get_url }}">{{ c|tr:"name" }}</a></li>{% endfor %}</ul></li>
+      <li class="has-sub"><a href="{{ home_url }}#brands">{{ t|tr:"nav_brands" }}{% include "includes/icons/chevron.svg" %}</a>
+        <ul class="submenu submenu--brands">{% for b in nav_brands %}<li><a href="{{ b.get_url }}">{{ b.name }}</a></li>{% endfor %}</ul></li>
       <li><a href="{{ home_url }}#contractors">{{ t|tr:"nav_contractors" }}</a></li>
-      <li><a href="{{ home_url }}#install">{{ t|tr:"nav_services" }}</a></li>
-      <li><a href="{% lurl '/maintenance/' %}">{{ t|tr:"nav_maintenance" }}</a></li>
-      {% if duct_url %}<li><a href="{{ duct_url }}">{{ t|tr:"nav_duct" }}</a></li>{% endif %}
+      <li class="has-sub"><a href="{{ home_url }}#install">{{ t|tr:"nav_services" }}{% include "includes/icons/chevron.svg" %}</a>
+        <ul class="submenu submenu--inline">
+          <li><a href="{% lurl '/maintenance/' %}">{{ t|tr:"nav_maintenance" }}</a></li>
+          {% if duct_url %}<li><a href="{{ duct_url }}">{{ t|tr:"nav_duct" }}</a></li>{% endif %}
+        </ul></li>
       {% if about_url %}<li><a href="{{ about_url }}">{{ t|tr:"nav_about" }}</a></li>{% endif %}
       <li><a href="{% if contact_url %}{{ contact_url }}{% else %}#contact{% endif %}">{{ t|tr:"nav_contact" }}</a></li>
+      <li class="menu__lang"><a href="{{ other_lang_url }}" hreflang="{{ other_lang }}" lang="{{ other_lang }}">{% if lang == 'ar' %}English{% else %}العربية{% endif %}</a></li>
     </ul>
     </nav>
     <div class="tools">
       <a class="lang" href="{{ other_lang_url }}" hreflang="{{ other_lang }}" lang="{{ other_lang }}" aria-label="{% if lang == 'ar' %}Switch to English{% else %}التحويل إلى العربية{% endif %}">{% if lang == 'ar' %}EN{% else %}العربية{% endif %}</a>
-      <a class="btn btn-wa btn-sm nav-wa" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener" aria-label="{% translate 'WhatsApp' %}">{% include "includes/wa.svg" %}</a>
-      <a class="btn btn-primary btn-sm nav-quote" href="#contact">{{ t|tr:"nav_quote" }}</a>
+      <a class="tool-btn tool-btn--call" href="tel:{{ s.phone }}" aria-label="{% translate 'Call' %}">{% include "includes/phone.svg" %}</a>
+      <a class="tool-btn tool-btn--wa" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener" aria-label="{% translate 'WhatsApp' %}">{% include "includes/wa.svg" %}<span>{% translate "WhatsApp" %}</span></a>
     </div>
+    <button class="burger" aria-label="{% translate 'Main menu' %}" aria-expanded="false" aria-controls="menu" id="burger">{% include "includes/burger.svg" %}</button>
   </div>
 </header>
 
@@ -67,7 +74,7 @@
   <div class="container container--wide">
     <div class="site-footer__top">
       <div class="site-footer__brand">
-        <a class="logo" href="{{ home_url }}">{% include "includes/logo.svg" %}<span><b>{{ s.short_name }}</b><small>{{ s|tr:"tagline" }}</small></span></a>
+        <a class="logo" href="{{ home_url }}"><img src="{% static 'img/opal-galaxy-logo-v1-reversed.svg' %}" alt="" width="88" height="60" loading="lazy"><span><b>{{ s.short_name }}</b><small>{{ s|tr:"tagline" }}</small></span></a>
         <p>{{ s|tr:"footer_about" }}</p>
         <a class="btn btn-wa" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{{ t|tr:"footer_whatsapp" }}</span></a>
         <ul class="social" aria-label="{% translate 'Social media' %}">{% for name, url in s.social_links %}

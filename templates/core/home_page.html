@@ -4,51 +4,55 @@
 {% block content %}
 {% with s=settings.core.CompanySettings t=settings.core.SiteCopy %}
 
-{# ---- hero ---- #}
-<section class="home-hero"><div class="container container--wide home-hero__grid">
-  <div class="home-hero__copy">
-    <h1>{{ page|tr:"hero_title" }}</h1>
-    <p class="lead">{{ page|tr:"hero_lead" }}</p>
-    <div class="home-hero__cta">
-      {% if page.hero_cta_primary_en %}<a class="btn btn-primary" href="#products">{{ page|tr:"hero_cta_primary" }}{% include "includes/icons/arrow.svg" %}</a>{% endif %}
-      {% if page.hero_cta_secondary_en %}<a class="btn btn-outline" href="#contact">{{ page|tr:"hero_cta_secondary" }}</a>{% endif %}
+{# ---- hero: navy, type at the inline start, illustration bleeding to the inline end ---- #}
+<section class="hero-x">
+  <div class="container container--wide hero-x__grid">
+    <div class="hero-x__copy">
+      {% if page.hero_eyebrow_en %}<p class="hero-x__eyebrow">{{ page|tr:"hero_eyebrow" }}</p>{% endif %}
+      <h1>{{ page|tr:"hero_title"|accent }}</h1>
+      <p class="hero-x__lead">{{ page|tr:"hero_lead" }}</p>
+      <div class="hero-x__cta">
+        {% if page.hero_cta_secondary_en %}<a class="btn btn-accent btn-lg" href="#contact">{% include "includes/icons/doc.svg" %}<span>{{ page|tr:"hero_cta_secondary" }}</span><span class="icon-dir">{% include "includes/icons/arrow.svg" %}</span></a>{% endif %}
+        {% if page.hero_cta_primary_en %}<a class="btn btn-outline on-dark btn-lg" href="#products">{% include "includes/icons/grid.svg" %}<span>{{ page|tr:"hero_cta_primary" }}</span></a>{% endif %}
+      </div>
     </div>
   </div>
-  {% if page.hero_image %}{% image page.hero_image width-720 format-webp as hero %}{% image page.hero_image width-1200 format-webp as hero2 %}
-  <figure class="frame frame--accent home-hero__photo">
-    <img src="{{ hero.url }}" srcset="{{ hero.url }} {{ hero.width }}w, {{ hero2.url }} {{ hero2.width }}w" sizes="(max-width:860px) 92vw, 38vw" alt="{{ page|tr:'hero_alt' }}" width="{{ hero.width }}" height="{{ hero.height }}" fetchpriority="high">
-    {% if page.hero_caption_en %}<figcaption><b>{{ page|tr:"hero_caption" }}</b>{{ page|tr:"hero_subcaption" }}</figcaption>{% endif %}
+  {% if page.hero_image %}{% image page.hero_image fill-1000x760 format-webp as h1x %}{% image page.hero_image fill-1600x1216 format-webp as h2x %}{% if page.hero_image_mobile %}{% image page.hero_image_mobile width-480 format-webp as m1 %}{% image page.hero_image_mobile width-960 format-webp as m2 %}{% endif %}
+  <figure class="hero-x__media">
+    <picture>
+      {% if page.hero_image_mobile %}<source media="(max-width:860px)" srcset="{{ m1.url }} {{ m1.width }}w, {{ m2.url }} {{ m2.width }}w" sizes="100vw" width="{{ m1.width }}" height="{{ m1.height }}">{% endif %}
+      <img src="{{ h1x.url }}" srcset="{{ h1x.url }} {{ h1x.width }}w, {{ h2x.url }} {{ h2x.width }}w" sizes="(max-width:860px) 100vw, 52vw" alt="{{ page|tr:'hero_alt' }}" width="{{ h1x.width }}" height="{{ h1x.height }}" fetchpriority="high">
+    </picture>
   </figure>{% endif %}
-</div>
-{% if page.facts.all %}<div class="container container--wide"><ul class="home-notes">{% for f in page.facts.all %}<li><b>{{ f|tr:"title" }}</b><span>{{ f|tr:"text" }}</span></li>{% endfor %}</ul></div>{% endif %}
+  {% if page.highlights.all %}<div class="container container--wide"><ul class="hero-x__highlights">{% for hl in page.highlights.all %}
+    <li>{% if hl.icon %}<span class="hero-x__icon">{% icon hl.icon %}</span>{% endif %}<span>{{ hl|tr:"title" }}</span></li>{% endfor %}
+  </ul></div>{% endif %}
 </section>
 
+{# ---- equipment categories ---- #}
+<section id="products" class="section section--tint"><div class="container container--wide">
+  <div class="section-head"><div><h2>{{ page|tr:"products_title"|accent }}</h2><p class="lead">{{ page|tr:"products_lead" }}</p></div></div>
+  <ul class="cat-tiles">{% for c in nav_categories %}
+    <li><a class="cat-tile" href="{{ c.get_url }}">
+      <span class="cat-tile__art">{% if c.image %}{% image c.image max-240x240 format-webp as ci %}<img src="{{ ci.url }}" alt="" width="{{ ci.width }}" height="{{ ci.height }}" loading="lazy">{% else %}{% cat_icon c.slug as line_icon %}{% if line_icon %}{{ line_icon }}{% else %}{% icon c.icon %}{% endif %}{% endif %}</span>
+      <span class="cat-tile__name">{{ c|tr:"name" }}</span>
+      {% if c|card_range %}<span class="cat-tile__range">{{ c|card_range }}</span>{% endif %}
+    </a></li>{% endfor %}
+  </ul>
+</div></section>
+
 {# ---- brands ---- #}
-<section id="brands" class="section section--ruled"><div class="container">
-  <div class="section-head"><div><h2>{{ page|tr:"brands_title" }}</h2><p class="lead">{{ page|tr:"brands_lead" }}</p></div></div>
+<section id="brands" class="section section--white"><div class="container">
+  <div class="section-head"><div><h2>{{ page|tr:"brands_title"|accent }}</h2><p class="lead">{{ page|tr:"brands_lead" }}</p></div></div>
   <ul class="brand-wall">{% for b in nav_brands %}
     <li><a class="brand-tile" href="{{ b.get_url }}"{% if b.logo %} aria-label="{{ b.name }}"{% endif %}>{% if b.logo %}{% image b.logo max-320x120 format-webp as lg %}<img src="{{ lg.url }}" alt="{{ b.name }}" width="{{ lg.width }}" height="{{ lg.height }}" loading="lazy">{% else %}{{ b.name }}{% endif %}</a></li>{% endfor %}
   </ul>
 </div></section>
 
-{# ---- equipment categories ---- #}
-<section id="products" class="section section--white section--ruled"><div class="container">
-  <div class="section-head"><div><h2>{{ page|tr:"products_title" }}</h2><p class="lead">{{ page|tr:"products_lead" }}</p></div></div>
-  <div class="grid grid--3 cat-grid">{% for c in nav_categories %}
-    <a class="card cat-card" href="{{ c.get_url }}" data-reveal>
-      <span class="card__icon">{% cat_icon c.slug %}</span>
-      <h3>{{ c|tr:"name" }}</h3>
-      {% if c.capacity_range %}<span class="card__meta">{{ c.capacity_range }}</span>{% endif %}
-      <p>{{ c|tr:"lead" }}</p>
-      <span class="card__foot cat-card__brands">{% for sp in c.supplies.all %}{{ sp.brand.name }}{% if not forloop.last %} · {% endif %}{% endfor %}</span>
-    </a>{% endfor %}
-  </div>
-</div></section>
-
 {# ---- contractors and projects ---- #}
 <section id="contractors" class="section section--dark"><div class="container split split--top">
   <div class="contractors__intro">
-    <h2>{{ page|tr:"contractors_title" }}</h2>
+    <h2>{{ page|tr:"contractors_title"|accent }}</h2>
     <p class="lead">{{ page|tr:"contractors_lead" }}</p>
     {% if page.contractors_cta_en %}<a class="btn btn-accent" href="#contact">{{ page|tr:"contractors_cta" }}</a>{% endif %}
     {% if page.contractors_image %}{% image page.contractors_image width-640 format-webp as ci %}
@@ -61,7 +65,7 @@
 
 {# ---- services ---- #}
 {% if page.services.all %}<section id="services" class="section"><div class="container">
-  <div class="section-head"><div><h2>{{ page|tr:"services_title" }}</h2><p class="lead">{{ page|tr:"services_lead" }}</p></div></div>
+  <div class="section-head"><div><h2>{{ page|tr:"services_title"|accent }}</h2><p class="lead">{{ page|tr:"services_lead" }}</p></div></div>
   <div class="grid grid--3">{% for sv in page.services.all %}
     {% if sv.link_page and sv.link_page.live %}<a class="card" href="{% lurl sv.link_page.slug|slugpath %}" data-reveal>{% else %}<div class="card" data-reveal>{% endif %}
       {% if sv.icon %}<span class="card__icon">{% icon sv.icon %}</span>{% endif %}
@@ -73,7 +77,7 @@
 
 {# ---- service process and duct cleaning ---- #}
 <section id="install" class="section section--white section--ruled"><div class="container">
-  <div class="section-head"><div><h2>{{ page|tr:"install_title" }}</h2><p class="lead">{{ page|tr:"install_lead" }}</p></div>
+  <div class="section-head"><div><h2>{{ page|tr:"install_title"|accent }}</h2><p class="lead">{{ page|tr:"install_lead" }}</p></div>
     {% if page.install_link_en %}<a class="link-arrow" href="{% lurl '/maintenance/' %}">{{ t|tr:"nav_maintenance" }}{% include "includes/icons/arrow.svg" %}</a>{% endif %}</div>
   <ol class="timeline" style="--steps:{{ page.install_steps.all|length }}">{% for st in page.install_steps.all %}
     <li data-reveal style="--i:{{ forloop.counter0 }}"><h3>{{ st|tr:"title" }}</h3><p>{{ st|tr:"text" }}</p></li>{% endfor %}
@@ -87,7 +91,7 @@
 
 {# ---- project gallery: photos keep their own proportions ---- #}
 {% if page.gallery.all %}<section id="projects" class="section section--ruled"><div class="container">
-  <div class="section-head"><div><h2>{{ page|tr:"projects_title" }}</h2><p class="lead">{{ page|tr:"projects_lead" }}</p></div></div>
+  <div class="section-head"><div><h2>{{ page|tr:"projects_title"|accent }}</h2><p class="lead">{{ page|tr:"projects_lead" }}</p></div></div>
   <ul class="gallery-grid" id="gallery">{% for g in page.gallery.all %}{% image g.image width-480 format-webp as im %}{% image g.image width-1000 format-webp as full %}
     <li><a class="frame" href="{{ full.url }}" data-lightbox data-caption="{{ g|tr:'caption' }}{% if g.subcaption_en %} · {{ g|tr:'subcaption' }}{% endif %}">
       <img src="{{ im.url }}" alt="{{ g|tr:'alt' }}" width="{{ im.width }}" height="{{ im.height }}" loading="lazy">
@@ -104,7 +108,7 @@
 {# ---- about ---- #}
 <section id="about" class="section section--white section--ruled"><div class="container split split--wide-start split--top">
   <div>
-    <h2>{{ page|tr:"about_title" }}</h2>
+    <h2>{{ page|tr:"about_title"|accent }}</h2>
     {% for p in page.about_paragraphs %}<p>{{ p }}</p>{% endfor %}
     {% if page.about_page and page.about_page.live and page.about_cta_en %}<a class="link-arrow" href="{% lurl page.about_page.slug|slugpath %}">{{ page|tr:"about_cta" }}{% include "includes/icons/arrow.svg" %}</a>{% endif %}
   </div>
@@ -120,7 +124,7 @@
 {# ---- FAQ ---- #}
 {% if page.home_faqs %}<section id="faq" class="section section--ruled"><div class="container split split--top">
   <div>
-    <h2>{{ page|tr:"faq_title" }}</h2><p class="lead">{{ page|tr:"faq_lead" }}</p>
+    <h2>{{ page|tr:"faq_title"|accent }}</h2><p class="lead">{{ page|tr:"faq_lead" }}</p>
     {% if page.faq_page and page.faq_page.live and page.faq_cta_en %}<a class="link-arrow" href="{% lurl page.faq_page.slug|slugpath %}">{{ page|tr:"faq_cta" }}{% include "includes/icons/arrow.svg" %}</a>{% endif %}
   </div>
   <div class="accordion">{% for f in page.home_faqs %}<details><summary>{{ f|tr:"question" }}</summary><div class="accordion__body"><p>{{ f|tr:"answer" }}</p></div></details>{% endfor %}</div>

@@ -1,6 +1,6 @@
 # Open questions — Opal Galaxy website
 
-Maintained through the redesign (last update: Phase 3, 23 Nov 2026). Catalogue questions stay in `review/questions.md`.
+Maintained through the redesign (last update: premium home page, 23 Nov 2026). Catalogue questions stay in `review/questions.md`.
 
 Each row: the exact text affected · what needs confirming · the placeholder used meanwhile. "Ahmad" = business owner; "Omar" = operator.
 
@@ -24,7 +24,9 @@ Each row: the exact text affected · what needs confirming · the placeholder us
 
 | # | Text affected | To confirm | Placeholder meanwhile |
 |---|---|---|---|
-| 8d | Hero and contractors photographs | Phase 2 uses two genuine gallery photos (two outdoor units beside a villa; crane lift). Both are small phone photos (675×900). Ahmad: new photographs as listed in the Phase 0 report. | Existing gallery photos in portrait frames. |
+| 8d | Hero image | Omar approved (23 Nov) an AI-generated rooftop image as a conceptual marketing illustration. It is not a photograph of an Opal Galaxy installation: its alt text says "Illustration", it has no caption, and it is not in the project gallery. Ahmad: real photographs as listed in the Phase 0 report, to replace it when available. | Illustration in the hero only. |
+| 8e | Highlights under the hero ("HVAC supply and installation", "Maintenance and spare parts", "Project and contractor support") | They replace the three notes shown there before ("Delivery within 48 hours", "Trade pricing for contractors", "Installation on request"). Those notes are kept in the admin (Home → Facts) and the 48-hour statement remains in the FAQ. Ahmad: confirm the claims before they return to the top of the page. | Highlights shown; notes not shown. |
+| 8f | Capacity range on category cards | Shown only where the stored value is in BTU, and in HP for VRF. Ducted ("12,000-336,000", no unit), package and chillers (tons) show the name only until Omar's unit audit (8b) updates their values. | No range on those three cards. |
 | 9 | New hero: "…for commercial, residential and industrial developments across the UAE." | Ahmad: does Opal Galaxy serve industrial developments? | Text as supplied in the brief. |
 | 10 | "Delivery within 48 hours — Dubai, Sharjah and Ajman. Other emirates by order size." (facts strip and FAQ) | Ahmad: is this a commitment, for which items and areas? | Kept as a small note under the hero and in the FAQ; no longer a headline band. |
 | 11 | "Volume quote within one working day"; "We reply within one working day." (contractor points, quote section, FAQ, form success notice) | Ahmad: confirm the response time. | Kept in the line under the quote heading and in the FAQ. Removed from the contractors heading and from the form's success notice (now "Your request has been sent. Thank you."). |
