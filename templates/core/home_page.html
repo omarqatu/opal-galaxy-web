@@ -30,13 +30,16 @@
 </section>
 
 {# ---- equipment categories ---- #}
-<section id="products" class="section section--tint"><div class="container container--wide">
+<section id="products" class="section section--tint"><div class="container">
   <div class="section-head"><div><h2>{{ page|tr:"products_title"|accent }}</h2><p class="lead">{{ page|tr:"products_lead" }}</p></div></div>
-  <ul class="cat-tiles">{% for c in nav_categories %}
-    <li><a class="cat-tile" href="{{ c.get_url }}">
-      <span class="cat-tile__art">{% if c.image %}{% image c.image max-240x240 format-webp as ci %}<img src="{{ ci.url }}" alt="" width="{{ ci.width }}" height="{{ ci.height }}" loading="lazy">{% else %}{% cat_icon c.slug as line_icon %}{% if line_icon %}{{ line_icon }}{% else %}{% icon c.icon %}{% endif %}{% endif %}</span>
-      <span class="cat-tile__name">{{ c|tr:"name" }}</span>
-      {% if c|card_range %}<span class="cat-tile__range">{{ c|card_range }}</span>{% endif %}
+  <ul class="cat-cards">{% for c in nav_categories %}
+    <li><a class="cat-card" href="{{ c.get_url }}">
+      <span class="cat-card__art">{% if c.image %}{% image c.image max-240x240 format-webp as ci %}<img src="{{ ci.url }}" alt="" width="{{ ci.width }}" height="{{ ci.height }}" loading="lazy">{% else %}{% cat_icon c.slug as line_icon %}{% if line_icon %}{{ line_icon }}{% else %}{% icon c.icon %}{% endif %}{% endif %}</span>
+      <span class="cat-card__body">
+        <span class="cat-card__name">{{ c|tr:"name" }}</span>
+        {% if c|card_range %}<span class="cat-card__range"><span class="cat-card__label">{% translate "Capacity" %}</span><span class="ltr">{{ c|card_range }}</span></span>{% endif %}
+      </span>
+      <span class="cat-card__go icon-dir" aria-hidden="true">{% include "includes/icons/arrow.svg" %}</span>
     </a></li>{% endfor %}
   </ul>
 </div></section>
@@ -45,37 +48,26 @@
 <section id="brands" class="section section--white"><div class="container">
   <div class="section-head"><div><h2>{{ page|tr:"brands_title"|accent }}</h2><p class="lead">{{ page|tr:"brands_lead" }}</p></div></div>
   <ul class="brand-wall">{% for b in nav_brands %}
-    <li><a class="brand-tile" href="{{ b.get_url }}"{% if b.logo %} aria-label="{{ b.name }}"{% endif %}>{% if b.logo %}{% image b.logo max-320x120 format-webp as lg %}<img src="{{ lg.url }}" alt="{{ b.name }}" width="{{ lg.width }}" height="{{ lg.height }}" loading="lazy">{% else %}{{ b.name }}{% endif %}</a></li>{% endfor %}
+    <li><a class="brand-tile" href="{{ b.get_url }}"{% if b.logo %} aria-label="{{ b.name }}"{% endif %}>
+      <span class="brand-tile__mark">{% if b.logo %}{% image b.logo max-320x120 format-webp as lg %}<img src="{{ lg.url }}" alt="{{ b.name }}" width="{{ lg.width }}" height="{{ lg.height }}" loading="lazy">{% else %}{{ b.name }}{% endif %}</span>
+    </a></li>{% endfor %}
   </ul>
 </div></section>
 
-{# ---- contractors and projects ---- #}
-<section id="contractors" class="section section--dark"><div class="container split split--top">
-  <div class="contractors__intro">
-    <h2>{{ page|tr:"contractors_title"|accent }}</h2>
-    <p class="lead">{{ page|tr:"contractors_lead" }}</p>
-    {% if page.contractors_cta_en %}<a class="btn btn-accent" href="#contact">{{ page|tr:"contractors_cta" }}</a>{% endif %}
-    {% if page.contractors_image %}{% image page.contractors_image width-640 format-webp as ci %}
-    <figure class="frame contractors__photo"><img src="{{ ci.url }}" alt="{{ page|tr:'contractors_image_alt' }}" width="{{ ci.width }}" height="{{ ci.height }}" loading="lazy"></figure>{% endif %}
+{# ---- services: editorial list, then how an installation runs, then duct cleaning ---- #}
+{% if page.services.all %}<section id="services" class="section"><div class="container split split--top services">
+  <div class="services__intro">
+    <h2>{{ page|tr:"services_title"|accent }}</h2>
+    <p class="lead">{{ page|tr:"services_lead" }}</p>
   </div>
-  <ul class="check-list">{% for p in page.contractor_points.all %}
-    <li data-reveal><h3>{{ p|tr:"title" }}</h3><p>{{ p|tr:"text" }}</p></li>{% endfor %}
+  <ul class="service-rows">{% for sv in page.services.all %}{% service_href sv as href %}
+    <li data-reveal>{% if href %}<a class="service-row" href="{{ href }}">{% else %}<div class="service-row">{% endif %}
+      <span class="service-row__icon">{% if sv.icon %}{% icon sv.icon %}{% endif %}</span>
+      <span class="service-row__body"><span class="service-row__title">{{ sv|tr:"title" }}</span><span class="service-row__text">{{ sv|tr:"text" }}</span></span>
+      {% if href %}<span class="service-row__go icon-dir" aria-hidden="true">{% include "includes/icons/arrow.svg" %}</span></a>{% else %}</div>{% endif %}</li>{% endfor %}
   </ul>
-</div></section>
-
-{# ---- services ---- #}
-{% if page.services.all %}<section id="services" class="section"><div class="container">
-  <div class="section-head"><div><h2>{{ page|tr:"services_title"|accent }}</h2><p class="lead">{{ page|tr:"services_lead" }}</p></div></div>
-  <div class="grid grid--3">{% for sv in page.services.all %}
-    {% if sv.link_page and sv.link_page.live %}<a class="card" href="{% lurl sv.link_page.slug|slugpath %}" data-reveal>{% else %}<div class="card" data-reveal>{% endif %}
-      {% if sv.icon %}<span class="card__icon">{% icon sv.icon %}</span>{% endif %}
-      <h3>{{ sv|tr:"title" }}</h3>
-      <p>{{ sv|tr:"text" }}</p>
-    {% if sv.link_page and sv.link_page.live %}</a>{% else %}</div>{% endif %}{% endfor %}
-  </div>
 </div></section>{% endif %}
 
-{# ---- service process and duct cleaning ---- #}
 <section id="install" class="section section--white section--ruled"><div class="container">
   <div class="section-head"><div><h2>{{ page|tr:"install_title"|accent }}</h2><p class="lead">{{ page|tr:"install_lead" }}</p></div>
     {% if page.install_link_en %}<a class="link-arrow" href="{% lurl '/maintenance/' %}">{{ t|tr:"nav_maintenance" }}{% include "includes/icons/arrow.svg" %}</a>{% endif %}</div>
@@ -89,17 +81,35 @@
   </div>{% endif %}
 </div></section>
 
-{# ---- project gallery: photos keep their own proportions ---- #}
-{% if page.gallery.all %}<section id="projects" class="section section--ruled"><div class="container">
+{# ---- contractors and projects: a distinct navy-and-cyan panel ---- #}
+<section id="contractors" class="projects-panel"><div class="container">
+  <div class="projects-panel__head">
+    <div>
+      <h2>{{ page|tr:"contractors_title"|accent }}</h2>
+      <p class="lead">{{ page|tr:"contractors_lead" }}</p>
+    </div>
+    <div class="projects-panel__cta">
+      {% if page.contractors_cta_en %}<a class="btn btn-accent btn-lg" href="#contact">{% include "includes/icons/doc.svg" %}<span>{{ page|tr:"contractors_cta" }}</span></a>{% endif %}
+      <a class="btn btn-outline on-dark" href="https://wa.me/{{ s.whatsapp }}?text={% if lang == 'ar' %}%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%B9%D8%B1%D8%B6%20%D8%B3%D8%B9%D8%B1{% else %}Hello%2C%20I%20would%20like%20a%20quote{% endif %}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{{ t|tr:"quote_whatsapp" }}</span></a>
+    </div>
+  </div>
+  <ul class="cap-grid">{% for p in page.contractor_points.all %}
+    <li data-reveal><span class="cap-grid__tick" aria-hidden="true">{% include "includes/icons/check.svg" %}</span><h3>{{ p|tr:"title" }}</h3><p>{{ p|tr:"text" }}</p></li>{% endfor %}
+  </ul>
+</div></section>
+
+{# ---- project gallery: the first two photos lead, the rest follow; genuine job photos only ---- #}
+{% if page.gallery.all %}<section id="projects" class="section section--white"><div class="container">
   <div class="section-head"><div><h2>{{ page|tr:"projects_title"|accent }}</h2><p class="lead">{{ page|tr:"projects_lead" }}</p></div></div>
-  <ul class="gallery-grid" id="gallery">{% for g in page.gallery.all %}{% image g.image width-480 format-webp as im %}{% image g.image width-1000 format-webp as full %}
-    <li><a class="frame" href="{{ full.url }}" data-lightbox data-caption="{{ g|tr:'caption' }}{% if g.subcaption_en %} · {{ g|tr:'subcaption' }}{% endif %}">
-      <img src="{{ im.url }}" alt="{{ g|tr:'alt' }}" width="{{ im.width }}" height="{{ im.height }}" loading="lazy">
+  <ul class="gallery-ed" id="gallery">{% for g in page.gallery.all %}{% image g.image width-1000 format-webp as full %}
+    <li{% if forloop.counter <= 2 %} class="is-lead"{% endif %}><a class="frame" href="{{ full.url }}" data-lightbox data-caption="{{ g|tr:'caption' }}{% if g.subcaption_en %} · {{ g|tr:'subcaption' }}{% endif %}">
+      {% if forloop.counter <= 2 %}{% image g.image width-480 format-webp as im %}{% image g.image width-720 format-webp as im2 %}<img src="{{ im.url }}" srcset="{{ im.url }} {{ im.width }}w, {{ im2.url }} {{ im2.width }}w" sizes="(max-width:700px) 92vw, 36rem" alt="{{ g|tr:'alt' }}" width="{{ im.width }}" height="{{ im.height }}" loading="lazy" decoding="async">{% else %}{% image g.image fill-240x320 format-webp as im %}{% image g.image fill-480x640 format-webp as im2 %}<img src="{{ im.url }}" srcset="{{ im.url }} {{ im.width }}w, {{ im2.url }} {{ im2.width }}w" sizes="(max-width:700px) 30vw, 12rem" alt="{{ g|tr:'alt' }}" width="{{ im.width }}" height="{{ im.height }}" loading="lazy" decoding="async">{% endif %}
       <figcaption><b>{{ g|tr:"caption" }}</b>{{ g|tr:"subcaption" }}</figcaption></a></li>{% endfor %}
   </ul>
 </div></section>
 <dialog class="lightbox" id="lightbox" aria-label="{% translate 'Photo viewer' %}">
   <figure><img alt=""><figcaption></figcaption></figure>
+  <p class="lightbox__count" aria-live="polite"></p>
   <button type="button" class="lightbox__close" data-close aria-label="{% translate 'Close' %}">×</button>
   <button type="button" class="lightbox__nav lightbox__prev" data-step="-1" aria-label="{% translate 'Previous photo' %}">{% include "includes/icons/arrow.svg" %}</button>
   <button type="button" class="lightbox__nav lightbox__next" data-step="1" aria-label="{% translate 'Next photo' %}">{% include "includes/icons/arrow.svg" %}</button>

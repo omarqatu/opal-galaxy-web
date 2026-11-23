@@ -278,8 +278,8 @@ class HomeRedesignTests(TestCase):
 
     def test_categories_come_from_the_cms_with_icons(self):
         html = self.client.get("/ar/").content.decode()
-        grid = html.split('class="cat-tiles"')[1].split("</section>")[0]
-        self.assertEqual(grid.count('class="cat-tile"'), ProductCategory.objects.live().count())
+        grid = html.split('class="cat-cards"')[1].split("</section>")[0]
+        self.assertEqual(grid.count('class="cat-card"'), ProductCategory.objects.live().count())
         self.assertEqual(grid.count("<img"), ProductCategory.objects.live().exclude(image=None).count())
         self.assertIn("<svg", grid)   # a category without an image falls back to its line icon
         self.assertIn("وحدات شباك", grid)
@@ -521,7 +521,7 @@ class InternalPagesTests(TestCase):
         from core.models import FaqItem
         FaqItem.objects.update(featured=False)
         html = self.client.get("/ar/faq/").content.decode()
-        self.assertEqual(html.count("<details"), 6)
+        self.assertEqual(html.split('class="accordion"')[1].split("</section>")[0].count("<details"), 6)
         self.assertIn("ما معنى تصنيف T3", html)
 
     def test_contact_page_shows_company_details_and_the_form(self):
@@ -700,17 +700,23 @@ class PremiumHomeTests(TestCase):
         gallery = self.client.get("/").content.decode().split('id="gallery"')[1].split("</ul>")[0]
         self.assertNotIn("hero-rooftop", gallery)
 
-    def test_category_cards_show_only_btu_ranges_and_vrf_in_hp(self):
+    def test_category_cards_never_show_tons_and_never_convert(self):
         from core.templatetags.opal import card_range
         shown = {c.slug: card_range(c) for c in ProductCategory.objects.all()}
         self.assertEqual(shown["wall"], "9,000 – 36,000 BTU")
-        self.assertEqual(shown["vrf"], "4 – 80 HP per system")
+        self.assertEqual(shown["vrf"], "4 – 80 HP per system")      # as stored; the operator edits it
         for slug in ("ducted", "package", "chillers-ahu"):
-            self.assertEqual(shown[slug], "", slug)          # tons / no unit: not shown, never converted
-        html = self.client.get("/").content.decode()
-        tiles = html.split('class="cat-tiles"')[1].split("</ul>")[0]
-        self.assertIn("9,000 – 36,000 BTU", tiles)
-        self.assertNotIn("ton", tiles)
+            self.assertEqual(shown[slug], "", slug)                   # stored in tons: not shown
+        ducted = ProductCategory.objects.get(slug="ducted")
+        ducted.capacity_range = "12,000-336,000"                      # a plain figure is shown as it is
+        ducted.save()
+        self.assertEqual(card_range(ducted), "12,000-336,000")
+        cards = self.client.get("/ar/").content.decode().split('class="cat-cards"')[1].split("</ul>")[0]
+        self.assertIn("9,000 – 36,000 BTU", cards)
+        self.assertIn("12,000-336,000", cards)
+        self.assertNotIn("ton", cards)
+        self.assertNotIn("طن", cards)
+        self.assertIn("السعة", cards)
         self.assertEqual(ProductCategory.objects.get(slug="package").capacity_range, "3 – 100 ton")  # stored value kept
 
     def test_accent_filter_escapes_and_plain_strips(self):
@@ -768,3 +774,135 @@ class HeroContentMigrationTests(TestCase):
         self.assertIsNone(home.hero_image_mobile_id)
         self.assertEqual((home.hero_title_en, home.hero_alt_en), ("Omar's headline", "Omar's alt"))
         self.assertEqual(home.highlights.count(), 1)
+
+
+class RefinementTests(TestCase):
+    """Refinement of navigation, brands, categories, gallery, services and the contractors panel."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def header(self, path="/"):
+        return self.client.get(path).content.decode().split('<header id="site-header"')[1].split("</header>")[0]
+
+    def test_navigation_uses_native_disclosure_menus(self):
+        header = self.header("/products/wall/")
+        self.assertEqual(header.count('<details class="nav-drop">'), 3)
+        self.assertEqual(header.count("<summary>"), 3)
+        self.assertIn('>Home</a>', header)
+        self.assertIn('class="btn btn-accent btn-sm nav-quote" href="#contact"', header)
+        self.assertIn('aria-controls="menu"', header)
+        for href in ('"/#products"', '"/#brands"', '"/#install"', '"/#contractors"', '"/maintenance/"',
+                     '"/duct-cleaning/"', '"/about/"', '"/contact/"', 'href="tel:', "https://wa.me/", 'hreflang="ar"'):
+            self.assertIn(href, header)
+
+    def test_every_internal_link_on_the_home_page_resolves(self):
+        import re
+        for prefix in ("", "/ar"):
+            html = self.client.get(prefix + "/").content.decode()
+            self.assertNotIn('href="#"', html)
+            self.assertNotIn('href=""', html)
+            ids = set(re.findall(r'id="([^"]+)"', html))
+            for href in set(re.findall(r'href="([^"]+)"', html)):
+                with self.subTest(href=href):
+                    if href.startswith("#"):
+                        self.assertIn(href[1:], ids)
+                    elif href.startswith("/") and not href.startswith(("/static/", "/media/")):
+                        path, _, anchor = href.partition("#")
+                        self.assertEqual(self.client.get(path).status_code, 200)
+                        if anchor and path in ("/", "/ar/"):
+                            self.assertIn(anchor, ids)
+
+    def test_brand_showcase_uses_brand_records_names_and_logo_slot(self):
+        from wagtail.images.models import Image
+        html = self.client.get("/").content.decode()
+        wall = html.split('class="brand-wall"')[1].split("</ul>")[0]
+        self.assertEqual(wall.count('class="brand-tile"'), Brand.objects.count())
+        self.assertEqual(wall.count('class="brand-tile__mark"'), Brand.objects.count())
+        self.assertNotIn("<img", wall)
+        self.assertIn('href="/brands/daikin/"', wall)
+        carrier = Brand.objects.get(slug="carrier")
+        carrier.logo = Image.objects.first()
+        carrier.save()
+        wall = self.client.get("/").content.decode().split('class="brand-wall"')[1].split("</ul>")[0]
+        self.assertEqual(wall.count("<img"), 1)
+        self.assertIn('alt="Carrier"', wall)
+        for banned in ("marquee", "authorised partner", "official partner"):
+            self.assertNotIn(banned, wall)
+
+    def test_services_link_only_to_things_that_exist(self):
+        html = self.client.get("/ar/").content.decode()
+        rows = html.split('class="service-rows"')[1].split("</ul>")[0]
+        self.assertEqual(rows.count('class="service-row"'), 6)
+        for href in ('href="#products"', 'href="#install"', 'href="/ar/maintenance/"', 'href="/ar/duct-cleaning/"',
+                     'href="#contact"', 'href="#contractors"'):
+            self.assertIn(href, rows)
+        from core.models import HomeService
+        HomeService.objects.filter(icon="parts").update(link_page=None, icon="")
+        rows = self.client.get("/").content.decode().split('class="service-rows"')[1].split("</ul>")[0]
+        self.assertEqual(rows.count("<a "), 5)      # a service with nowhere to go is plain text, not a dead link
+        self.assertEqual(rows.count('<div class="service-row">'), 1)
+
+    def test_contractors_panel_has_quote_and_boq_actions(self):
+        html = self.client.get("/").content.decode()
+        panel = html.split('id="contractors"')[1].split("</section>")[0]
+        self.assertIn('href="#contact"', panel)
+        self.assertIn("https://wa.me/971541981593?text=", panel)
+        self.assertIn("Send your BOQ", panel)
+        self.assertEqual(panel.count("<h3>"), 7)
+        self.assertLess(panel.index("Project quotations"), panel.index("Warranty documentation"))
+        self.assertIn('id="quote"', html)   # the existing quotation form the buttons lead to
+
+    def test_gallery_leads_with_two_photos_and_holds_only_project_photos(self):
+        from core.models import HomePage
+        home = HomePage.objects.get()
+        titles = [g.image.title for g in home.gallery.all()]
+        self.assertEqual(titles[:2], ["Gallery: Two inverter condensers beside a villa",
+                                      "Gallery: Crane lifting a package unit onto a roof"])
+        self.assertEqual(len(titles), 8)
+        self.assertTrue(all(t.startswith("Gallery: ") for t in titles))
+        html = self.client.get("/").content.decode()
+        gallery = html.split('id="gallery"')[1].split("</ul>")[0]
+        self.assertEqual(gallery.count('class="is-lead"'), 2)
+        self.assertEqual(gallery.count("data-lightbox"), 8)
+        self.assertEqual(gallery.count('loading="lazy"'), 8)
+        self.assertEqual(gallery.count("srcset="), 8)
+        self.assertNotIn("hero-rooftop", gallery)
+        self.assertIn('class="lightbox__count"', html)
+        # Captions are the stored ones (the operator edits them in the admin).
+        self.assertIn(home.gallery.first().caption_en, gallery)
+
+
+class GalleryOrderMigrationTests(TestCase):
+    """core 0008 reorders the gallery only while it is in its original order."""
+
+    def apply(self):
+        import importlib
+        from django.apps import apps
+        importlib.import_module("core.migrations.0008_gallery_lead_photos").apply_content(apps, None)
+
+    def test_original_order_is_reordered_once_with_captions_intact(self):
+        from core.models import HomePage
+        call_command("seed_site", verbosity=0)
+        home = HomePage.objects.get()
+        before = {g.image.title: (g.caption_en, g.caption_ar, g.alt_en) for g in home.gallery.all()}
+        self.apply()
+        home = HomePage.objects.get()
+        for obj in (home, home.get_latest_revision_as_object()):
+            order = [g.image.title for g in obj.gallery.all()]
+            self.assertEqual(order[:3], ["Gallery: Two inverter condensers beside a villa",
+                                         "Gallery: Crane lifting a package unit onto a roof",
+                                         "Gallery: Rooftop package units on a commercial building"])
+        self.assertEqual({g.image.title: (g.caption_en, g.caption_ar, g.alt_en) for g in home.gallery.all()}, before)
+
+    def test_an_edited_gallery_is_left_alone(self):
+        from core.models import GalleryItem, HomePage
+        call_command("seed_site", verbosity=0)
+        home = HomePage.objects.get()
+        last = home.gallery.order_by("-sort_order").first()
+        GalleryItem.objects.filter(pk=last.pk).update(sort_order=-1)      # the operator moved a photo first
+        order = list(GalleryItem.objects.filter(page=home).order_by("sort_order", "pk").values_list("pk", flat=True))
+        self.apply()
+        self.assertEqual(list(GalleryItem.objects.filter(page=home).order_by("sort_order", "pk")
+                              .values_list("pk", flat=True)), order)

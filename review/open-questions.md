@@ -1,6 +1,6 @@
 # Open questions — Opal Galaxy website
 
-Maintained through the redesign (last update: premium home page, 23 Nov 2026). Catalogue questions stay in `review/questions.md`.
+Maintained through the redesign (last update: design refinement, 23 Nov 2026). Catalogue questions stay in `review/questions.md`.
 
 Each row: the exact text affected · what needs confirming · the placeholder used meanwhile. "Ahmad" = business owner; "Omar" = operator.
 
@@ -26,7 +26,11 @@ Each row: the exact text affected · what needs confirming · the placeholder us
 |---|---|---|---|
 | 8d | Hero image | Omar approved (23 Nov) an AI-generated rooftop image as a conceptual marketing illustration. It is not a photograph of an Opal Galaxy installation: its alt text says "Illustration", it has no caption, and it is not in the project gallery. Ahmad: real photographs as listed in the Phase 0 report, to replace it when available. | Illustration in the hero only. |
 | 8e | Highlights under the hero ("HVAC supply and installation", "Maintenance and spare parts", "Project and contractor support") | They replace the three notes shown there before ("Delivery within 48 hours", "Trade pricing for contractors", "Installation on request"). Those notes are kept in the admin (Home → Facts) and the 48-hour statement remains in the FAQ. Ahmad: confirm the claims before they return to the top of the page. | Highlights shown; notes not shown. |
-| 8f | Capacity range on category cards | Shown only where the stored value is in BTU, and in HP for VRF. Ducted ("12,000-336,000", no unit), package and chillers (tons) show the name only until Omar's unit audit (8b) updates their values. | No range on those three cards. |
+| 8f | Capacity on category cards | Rule (Omar, 23 Nov): never the word "ton"; a card shows the stored value only when it is in BTU or is a plain figure. Package ("3 – 100 ton") and chillers ("3 – 500 ton") therefore show the name only. "4 – 80 HP per system" is shown as stored; Omar edits it in the admin. Nothing is converted. | Stored values, tons hidden. |
+| 8g | Gallery captions | Unsupported brand, capacity and site claims: "O General 5 ton", "Midea Package 15 ton", "Midea 5 ton", "Commercial compound", "Warehouse", "Private villa", "Occupied villa", "Villa under construction", "Residential project". Omar edits them in the admin (Pages → Home → Gallery photos); the redesign does not change them. | Captions shown as stored. |
+| 8h | People and a vehicle plate in gallery photos | "Ducted unit delivery" (a person from behind and a readable number plate) and "Midea 5 ton" (a technician's face). Published by Omar's decision (23 Nov); Omar follows up consent or blurred replacements with Ahmad. | Photos published as they are. |
+| 8i | Gallery order | The two lead photos are the first two in Pages → Home → Gallery photos. The refinement moved "Two inverter condensers beside a villa" and "Crane lifting a package unit" to the front once; reorder them in the admin at any time. | Villa units and crane lift lead. |
+| 8j | Brands section text "Genuine units through authorised UAE distributors, with manufacturer warranty and original spare parts." | Ahmad: is this true for every brand listed? It reads as a distributor-relationship claim (see 13). | Text unchanged; brand tiles themselves make no partnership claim. |
 | 9 | New hero: "…for commercial, residential and industrial developments across the UAE." | Ahmad: does Opal Galaxy serve industrial developments? | Text as supplied in the brief. |
 | 10 | "Delivery within 48 hours — Dubai, Sharjah and Ajman. Other emirates by order size." (facts strip and FAQ) | Ahmad: is this a commitment, for which items and areas? | Kept as a small note under the hero and in the FAQ; no longer a headline band. |
 | 11 | "Volume quote within one working day"; "We reply within one working day." (contractor points, quote section, FAQ, form success notice) | Ahmad: confirm the response time. | Kept in the line under the quote heading and in the FAQ. Removed from the contractors heading and from the form's success notice (now "Your request has been sent. Thank you."). |
