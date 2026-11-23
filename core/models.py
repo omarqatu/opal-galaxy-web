@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from modelcluster.fields import ParentalKey
 from wagtail.admin.panels import FieldPanel, FieldRowPanel, InlinePanel, MultiFieldPanel
@@ -418,6 +419,66 @@ class GalleryCategory(models.Model):
     def with_approved_photos(cls):
         """Only categories that have at least one approved photo are offered to visitors."""
         return cls.objects.filter(photos__approved_for_publication=True).distinct()
+
+
+class FieldPhoto(models.Model):
+    """One field photograph, managed on its own under Field gallery in the admin.
+
+    The file lives once, in Wagtail Images; this record adds the bilingual texts, the category and
+    the publication controls. Until the switch described in docs/field-gallery-transition.md the
+    public pages still read GalleryItem, and photos carrying a legacy_item_id mirror those rows.
+    """
+    image = models.ForeignKey("wagtailimages.Image", on_delete=models.PROTECT, related_name="+")
+    alt_en = models.CharField("Alt text (EN)", max_length=200, blank=True,
+                              help_text="What the photo shows, for screen readers and search engines")
+    alt_ar = models.CharField("Alt text (AR)", max_length=200, blank=True)
+    title_en = models.CharField("Title (EN)", max_length=120, blank=True)
+    title_ar = models.CharField("Title (AR)", max_length=120, blank=True)
+    caption_en = models.CharField("Caption (EN)", max_length=200, blank=True)
+    caption_ar = models.CharField("Caption (AR)", max_length=200, blank=True)
+    category = models.ForeignKey("core.GalleryCategory", null=True, blank=True, on_delete=models.SET_NULL,
+                                 related_name="field_photos")
+    approved_for_publication = models.BooleanField(
+        "Approved for publication", default=False,
+        help_text="The photo appears on the site only when this is ticked. Tick it after checking that the "
+                  "photo shows no identifiable face or vehicle number plate, or that permission was given "
+                  "or the photo was redacted.")
+    featured = models.BooleanField("Featured photo", default=False,
+                                   help_text="Shown larger in the gallery. Only the first two featured photos lead.")
+    show_on_homepage = models.BooleanField(
+        "Show on homepage", default=False,
+        help_text="The home page shows up to eight approved photos that have this ticked.")
+    home_order = models.PositiveIntegerField("Homepage order", default=0, help_text="Lower numbers come first on the home page")
+    sort_order = models.IntegerField(
+        "Manual order", null=True, blank=True,
+        help_text="Optional. Photos with a number come first, lowest first; the rest follow, newest first.")
+    created = models.DateTimeField(default=timezone.now, editable=False)
+    updated = models.DateTimeField(auto_now=True)
+    legacy_item_id = models.PositiveIntegerField(
+        null=True, blank=True, unique=True, editable=False,
+        help_text="The home page gallery row this photo was imported from, if any")
+
+    panels = [
+        FieldPanel("image"),
+        bi("alt"), bi("title"), bi("caption"),
+        FieldRowPanel([FieldPanel("category"), FieldPanel("featured")]),
+        FieldRowPanel([FieldPanel("show_on_homepage"), FieldPanel("home_order")]),
+        FieldPanel("sort_order"),
+        FieldPanel("approved_for_publication", permission="core.approve_fieldphoto"),
+    ]
+
+    class Meta:
+        ordering = [models.F("sort_order").asc(nulls_last=True), "-created", "-pk"]
+        verbose_name = "Field photo"
+        verbose_name_plural = "Field photos"
+        permissions = [("approve_fieldphoto", "Can approve field photos for publication")]
+
+    def __str__(self):
+        return self.title_en or self.alt_en or self.image.title
+
+    def thumbnail(self):
+        return self.image.get_rendition("fill-96x96|format-webp").img_tag({"loading": "lazy"})
+    thumbnail.short_description = "Photo"
 
 
 class FaqItem(_Bi):

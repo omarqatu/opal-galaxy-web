@@ -139,6 +139,9 @@ class Command(BaseCommand):
         for name in ("core.migrations.0003_redesign_home_content", "core.migrations.0005_redesign_pages_content",
                      "core.migrations.0007_home_hero_content", "core.migrations.0008_gallery_lead_photos"):
             importlib.import_module(name).apply_content(live_apps, None)
+        from core import gallery
+        from core.models import FieldPhoto
+        gallery.sync_field_photos(GalleryItem, FieldPhoto)   # a fresh site gets its field photos like an existing one
 
         self.stdout.write(self.style.SUCCESS(
             f"Seeded: {Brand.objects.count()} brands, {ProductCategory.objects.count()} categories, "
