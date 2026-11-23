@@ -168,3 +168,21 @@ msgstr "جميع الخدمات"
 
 msgid "Capacity"
 msgstr "السعة"
+
+msgid "Series and models"
+msgstr "السلاسل والطرازات"
+
+msgid "Specifications"
+msgstr "المواصفات"
+
+msgid "Equipment categories"
+msgstr "فئات المعدات"
+
+msgid "Draft content for review"
+msgstr "محتوى مسودة للمراجعة"
+
+msgid "Texts marked “Draft” are proposals. They are not saved on the site and are not published."
+msgstr "النصوص المعلَّمة بكلمة «مسودة» مقترحات، غير محفوظة في الموقع وغير منشورة."
+
+msgid "Draft"
+msgstr "مسودة"

@@ -98,3 +98,36 @@ def service_href(service):
     if page is not None and page.live:
         return i18n.lang_url(f"/{page.slug}/")
     return SERVICE_ANCHORS.get(service.icon, "")
+
+
+# ---------------------------------------------------------------- catalogue rows, for reading
+# The stored strings are never changed. These helpers only split them where the catalogue text
+# itself separates things (" · ", or ". " before a "Label:"), so that a long row can be laid
+# out as labelled lists instead of one paragraph.
+_GROUP_SPLIT = re.compile(r"\.\s+(?=[A-Z][\w &/()\-]{1,40}:\s)")
+_GROUP_LABEL = re.compile(r"^([A-Z][\w &/()\-]{1,40}):\s+(.+)$", re.S)
+
+
+@register.filter
+def model_groups(supply):
+    """[(label or "", [items…]), …] from Supply.models_text, text of every item verbatim."""
+    groups = []
+    for chunk in (supply.models_text or "").split(" · "):
+        for piece in _GROUP_SPLIT.split(chunk):
+            piece = piece.strip()
+            if not piece:
+                continue
+            match = _GROUP_LABEL.match(piece)
+            if match:
+                groups.append((match.group(1), [match.group(2).strip()]))
+            elif groups:
+                groups[-1][1].append(piece)
+            else:
+                groups.append(("", [piece]))
+    return groups
+
+
+@register.filter
+def spec_rows(supply):
+    """Spec lines as stored, each flagged when it states a capacity in BTU (shown emphasised)."""
+    return [{"text": line, "btu": "btu" in line.lower()} for line in supply.spec_list()]
