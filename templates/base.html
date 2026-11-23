@@ -39,7 +39,9 @@
       <li><a href="{{ home_url }}#contractors">{{ t|tr:"nav_contractors" }}</a></li>
       <li><a href="{{ home_url }}#install">{{ t|tr:"nav_services" }}</a></li>
       <li><a href="{% lurl '/maintenance/' %}">{{ t|tr:"nav_maintenance" }}</a></li>
-      <li><a href="#contact">{{ t|tr:"nav_contact" }}</a></li>
+      {% if duct_url %}<li><a href="{{ duct_url }}">{{ t|tr:"nav_duct" }}</a></li>{% endif %}
+      {% if about_url %}<li><a href="{{ about_url }}">{{ t|tr:"nav_about" }}</a></li>{% endif %}
+      <li><a href="{% if contact_url %}{{ contact_url }}{% else %}#contact{% endif %}">{{ t|tr:"nav_contact" }}</a></li>
     </ul>
     </nav>
     <div class="tools">
@@ -86,7 +88,12 @@
           {% for sp in service_pages %}<li><a href="{% lurl sp.slug|slugpath %}">{{ sp|tr:"title" }}</a></li>{% endfor %}
           <li><a href="{{ home_url }}#contractors">{{ t|tr:"nav_contractors" }}</a></li>
           <li><a href="{{ home_url }}#install">{{ t|tr:"nav_services" }}</a></li>
+        </ul>
+        <h2>{{ t|tr:"footer_company" }}</h2>
+        <ul>
+          {% if about_url %}<li><a href="{{ about_url }}">{{ t|tr:"nav_about" }}</a></li>{% endif %}
           <li><a href="{% if faq_url %}{{ faq_url }}{% else %}{{ home_url }}#faq{% endif %}">{{ t|tr:"footer_faq" }}</a></li>
+          {% if contact_url %}<li><a href="{{ contact_url }}">{{ t|tr:"nav_contact" }}</a></li>{% endif %}
           {% if privacy_url %}<li><a href="{{ privacy_url }}">{{ t|tr:"footer_privacy" }}</a></li>{% endif %}
         </ul>
       </nav>

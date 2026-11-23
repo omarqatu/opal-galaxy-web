@@ -136,7 +136,7 @@ class Command(BaseCommand):
         # existing site gets it (the guarded content migrations).
         import importlib
         from django.apps import apps as live_apps
-        for name in ("core.migrations.0003_redesign_home_content",):
+        for name in ("core.migrations.0003_redesign_home_content", "core.migrations.0005_redesign_pages_content"):
             importlib.import_module(name).apply_content(live_apps, None)
 
         self.stdout.write(self.style.SUCCESS(

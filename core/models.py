@@ -66,6 +66,8 @@ SITE_COPY = [
     ("Menu", "nav_contractors", "Contractors", "المقاولون والمشاريع"),
     ("Menu", "nav_services", "Services", "الخدمات"),
     ("Menu", "nav_maintenance", "Maintenance and parts", "الصيانة وقطع الغيار"),
+    ("Menu", "nav_duct", "Duct cleaning", "تنظيف مجاري التكييف"),
+    ("Menu", "nav_about", "About", "عن الشركة"),
     ("Menu", "nav_contact", "Contact", "تواصل معنا"),
     ("Menu", "nav_quote", "Request a quote", "طلب عرض سعر"),
     ("Quote section", "quote_title", "Request a project quote", "طلب عرض سعر لمشروعكم"),
@@ -84,6 +86,32 @@ SITE_COPY = [
     ("Footer", "footer_whatsapp", "Chat on WhatsApp", "تواصل عبر واتساب"),
     ("Footer", "footer_faq", "Frequently asked questions", "الأسئلة الشائعة"),
     ("Footer", "footer_privacy", "Privacy Policy", "سياسة الخصوصية"),
+    ("Footer", "footer_company", "Company", "الشركة"),
+    # {name} is replaced by the category or brand name.
+    ("Product pages", "cat_cta", "Request a quote for this equipment", "طلب عرض سعر لهذه المعدات"),
+    ("Product pages", "cat_know_title", "Good to know before you order", "ما ينبغي معرفته قبل الطلب"),
+    ("Product pages", "cat_brands_title", "Available from these brands", "متوفرة من هذه العلامات التجارية"),
+    ("Product pages", "cat_brands_lead",
+     "Series and ranges as published by each manufacturer for the Gulf. The quote states the exact model, "
+     "capacity and refrigerant.",
+     "السلاسل والنطاقات كما تنشرها كل شركة مصنّعة لمنطقة الخليج. يُذكر الطراز الدقيق والسعة ونوع غاز التبريد "
+     "في عرض السعر."),
+    ("Product pages", "cat_pending", "Ranges and model numbers are confirmed on the quote.",
+     "النطاقات والطرازات تؤكَّد في عرض السعر."),
+    ("Product pages", "cat_brand_link", "All {name} products", "جميع منتجات {name}"),
+    ("Product pages", "cat_other", "Other equipment categories", "فئات معدات أخرى"),
+    ("Brand pages", "brand_title", "{name} from Opal Galaxy", "{name} من Opal Galaxy"),
+    ("Brand pages", "brand_cta", "Request a {name} quote", "طلب عرض سعر لمنتجات {name}"),
+    ("Brand pages", "brand_supply_title", "What we supply from {name}", "ما نورّده من {name}"),
+    ("Brand pages", "brand_pending", "Models and capacities are confirmed on the quote.",
+     "الطرازات والسعات تؤكَّد في عرض السعر."),
+    ("Brand pages", "brand_cat_link", "About this equipment", "عن هذه المعدات"),
+    ("Brand pages", "brand_note",
+     "Model availability changes by season and by distributor stock. Every quote names the exact model, "
+     "capacity, refrigerant and lead time.",
+     "يتغير توفر الطرازات بحسب الموسم ومخزون الوكيل. يُحدَّد في كل عرض سعر الطراز الدقيق والسعة ونوع غاز "
+     "التبريد ومدة التوريد."),
+    ("Brand pages", "brand_other", "Other brands", "علامات تجارية أخرى"),
 ]
 
 
@@ -94,8 +122,8 @@ class SiteCopy(BaseGenericSetting):
 
 
 for _group, _name, _en, _ar in SITE_COPY:
-    SiteCopy.add_to_class(f"{_name}_en", models.CharField(f"{_name} (EN)", max_length=200, default=_en))
-    SiteCopy.add_to_class(f"{_name}_ar", models.CharField(f"{_name} (AR)", max_length=200, default=_ar))
+    SiteCopy.add_to_class(f"{_name}_en", models.CharField(f"{_name} (EN)", max_length=300, default=_en))
+    SiteCopy.add_to_class(f"{_name}_ar", models.CharField(f"{_name} (AR)", max_length=300, default=_ar))
 SiteCopy.panels = [
     MultiFieldPanel([bi(n) for g, n, _e, _a in SITE_COPY if g == group], heading=group)
     for group in dict.fromkeys(g for g, *_ in SITE_COPY)
@@ -334,9 +362,13 @@ class ServicePage(Page):
     list_title_ar = models.CharField(max_length=120, blank=True)
     form_value = models.CharField(max_length=40, default="maintenance",
                                   help_text="Value pre-selected in the quote form on this page")
+    form_label_en = models.CharField(max_length=80, blank=True, help_text="Name of this service in the quote form")
+    form_label_ar = models.CharField(max_length=80, blank=True)
+    icon = models.CharField(max_length=20, choices=SERVICE_ICONS, default="parts")
 
     content_panels = Page.content_panels + [
-        bi("title"), bi("lead"), bi("cta"), bi("list_title"), FieldPanel("form_value"),
+        bi("title"), bi("lead"), bi("cta"), bi("list_title"), FieldPanel("form_value"), bi("form_label"),
+        FieldPanel("icon"),
         InlinePanel("items", heading="What is covered", label="Item"),
     ]
 
@@ -353,6 +385,62 @@ class ServiceItem(_Bi):
     text_en = models.TextField(blank=True)
     text_ar = models.TextField(blank=True)
     panels = [bi("title"), bi("text")]
+
+
+# ---------------------------------------------------------------- content pages
+CONTENT_KINDS = [
+    ("text", "Text only (About, Privacy Policy)"),
+    ("faq", "Text, then every question from the home page"),
+    ("contact", "Text, then the company's contact details"),
+]
+
+
+class ContentPage(Page):
+    """A simple bilingual page: heading, lead and titled text sections."""
+    parent_page_types = ["core.HomePage"]
+    subpage_types = []
+
+    kind = models.CharField(max_length=10, choices=CONTENT_KINDS, default="text")
+    title_en = models.CharField(max_length=160)
+    title_ar = models.CharField(max_length=160, blank=True)
+    lead_en = models.TextField(blank=True)
+    lead_ar = models.TextField(blank=True)
+    show_quote_form = models.BooleanField(default=True, help_text="Show the quote form at the bottom of the page")
+
+    content_panels = Page.content_panels + [
+        FieldPanel("kind"), bi("title"), bi("lead"), FieldPanel("show_quote_form"),
+        InlinePanel("sections", heading="Sections", label="Section"),
+    ]
+
+    def get_context(self, request, *args, **kwargs):
+        ctx = super().get_context(request, *args, **kwargs)
+        ctx["page_kind"] = "content"
+        if self.kind == "faq":
+            home = HomePage.objects.live().first()
+            ctx["faqs"] = home.faqs.all() if home else []
+        return ctx
+
+
+class ContentSection(_Bi):
+    page = ParentalKey(ContentPage, on_delete=models.CASCADE, related_name="sections")
+    heading_en = models.CharField(max_length=160, blank=True)
+    heading_ar = models.CharField(max_length=160, blank=True)
+    body_en = models.TextField(blank=True, help_text="Blank line between paragraphs. A line starting with - is a list item.")
+    body_ar = models.TextField(blank=True)
+    panels = [bi("heading"), bi("body")]
+
+    def blocks(self):
+        """[("p", text) | ("ul", [items])] for the current language."""
+        out = []
+        for chunk in tr(self, "body").replace("\r", "").split("\n\n"):
+            lines = [ln.strip() for ln in chunk.split("\n") if ln.strip()]
+            if not lines:
+                continue
+            if all(ln.startswith("- ") for ln in lines):
+                out.append(("ul", [ln[2:] for ln in lines]))
+            else:
+                out.append(("p", " ".join(lines)))
+        return out
 
 
 # ---------------------------------------------------------------- quote requests

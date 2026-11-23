@@ -1,6 +1,6 @@
 # Open questions — Opal Galaxy website
 
-Maintained through the redesign (last update: Phase 2, 23 Nov 2026). Catalogue questions stay in `review/questions.md`.
+Maintained through the redesign (last update: Phase 3, 23 Nov 2026). Catalogue questions stay in `review/questions.md`.
 
 Each row: the exact text affected · what needs confirming · the placeholder used meanwhile. "Ahmad" = business owner; "Omar" = operator.
 
@@ -17,7 +17,7 @@ Each row: the exact text affected · what needs confirming · the placeholder us
 | 7 | Brand logos | Ahmad: approved logo files and permission for each of the brands. | Brand names in type. |
 | 8a | Quote form processing (validation, storage, forwarding, notifications) | Omar (23 Nov): the form stays as it is for now and will be dealt with separately. Open: who is notified of a request and how; whether the visitor gets a confirmation; whether typed data should survive a validation error. | Form unchanged. |
 | 8b | Capacity units across the site | Omar audits BTU and the other units himself. New copy is written in BTU (VRF: HP with BTU where the catalogue gives it). Existing texts and imported spec lines are **not** converted or corrected in the redesign. | Existing values shown as stored. |
-| 8c | Spec lines on Arabic pages (stored in English only) | Omar: keep them in English in a left-to-right technical block (recommended), translate recurring terms at display time, or add an Arabic field. Needed before Phase 3. | Shown in English, as today. |
+| 8c | Spec lines on Arabic pages (stored in English only) | Phase 3 applies option A: models and specs are shown exactly as stored, in a left-to-right technical block marked as English. Omar may still choose a display glossary or an Arabic field later; neither needs a redesign. | English technical block. |
 | 8 | "We never share your details." / "لن تتم مشاركة بياناتكم مع أي جهة." | Omar: requests are forwarded to an n8n webhook when configured; confirm the sentence is still true, or reword. | Sentence kept, linked to the Privacy Policy. |
 
 ## Home
@@ -71,7 +71,7 @@ Each row: the exact text affected · what needs confirming · the placeholder us
 
 | # | Text affected | To confirm | Placeholder meanwhile |
 |---|---|---|---|
-| 31 | Whole page | Ahmad: method and equipment used, what a visit includes, property types served, areas served, whether a report or photos are given, whether disinfection is offered. | General description of the service with no method, duration, price, guarantee or coverage stated. |
+| 31 | Whole page (`/duct-cleaning/`) | Ahmad: method and equipment used, what a visit includes, property types served, areas served, whether a report or photos are given, whether disinfection is offered. | Page published in Phase 3. It says only that the service exists and lists what the customer should tell us (type of property, system, location, access). No method, duration, price, guarantee or coverage is stated. |
 
 ## Contact (new)
 
@@ -89,7 +89,7 @@ Each row: the exact text affected · what needs confirming · the placeholder us
 
 | # | Text affected | To confirm | Placeholder meanwhile |
 |---|---|---|---|
-| 34 | Company description | Ahmad: year founded, team size, own installation team, notable project types that may be named. | Existing About text only; no history or figures. |
+| 34 | Company description (`/about/`) | Ahmad: year founded, team size, own installation team, notable project types that may be named. | Page published in Phase 3 with the existing About text from the home page and a list of the services; no history or figures. |
 
 ## Privacy Policy (new)
 
@@ -98,11 +98,13 @@ Each row: the exact text affected · what needs confirming · the placeholder us
 | 35 | Retention | Ahmad / Omar: how long quote requests are kept. | "kept for as long as needed to handle the request" — no period stated. |
 | 36 | Data controller contact | Ahmad: name or role and address for privacy requests. | info@opalgalaxy.ae. |
 | 37 | Applicable law | Opal's legal adviser. | No law named. |
-| 38 | Where submissions go | Omar: is `N8N_QUOTE_WEBHOOK` set on staging / at launch, where is n8n hosted, and what does it send onward (WhatsApp, email)? Are backups (S3) to be mentioned? | States only: saved in the website's database and visible to the company's site administrators. |
+| 38 | "Requests are saved in the website's database, where the company's website administrators can read them, and they are passed to the company's sales team so that they can reply to you." | Omar: is `N8N_QUOTE_WEBHOOK` set on staging / at launch, where is n8n hosted, and what does it send onward (WhatsApp, email)? Are backups (S3) to be mentioned? Is "website administrators" the right description of Omar Digital's role? | As quoted; no tool or provider named. |
 | 39 | Third parties | Omar: Cloudflare is in front of the site; Google Fonts is contacted until fonts are self-hosted. Mention them? | Cloudflare mentioned as the delivery network; Google Fonts removed by self-hosting. |
 | 40 | Cookie | Omar: the site sets one security cookie (`csrftoken`) for the form. Wording approval. | Stated factually as a security cookie; no tracking cookies. |
 
 ## Arabic language notes (existing fields)
+
+Status after Phase 3: L1–L6, L10–L16, L18, L20, L21, L23, L25 and L26 were applied by the guarded migration `core 0005` (a phrase is replaced only where the old phrase still stands). L7–L9 (units), L17, L19 and L22 remain open with their owners.
 
 Every text below has its own Arabic field in the admin and can be edited there; none needs a code change. The only texts with no Arabic field are the catalogue rows (`Series / models` and `specs` of each brand row), covered by question 8c. Each note gives the admin location, the current text, and a suggested wording. Nothing here is changed by the redesign until Omar approves it.
 
