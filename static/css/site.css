@@ -1,8 +1,9 @@
 
+/* Colours, type and spacing live in tokens.css. The names below are the older aliases
+   this stylesheet was written with; they now point at the design tokens. */
 :root{
-  --primary:#0B1A2B;--primary-light:#2B4A6B;--accent:#74C4D9;--accent-deep:#3FA3BF;
-  --ink:#0B1A2B;--slate:#5C6B7A;--stone:#E3E8ED;--base:#F5F7F9;--white:#FFFFFF;--wa:#25D366;
-  --font:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;
+  --primary:var(--navy);--primary-light:var(--navy-600);--accent:var(--cyan);--accent-deep:var(--cyan-ink);
+  --ink:var(--navy);--slate:var(--muted);--stone:var(--line);--base:var(--off-white);
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);

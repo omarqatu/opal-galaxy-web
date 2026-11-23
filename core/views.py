@@ -4,9 +4,10 @@ from urllib.parse import urlsplit
 
 import requests
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseNotAllowed
+from django.http import Http404, HttpResponse, HttpResponseNotAllowed, HttpResponseServerError
 from django.shortcuts import redirect, render
-from django.utils import timezone
+from django.template.loader import render_to_string
+from django.utils import timezone, translation
 
 from catalog.models import Brand, ProductCategory
 from .models import QuoteRequest, ServicePage
@@ -84,3 +85,24 @@ def sitemap_xml(request):
 
 def health(request):
     return HttpResponse("ok", content_type="text/plain")
+
+
+def server_error(request):
+    """Branded 500 page in the visitor's language. It uses no database, no context
+    processors and no static files, so it still renders when one of those is the fault."""
+    lang = "ar" if request.path == "/ar" or request.path.startswith("/ar/") else "en"
+    try:
+        with translation.override(lang):
+            html = render_to_string("500.html", {"lang": lang, "dir": "rtl" if lang == "ar" else "ltr",
+                                                 "home_url": "/ar/" if lang == "ar" else "/"})
+    except Exception:  # noqa: BLE001 — never let the error page itself fail
+        log.exception("500 page failed to render")
+        html = "<!doctype html><title>Error</title><h1>Server error</h1>"
+    return HttpResponseServerError(html)
+
+
+def styleguide(request):
+    """Design system reference, for review on staging only (never on an indexed site)."""
+    if not settings.SITE_NOINDEX:
+        raise Http404
+    return render(request, "styleguide.html", {"page_kind": "styleguide"})

@@ -1,0 +1,31 @@
+{% load i18n %}<!DOCTYPE html>
+<html lang="{{ lang|default:'en' }}" dir="{{ dir|default:'ltr' }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{% translate "Something went wrong" %} — Opal Galaxy</title>
+<style>
+/* Self-contained on purpose: this page must render when the database or static files are unavailable. */
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0B1A2B;color:#fff;font:17px/1.7 "IBM Plex Sans","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;padding:24px}
+main{max-width:34rem}
+svg{width:84px;height:58px;display:block;margin-bottom:28px}
+.code{font-size:14px;font-weight:600;color:#8FD3E6;margin:0 0 8px;direction:ltr;text-align:start}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.2;margin:0 0 12px;font-weight:600}
+p{color:rgba(255,255,255,.76);margin:0 0 28px}
+a{display:inline-block;background:#5AB6D1;color:#0B1A2B;font-weight:600;text-decoration:none;padding:12px 24px;border-radius:2px}
+a:hover{background:#8FD3E6}
+a:focus-visible{outline:3px solid #8FD3E6;outline-offset:3px}
+</style>
+</head>
+<body>
+<main>
+  {% include "includes/logo.svg" %}
+  <p class="code">500</p>
+  <h1>{% translate "Something went wrong" %}</h1>
+  <p>{% translate "The page could not be displayed. Please try again in a few minutes." %}</p>
+  <a href="{{ home_url|default:'/' }}">{% translate "Back to the home page" %}</a>
+</main>
+</body>
+</html>

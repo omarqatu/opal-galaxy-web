@@ -1,0 +1,125 @@
+{% extends "base.html" %}{% load opal %}
+{# Design system reference for review on staging. Sample text only; not part of the site content. #}
+{% block title %}Design system — Opal Galaxy{% endblock %}
+{% block description %}{% endblock %}
+{% block head_extra %}<meta name="robots" content="noindex, nofollow">
+<style>
+.sg-swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:var(--s-4)}
+.sg-swatch{border:1px solid var(--line);background:var(--white);font-size:var(--fs-micro)}
+.sg-swatch i{display:block;block-size:4.5rem}
+.sg-swatch b,.sg-swatch span{display:block;padding-inline:var(--s-3)}
+.sg-swatch b{padding-block-start:var(--s-2)}
+.sg-swatch span{padding-block-end:var(--s-2);color:var(--muted);direction:ltr;text-align:start}
+.sg-row{display:flex;flex-wrap:wrap;gap:var(--s-3);align-items:center}
+.sg-note{font-size:var(--fs-small);color:var(--muted)}
+</style>{% endblock %}
+{% block content %}
+<section class="section section--white"><div class="container">
+  <p class="eyebrow">{% T "Design system" "نظام التصميم" %}</p>
+  <h1>{% T "Engineered Cooling. Delivered with Confidence." "تبريد بمعايير هندسية، وتنفيذ يُعتمد عليه." %}</h1>
+  <p class="lead">{% T "Reference page for the Opal Galaxy visual language: colour, type and the components every page is built from. Sample text only." "صفحة مرجعية للهوية البصرية لموقع Opal Galaxy: الألوان والخطوط والمكوّنات التي تُبنى منها جميع الصفحات. النصوص هنا للعرض فقط." %}</p>
+</div></section>
+
+<section class="section section--ruled"><div class="container">
+  <div class="section-head"><div><p class="eyebrow">01</p><h2>{% T "Colour" "الألوان" %}</h2>
+    <p class="lead">{% T "Six colours from the logo. Cyan and Sky are fills; text on light surfaces uses Navy or the darkened cyan." "ستة ألوان مأخوذة من الشعار. يُستخدم السماوي للتعبئة فقط، أما النصوص على الخلفيات الفاتحة فبالكحلي أو السماوي الداكن." %}</p></div></div>
+  <div class="sg-swatches">
+    <div class="sg-swatch"><i style="background:var(--navy)"></i><b>Deep Navy</b><span>#0B1A2B</span></div>
+    <div class="sg-swatch"><i style="background:var(--cyan)"></i><b>Cyan Blue</b><span>#5AB6D1</span></div>
+    <div class="sg-swatch"><i style="background:var(--sky)"></i><b>Sky Blue</b><span>#8FD3E6</span></div>
+    <div class="sg-swatch"><i style="background:var(--sand)"></i><b>Warm Sand</b><span>#F3D9B6</span></div>
+    <div class="sg-swatch"><i style="background:var(--off-white)"></i><b>Off White</b><span>#F5F7F9</span></div>
+    <div class="sg-swatch"><i style="background:var(--white)"></i><b>White</b><span>#FFFFFF</span></div>
+    <div class="sg-swatch"><i style="background:var(--cyan-ink)"></i><b>Cyan ink (text)</b><span>#1B6680 · 6.4:1</span></div>
+    <div class="sg-swatch"><i style="background:var(--muted)"></i><b>Muted text</b><span>#55657A · 5.9:1</span></div>
+  </div>
+</div></section>
+
+<section class="section section--white section--ruled"><div class="container">
+  <div class="section-head"><div><p class="eyebrow">02</p><h2>{% T "Typography" "الخطوط" %}</h2></div></div>
+  <div class="split split--top">
+    <div class="stack">
+      <h1>{% T "Heading one" "العنوان الأول" %}</h1>
+      <h2>{% T "Heading two" "العنوان الثاني" %}</h2>
+      <h3>{% T "Heading three" "العنوان الثالث" %}</h3>
+      <p class="lead">{% T "Lead paragraph: one or two sentences that introduce a section." "فقرة تمهيدية: جملة أو جملتان تقدّمان القسم." %}</p>
+      <p>{% T "Body text in IBM Plex Sans. Model names such as 38VT020168HTMM and capacities such as 191,000 BTU/h keep their left-to-right order in both languages." "نص أساسي بخط IBM Plex Sans Arabic. تحافظ أسماء الطرازات مثل 38VT020168HTMM والسعات مثل 191,000 BTU/h على اتجاهها من اليسار إلى اليمين في اللغتين." %}</p>
+    </div>
+    <dl class="kv">
+      <dt>{% T "Latin" "اللاتيني" %}</dt><dd class="ltr">IBM Plex Sans 400 · 500 · 600 · 700</dd>
+      <dt>{% T "Arabic" "العربي" %}</dt><dd class="ltr">IBM Plex Sans Arabic 400 · 500 · 600 · 700</dd>
+      <dt>{% T "Numerals" "الأرقام" %}</dt><dd class="ltr num">0123456789 · 20 HP · 191,000 BTU/h</dd>
+      <dt>{% T "Hosting" "الاستضافة" %}</dt><dd>{% T "Self-hosted woff2, no external requests" "ملفات woff2 مستضافة ذاتياً، دون طلبات خارجية" %}</dd>
+    </dl>
+  </div>
+</div></section>
+
+<section class="section section--ruled"><div class="container">
+  <div class="section-head"><div><p class="eyebrow">03</p><h2>{% T "Buttons and links" "الأزرار والروابط" %}</h2></div></div>
+  <div class="sg-row">
+    <a class="btn btn-primary" href="#top">{% T "Primary action" "إجراء أساسي" %}</a>
+    <a class="btn btn-accent" href="#top">{% T "Accent action" "إجراء مميّز" %}</a>
+    <a class="btn btn-outline" href="#top">{% T "Secondary action" "إجراء ثانوي" %}</a>
+    <a class="btn btn-wa" href="#top">{% include "includes/wa.svg" %}<span>{% T "WhatsApp" "واتساب" %}</span></a>
+    <a class="btn btn-outline btn-sm" href="#top">{% T "Small" "صغير" %}</a>
+    <a class="link-arrow" href="#top">{% T "Text link" "رابط نصي" %}{% icon "arrow" %}</a>
+  </div>
+</div></section>
+
+<section class="section section--white section--ruled"><div class="container">
+  <div class="section-head"><div><p class="eyebrow">04</p><h2>{% T "Equipment icons and cards" "أيقونات المعدات والبطاقات" %}</h2>
+    <p class="lead">{% T "One line-icon per equipment category, drawn as a set. Cards lift slightly on hover." "أيقونة خطية لكل فئة من المعدات، مرسومة كمجموعة واحدة. ترتفع البطاقة قليلاً عند المرور عليها." %}</p></div>
+    <a class="link-arrow" href="#top">{% T "All equipment" "جميع المعدات" %}{% icon "arrow" %}</a></div>
+  <div class="grid grid--3">{% for c in nav_categories %}
+    <a class="card" href="{{ c.get_url }}" data-reveal style="--i:{{ forloop.counter0|divisibleby:3|yesno:'0,1' }}">
+      <span class="card__icon">{% cat_icon c.slug %}</span>
+      <h3>{{ c|tr:"name" }}</h3>
+      <p>{{ c|tr:"lead" }}</p>
+      <span class="card__foot"><span class="link-arrow">{% T "View" "عرض" %}{% icon "arrow" %}</span></span>
+    </a>{% endfor %}
+  </div>
+</div></section>
+
+<section class="section section--ruled"><div class="container">
+  <div class="section-head"><div><p class="eyebrow">05</p><h2>{% T "Brand tiles" "بطاقات العلامات التجارية" %}</h2>
+    <p class="lead">{% T "Typographic until an approved logo is supplied for a brand." "تُعرض بالاسم إلى أن يُورَّد شعار معتمد للعلامة." %}</p></div></div>
+  <div class="grid grid--auto">{% for b in nav_brands %}<a class="brand-tile" href="{{ b.get_url }}">{{ b.name }}</a>{% endfor %}</div>
+</div></section>
+
+<section class="section section--dark"><div class="container">
+  <div class="section-head"><div><p class="eyebrow">06</p><h2>{% T "Process timeline" "تسلسل مراحل العمل" %}</h2></div></div>
+  <ol class="timeline" style="--steps:3">
+    <li data-reveal style="--i:0"><h3>{% T "Step title" "عنوان المرحلة" %}</h3><p>{% T "Short description of the step." "وصف مختصر للمرحلة." %}</p></li>
+    <li data-reveal style="--i:1"><h3>{% T "Step title" "عنوان المرحلة" %}</h3><p>{% T "Short description of the step." "وصف مختصر للمرحلة." %}</p></li>
+    <li data-reveal style="--i:2"><h3>{% T "Step title" "عنوان المرحلة" %}</h3><p>{% T "Short description of the step." "وصف مختصر للمرحلة." %}</p></li>
+  </ol>
+</div></section>
+
+<section class="section section--white"><div class="container">
+  <div class="split split--top">
+    <div>
+      <p class="eyebrow">07</p><h2>{% T "Accordion" "القائمة المنسدلة" %}</h2>
+      <div class="accordion">
+        <details open><summary>{% T "First question" "السؤال الأول" %}</summary><div class="accordion__body"><p>{% T "The answer opens and closes without JavaScript." "تُفتح الإجابة وتُغلق دون الحاجة إلى JavaScript." %}</p></div></details>
+        <details><summary>{% T "Second question" "السؤال الثاني" %}</summary><div class="accordion__body"><p>{% T "Answer text." "نص الإجابة." %}</p></div></details>
+      </div>
+    </div>
+    <div>
+      <p class="eyebrow">08</p><h2>{% T "Details list" "قائمة البيانات" %}</h2>
+      <dl class="kv">
+        <dt>{% T "Label" "البيان" %}</dt><dd>{% T "Value" "القيمة" %}</dd>
+        <dt>{% T "Capacity" "السعة" %}</dt><dd class="ltr num">20 HP · 191,000 BTU/h</dd>
+      </dl>
+    </div>
+  </div>
+</div></section>
+
+<section class="section section--ruled"><div class="container">
+  <p class="eyebrow">09</p>
+  <div class="cta-band">
+    <div><h2>{% T "Call-to-action band" "شريط الدعوة إلى الإجراء" %}</h2><p>{% T "One sentence that says what happens next." "جملة واحدة توضّح الخطوة التالية." %}</p></div>
+    <div class="cta-band__actions"><a class="btn btn-accent" href="#contact">{% T "Primary action" "إجراء أساسي" %}</a><a class="btn btn-outline on-dark" href="#top">{% T "Secondary action" "إجراء ثانوي" %}</a></div>
+  </div>
+</div></section>
+{% endblock %}
+{% block quote_form %}{% endblock %}

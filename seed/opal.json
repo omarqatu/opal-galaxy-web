@@ -117,6 +117,22 @@
     "en": "Coolex is the Gulf-built option: manufactured in Kuwait by RIC since 1986, rated for 52 – 55 °C ambient, with UL, AHRI and Eurovent certification across the range. Inverter ducted splits, PNGv package units, air-cooled chillers, fan coils, precision cooling for data rooms, condensing units and the IVCF VRF series.",
     "ar": "Coolex هي الخيار خليجي الصنع: تصنّعها RIC في الكويت منذ 1986، مصنّفة لحرارة محيطة 52 – 55 °م، وحاصلة على شهادات UL وAHRI وEurovent عبر التشكيلة. وحدات مخفية Inverter، ووحدات مجمّعة PNGv، وشيلرات هوائية، وفان كويل، وتبريد دقيق لغرف البيانات، ووحدات تكثيف، وسلسلة IVCF لأنظمة VRF."
    }
+  },
+  {
+   "slug": "skm",
+   "name": "SKM"
+  },
+  {
+   "slug": "lg",
+   "name": "LG"
+  },
+  {
+   "slug": "daikin",
+   "name": "Daikin"
+  },
+  {
+   "slug": "trane",
+   "name": "Trane"
   }
  ],
  "categories": [

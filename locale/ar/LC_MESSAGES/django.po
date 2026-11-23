@@ -1,0 +1,50 @@
+# Opal Galaxy — fixed interface labels (Arabic).
+# Editorial copy is edited in Wagtail; this file holds only labels such as "Home".
+# After editing, compile with:  python manage.py compilemessages -l ar
+msgid ""
+msgstr ""
+"Project-Id-Version: opal-galaxy-web\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+msgid "Skip to content"
+msgstr "الانتقال إلى المحتوى"
+
+msgid "Main menu"
+msgstr "القائمة الرئيسية"
+
+msgid "WhatsApp"
+msgstr "واتساب"
+
+msgid "Quick actions"
+msgstr "إجراءات سريعة"
+
+msgid "Call"
+msgstr "اتصال"
+
+msgid "Breadcrumb"
+msgstr "مسار التنقل"
+
+msgid "Home"
+msgstr "الرئيسية"
+
+msgid "Page not found"
+msgstr "الصفحة غير موجودة"
+
+msgid "The page you are looking for does not exist or has been moved."
+msgstr "الصفحة التي تبحثون عنها غير موجودة أو نُقلت إلى عنوان آخر."
+
+msgid "Back to the home page"
+msgstr "العودة إلى الصفحة الرئيسية"
+
+msgid "Browse products"
+msgstr "استعراض المنتجات"
+
+msgid "Something went wrong"
+msgstr "حدث خطأ غير متوقع"
+
+msgid "The page could not be displayed. Please try again in a few minutes."
+msgstr "تعذّر عرض الصفحة. يُرجى المحاولة مرة أخرى بعد بضع دقائق."

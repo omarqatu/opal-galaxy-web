@@ -96,6 +96,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "en"
 LANGUAGES = [("en", "English"), ("ar", "العربية")]
 USE_I18N = True
+LOCALE_PATHS = [BASE_DIR / "locale"]  # fixed interface labels; editorial copy lives in Wagtail
 TIME_ZONE = "Asia/Dubai"
 USE_TZ = True
 

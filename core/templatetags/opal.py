@@ -1,4 +1,5 @@
 from django import template
+from django.template import TemplateDoesNotExist
 from django.template.loader import get_template
 from django.utils.safestring import mark_safe
 
@@ -29,6 +30,16 @@ def icon(name):
     if not name:
         return ""
     return mark_safe(get_template(f"includes/icons/{name}.svg").render())
+
+
+@register.simple_tag
+def cat_icon(slug):
+    """Line icon for an equipment category (includes/icons/cat-<slug>.svg); empty if none exists,
+    so a category added later in the admin never breaks a page."""
+    try:
+        return mark_safe(get_template(f"includes/icons/cat-{slug}.svg").render())
+    except TemplateDoesNotExist:
+        return ""
 
 
 @register.filter

@@ -18,4 +18,10 @@ urlpatterns = [
     # Media is small (a few dozen product photos), so Django serves it directly.
     re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
 ]
-urlpatterns += i18n_patterns(path("", include(wagtail_urls)), prefix_default_language=False)
+urlpatterns += i18n_patterns(
+    path("styleguide/", views.styleguide, name="styleguide"),  # staging only (404 when indexed)
+    path("", include(wagtail_urls)),
+    prefix_default_language=False,
+)
+
+handler500 = "core.views.server_error"
