@@ -101,3 +101,45 @@ Each row: the exact text affected · what needs confirming · the placeholder us
 | 38 | Where submissions go | Omar: is `N8N_QUOTE_WEBHOOK` set on staging / at launch, where is n8n hosted, and what does it send onward (WhatsApp, email)? Are backups (S3) to be mentioned? | States only: saved in the website's database and visible to the company's site administrators. |
 | 39 | Third parties | Omar: Cloudflare is in front of the site; Google Fonts is contacted until fonts are self-hosted. Mention them? | Cloudflare mentioned as the delivery network; Google Fonts removed by self-hosting. |
 | 40 | Cookie | Omar: the site sets one security cookie (`csrftoken`) for the form. Wording approval. | Stated factually as a security cookie; no tracking cookies. |
+
+## Arabic language notes (existing fields)
+
+Every text below has its own Arabic field in the admin and can be edited there; none needs a code change. The only texts with no Arabic field are the catalogue rows (`Series / models` and `specs` of each brand row), covered by question 8c. Each note gives the admin location, the current text, and a suggested wording. Nothing here is changed by the redesign until Omar approves it.
+
+| # | Admin location · field | Current Arabic text | Note | Suggested wording |
+|---|---|---|---|---|
+| L1 | Products → Ducted split · name (AR) | وحدات مخفية (Ducted) | English word inside the Arabic name. | وحدات مخفية |
+| L2 | Products → Package / rooftop · name (AR) | وحدات مجمّعة (Package) | English word inside the Arabic name. | وحدات مجمّعة |
+| L3 | Products → Chillers, AHU and fan coils · name (AR) | شيلرات ووحدات مناولة الهواء | The English name also has fan coils; "شيلرات" is a transliteration. Choose one term for the whole site. | مبرّدات المياه ووحدات مناولة الهواء ووحدات الملف والمروحة — or keep "شيلرات" everywhere and add "وفان كويل" |
+| L4 | Products → Ducted split · lead (AR) | …تغذي فتحات التوزيع عبر مجاري الهواء، ووحدة خارجية لكل منطقة. | "مجاري الهواء" here, "مجاري التكييف" in the duct cleaning service. One term for ducts. | …عبر مجاري التكييف، مع وحدة خارجية لكل منطقة. |
+| L5 | Products → Wall mounted split · lead (AR) | …دون مجارٍ للهواء. | Same term as L4. | …دون مجاري تكييف. |
+| L6 | Products → Package / rooftop · lead and "Good to know" (AR) | يُوصَل بمجاري الهواء · تُوصل بمجاري الهواء والكهرباء فقط | Same term as L4. | بمجاري التكييف |
+| L7 | Products → VRF systems · capacity range | 4 – 80 HP per system | English phrase on the Arabic page. The field has one value for both languages (unit audit, 8b). | 4 – 80 HP (and a separate Arabic range field, if wanted) |
+| L8 | Products → Package / rooftop, Chillers · capacity range | 3 – 100 ton · 3 – 500 ton | "ton" on Arabic pages (unit audit, 8b). | Omar's decision |
+| L9 | Pages → Home → Gallery photos · caption (AR) | O General 5 ton · Midea Package 15 ton · Midea 5 ton | English "ton" and "Package" in Arabic captions (unit audit, 8b; caption facts, question 20). | Omar's decision |
+| L10 | Pages → Home → Gallery photos · caption (AR) | وحدتان Inverter | Latin term where Arabic exists. | وحدتان بتقنية Inverter — or وحدتان بضاغط متغيّر السرعة |
+| L11 | Pages → Home → FAQ · answer (AR), T3 question | مختبرة عند حرارة خارجية 46° مئوية، بخلاف T1 المختبرة عند 35°. | Degree style differs from the product pages ("46 °م"). | مختبرة عند درجة حرارة خارجية تبلغ 46 °م، بخلاف T1 المختبرة عند 35 °م. |
+| L12 | Pages → Home → FAQ · answer (AR), quote question | عبر النموذج أدناه أو بإرسال جدول الكميات (BOQ)… نرد خلال يوم عمل واحد. | "(BOQ)" in brackets; "نرد" is plain beside "سنوافيكم بالرد" used elsewhere. Also an unverified claim (question 11). | عبر النموذج أدناه، أو بإرسال جدول الكميات أو مخططات التكييف عبر واتساب، وسنوافيكم بالرد خلال يوم عمل واحد. |
+| L13 | Pages → Home → FAQ · answer (AR), documents question | مستندات الاعتماد (Submittals) وكتالوجات المصنّع | English in brackets; "المصنّع" vs "الشركة المصنّعة" elsewhere. | مستندات الاعتماد وكتالوجات الشركة المصنّعة |
+| L14 | Pages → Home → FAQ · answers (AR) | R22 غاز قديم يُبقى عليه… · يُذكر نوع الغاز | "غاز" alone vs "غاز التبريد" elsewhere. | غاز التبريد (throughout) |
+| L15 | Pages → Home → About · text (AR) | تعمل الشركة حلقة وصل بين الوكلاء المعتمدين والمقاولين | Grammatically sound; reads more naturally with "بوصفها". | تعمل الشركة بوصفها حلقة وصل بين الوكلاء المعتمدين والمقاولين |
+| L16 | Pages → Home → Contractors · lead (AR) | بصفة مورّد معتمد | "معتمد" suggests an official approval; the English says "standing supplier". | بصفة مورّد دائم |
+| L17 | Pages → Home → Facts · text (AR) | في دبي والشارقة وعجمان، وإلى بقية الإمارات وفق حجم الطلب | No full stop, unlike the other texts. Unverified claim (question 10). | Add the full stop once the claim is confirmed. |
+| L18 | Settings → Company details · footer_about (AR) | Opal Galaxy Air Condition Trading L.L.C — شركة توريد أنظمة تكييف… | Sentence opens with the Latin legal name and a dash. | شركة Opal Galaxy لتجارة مكيفات الهواء: توريد أنظمة التكييف للمقاولين والمشاريع والفلل في دولة الإمارات. |
+| L19 | Settings → Company details · hours_full (AR) | السبت – الخميس، 8:00 – 18:00 · الأحد عطلة | Contradiction (question 1). | After Ahmad confirms. |
+| L20 | Brands → Coolex · line (AR) | …وتبريد دقيق وVRF | Arabic "و" joined to a Latin word. Site-wide rule needed (also "وR410A", "وRotary", "وBMS"). | …وتبريد دقيق وأنظمة VRF — rule: put an Arabic noun before the Latin term |
+| L21 | Brands → Coolex · about (AR) | Coolex هي الخيار خليجي الصنع | Missing definite article on the adjective. | Coolex هي الخيار الخليجي الصنع |
+| L22 | Brands → Super General · about (AR) | بضواغط Inverter وRotary وReciprocating وScroll | Four Latin terms in a row; contradicts the imported data (question 25). | With the manual rewrite of this text. |
+| L23 | Brands → Westpoint · about (AR) | أرضية-سقفية | Hyphen here, spaced dash in the category name "أرضية – سقفية". | أرضية – سقفية |
+| L24 | Products → Chillers · lead and "Good to know" (AR) | فان كويل · شيلرات Screw وScroll | Transliteration and Latin terms; follows the decision in L3. | وحدات الملف والمروحة · مبرّدات لولبية وحلزونية — or keep the trade terms consistently |
+| L25 | Pages → Maintenance · item text (AR) | للعلامات السبع | States a count (approved correction 1); fixed in Phase 3. | للعلامات التجارية التي نورّدها |
+| L26 | Pages → Maintenance · item text (AR) | وفحص ضغط الغاز والكهرباء | "الغاز" as in L14. | وفحص ضغط غاز التبريد والتوصيلات الكهربائية |
+
+Admin display note: Arabic fields in the admin are laid out left-to-right, so a full stop at the end of an Arabic sentence appears at the wrong end while editing. The public site shows it correctly. The fields can be given right-to-left direction in the admin in a later phase.
+
+Terminology decisions needed from Omar before Phase 3 (they affect every page):
+
+1. Ducts: "مجاري التكييف" everywhere (recommended, matches the service name) or "مجاري الهواء".
+2. Trade terms: keep the transliterations the market uses ("شيلرات", "فان كويل", "كاسيت") or use Arabic equivalents.
+3. Technical Latin terms (Inverter, Rotary, Scroll, VRF, BMS): keep in Latin with an Arabic noun before them (recommended), or translate.
+4. Temperature style: "46 °م" (recommended) everywhere.
