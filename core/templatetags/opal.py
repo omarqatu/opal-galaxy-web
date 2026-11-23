@@ -1,6 +1,9 @@
 from django import template
 from django.template import TemplateDoesNotExist
 from django.template.loader import get_template
+import re
+
+from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 
 from core import i18n
@@ -57,3 +60,29 @@ def slugpath(slug):
 def fmt(text, name):
     """'Request a {name} quote'|fmt:brand.name — fills the {name} placeholder of a site text."""
     return str(text).replace("{name}", str(name))
+
+
+_ACCENT = re.compile(r"\*([^*]+)\*")
+
+
+@register.filter
+def accent(text):
+    """'Engineered Cooling. *Delivered with Confidence.*' → the starred words in the accent colour."""
+    return mark_safe(_ACCENT.sub(r'<span class="accent">\1</span>', conditional_escape(text or "")))
+
+
+@register.filter
+def plain(text):
+    """The same text without accent markers (titles, alt text, meta tags)."""
+    return (text or "").replace("*", "")
+
+
+@register.filter
+def card_range(category):
+    """Capacity range for a category card. Shown only when the stored value is stated in BTU,
+    or in HP for VRF; other units stay off the cards until the unit audit is done. Never converted."""
+    value = (category.capacity_range or "").strip()
+    upper = value.upper()
+    if "BTU" in upper or (category.slug == "vrf" and "HP" in upper):
+        return value
+    return ""

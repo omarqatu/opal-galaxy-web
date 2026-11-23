@@ -250,10 +250,10 @@ class HomeRedesignTests(TestCase):
     def test_hero_copy_and_buttons_come_from_wagtail(self):
         from core.models import HomePage
         en, ar = self.client.get("/"), self.client.get("/ar/")
-        self.assertContains(en, "<h1>Engineered Cooling. Delivered with Confidence.</h1>", html=True)
+        self.assertContains(en, '<h1>Engineered Cooling. <span class="accent">Delivered with Confidence.</span></h1>')
         self.assertContains(en, "Explore HVAC Solutions")
         self.assertContains(en, "Request a Project Quote")
-        self.assertContains(ar, "تكييف بمعايير هندسية، وتنفيذ جدير بالثقة")
+        self.assertContains(ar, 'تكييف بمعايير هندسية، <span class="accent">وتنفيذ جدير بالثقة</span>')
         self.assertContains(ar, "استكشاف حلول التكييف")
         home = HomePage.objects.get()
         home.hero_cta_primary_en = "See the equipment"
@@ -278,11 +278,12 @@ class HomeRedesignTests(TestCase):
 
     def test_categories_come_from_the_cms_with_icons(self):
         html = self.client.get("/ar/").content.decode()
-        grid = html.split("cat-grid")[1].split("</section>")[0]
-        self.assertEqual(grid.count('class="card cat-card"'), ProductCategory.objects.live().count())
-        self.assertNotIn("<img", grid)
-        self.assertIn("<svg", grid)
+        grid = html.split('class="cat-tiles"')[1].split("</section>")[0]
+        self.assertEqual(grid.count('class="cat-tile"'), ProductCategory.objects.live().count())
+        self.assertEqual(grid.count("<img"), ProductCategory.objects.live().exclude(image=None).count())
+        self.assertIn("<svg", grid)   # a category without an image falls back to its line icon
         self.assertIn("وحدات شباك", grid)
+        self.assertIn('href="/ar/products/vrf/"', grid)
 
     def test_services_process_and_duct_cleaning(self):
         en, ar = self.client.get("/").content.decode(), self.client.get("/ar/").content.decode()
@@ -300,7 +301,10 @@ class HomeRedesignTests(TestCase):
         html = self.client.get("/").content.decode()
         self.assertNotIn('class="facts"', html)
         self.assertNotIn("<h3>Volume quote within one working day</h3>", html)
-        self.assertIn("Delivery within 48 hours", html)  # kept, as a quiet note under the hero
+        self.assertNotIn("Delivery within 48 hours", html)   # no longer shown at the top of the page
+        self.assertIn("within 48 hours in Dubai", html)      # still stated in the FAQ answer
+        from core.models import HomeFact
+        self.assertEqual(HomeFact.objects.count(), 3)        # the records themselves are kept
 
     def test_gallery_links_open_the_photo_without_javascript(self):
         html = self.client.get("/").content.decode()
@@ -363,8 +367,8 @@ class HomeRedesignTests(TestCase):
 
     def test_existing_destinations_are_still_in_the_menu(self):
         html = self.client.get("/products/wall/").content.decode()
-        menu = html.split('id="menu"')[1].split("</ul>")[0]
-        for href in ('/#products"', '/#brands"', '/#contractors"', '/#install"', '"/maintenance/"',
+        menu = html.split('id="menu"')[1].split("</nav>")[0]
+        for href in ('"/"', '/#products"', '/#brands"', '/#contractors"', '/#install"', '"/maintenance/"',
                      '"/duct-cleaning/"', '"/about/"', '"/contact/"'):
             self.assertIn(href, menu)
 
@@ -640,3 +644,127 @@ class PagesContentMigrationTests(TestCase):
         self.assertEqual(draft.duct_page.slug, "duct-cleaning")
         self.assertIn("46 °م", " ".join(f.answer_ar for f in draft.faqs.all()))
         self.assertEqual(ProductCategory.objects.get(slug="ducted").name_ar, "وحدات مخفية")
+
+
+class PremiumHomeTests(TestCase):
+    """The approved premium composition: navy header, hero illustration, category tiles."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def test_header_uses_the_original_logo_file_and_keeps_every_action(self):
+        import hashlib
+        from django.conf import settings
+        html = self.client.get("/ar/").content.decode()
+        header = html.split('<header id="site-header"')[1].split("</header>")[0]
+        self.assertIn("img/opal-galaxy-logo-v1-reversed.svg", header)
+        self.assertIn('href="tel:+971541981593"', header)
+        self.assertIn("https://wa.me/971541981593", header)
+        self.assertIn('hreflang="en"', header)
+        self.assertIn('class="submenu"', header)
+        self.assertEqual(header.count('/ar/products/'), ProductCategory.objects.live().count())
+        self.assertEqual(header.count('/ar/brands/'), Brand.objects.count())
+        # The logo artwork is the file that was already in the repository, byte for byte.
+        digests = {n: hashlib.sha256((settings.BASE_DIR / "static/img" / n).read_bytes()).hexdigest()
+                   for n in ("opal-galaxy-logo-v1.svg", "opal-galaxy-logo-v1-reversed.svg")}
+        self.assertEqual(digests, {
+            "opal-galaxy-logo-v1.svg": "f42f23107c91e15c794bbfc317b7dd863dbf083f636fcea3c442429c613f008a",
+            "opal-galaxy-logo-v1-reversed.svg": "d5b0300b124f56a48840d6f64e2d4dd5b80ee9b0cf21817106bac55aed759681"})
+
+    def test_hero_has_eyebrow_highlights_and_responsive_illustration(self):
+        from core.models import HomePage
+        en, ar = self.client.get("/").content.decode(), self.client.get("/ar/").content.decode()
+        hero = en.split('class="hero-x"')[1].split("</section>")[0]
+        self.assertIn("HVAC supply · Installation · Project support", hero)
+        self.assertEqual(hero.count("<li>"), 3)
+        for text in ("HVAC supply and installation", "Maintenance and spare parts", "Project and contractor support"):
+            self.assertIn(text, hero)
+        self.assertIn('<source media="(max-width:860px)"', hero)
+        self.assertRegex(hero, r'<img src="/media/images/hero-rooftop[^"]+\.webp" srcset="[^"]+ 1000w, [^"]+ \d+w"')
+        self.assertIn('alt="Illustration: a technician servicing rooftop air-conditioning units"', hero)
+        self.assertIn('fetchpriority="high"', hero)
+        self.assertIn("صورة توضيحية", ar)
+        self.assertIn("دعم المشاريع والمقاولين", ar)
+        self.assertLess(hero.index('href="#contact"'), hero.index('href="#products"'))  # quote first
+        home = HomePage.objects.get()
+        home.hero_eyebrow_en = "Edited eyebrow"
+        home.save()
+        self.assertContains(self.client.get("/"), "Edited eyebrow")
+
+    def test_illustration_is_not_presented_as_a_project(self):
+        from core.models import HomePage
+        home = HomePage.objects.get()
+        self.assertNotIn(home.hero_image_id, list(home.gallery.values_list("image_id", flat=True)))
+        self.assertEqual(home.hero_caption_en, "")
+        gallery = self.client.get("/").content.decode().split('id="gallery"')[1].split("</ul>")[0]
+        self.assertNotIn("hero-rooftop", gallery)
+
+    def test_category_cards_show_only_btu_ranges_and_vrf_in_hp(self):
+        from core.templatetags.opal import card_range
+        shown = {c.slug: card_range(c) for c in ProductCategory.objects.all()}
+        self.assertEqual(shown["wall"], "9,000 – 36,000 BTU")
+        self.assertEqual(shown["vrf"], "4 – 80 HP per system")
+        for slug in ("ducted", "package", "chillers-ahu"):
+            self.assertEqual(shown[slug], "", slug)          # tons / no unit: not shown, never converted
+        html = self.client.get("/").content.decode()
+        tiles = html.split('class="cat-tiles"')[1].split("</ul>")[0]
+        self.assertIn("9,000 – 36,000 BTU", tiles)
+        self.assertNotIn("ton", tiles)
+        self.assertEqual(ProductCategory.objects.get(slug="package").capacity_range, "3 – 100 ton")  # stored value kept
+
+    def test_accent_filter_escapes_and_plain_strips(self):
+        from core.templatetags.opal import accent, plain
+        self.assertEqual(accent("A <b> *C & D*"), 'A &lt;b&gt; <span class="accent">C &amp; D</span>')
+        self.assertEqual(accent("No markers"), "No markers")
+        self.assertEqual(plain("One *two*"), "One two")
+
+
+class HeroContentMigrationTests(TestCase):
+    """core 0007: adds the illustrations and highlights; replaces only what phase 2 put there."""
+
+    def apply(self):
+        import importlib
+        from django.apps import apps
+        importlib.import_module("core.migrations.0007_home_hero_content").apply_content(apps, None)
+
+    def test_empty_database_is_left_alone(self):
+        from wagtail.images.models import Image
+        self.apply()
+        self.assertFalse(Image.objects.exists())
+
+    def test_seeded_site_gets_the_illustration_once_and_revision_matches(self):
+        from wagtail.images.models import Image
+        from core.models import HomePage
+        call_command("seed_site", verbosity=0)
+        images = Image.objects.count()
+        self.apply()
+        self.assertEqual(Image.objects.count(), images)
+        home = HomePage.objects.get()
+        for obj in (home, home.get_latest_revision_as_object()):
+            self.assertEqual(obj.hero_image.title, "Home hero illustration (rooftop, wide)")
+            self.assertEqual(obj.hero_image_mobile.title, "Home hero illustration (rooftop, 4:3)")
+            self.assertEqual(obj.hero_title_en, "Engineered Cooling. *Delivered with Confidence.*")
+            self.assertEqual(obj.highlights.count(), 3)
+        self.assertEqual((home.hero_image.width, home.hero_image.height), (2000, 1125))
+        self.assertTrue(home.hero_image.file.storage.exists(home.hero_image.file.name))
+        self.assertEqual(home.hero_lead_en[:12], "Premium HVAC")   # other texts untouched
+
+    def test_operator_choices_are_kept(self):
+        from wagtail.images.models import Image
+        from core.models import HomeHighlight, HomePage
+        call_command("seed_site", verbosity=0)
+        home = HomePage.objects.get()
+        own = Image.objects.get(title="Gallery: Batch of boxed units on a residential site")
+        home.hero_image, home.hero_image_mobile = own, None
+        home.hero_title_en = "Omar's headline"
+        home.hero_alt_en = "Omar's alt"
+        home.save()
+        home.highlights.all().delete()
+        HomeHighlight.objects.create(page=home, sort_order=0, title_en="Only one")
+        self.apply()
+        home = HomePage.objects.get()
+        self.assertEqual(home.hero_image_id, own.pk)
+        self.assertIsNone(home.hero_image_mobile_id)
+        self.assertEqual((home.hero_title_en, home.hero_alt_en), ("Omar's headline", "Omar's alt"))
+        self.assertEqual(home.highlights.count(), 1)
