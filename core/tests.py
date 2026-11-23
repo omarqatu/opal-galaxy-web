@@ -966,3 +966,83 @@ class DesignSystemTests(TestCase):
         self.assertIn('class="btn btn-accent" href="#contact"', hero)
         self.assertNotIn("btn-primary", hero)
         self.assertIn('dir="ltr"', html.split('name="phone"')[1].split(">")[0])   # digits stay left-to-right
+
+
+class FooterAndMotionTests(TestCase):
+    """Footer built from CMS fields only, and motion that stays on the shared tokens."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def footer(self, path="/"):
+        return self.client.get(path).content.decode().split("<footer")[1].split("</footer>")[0]
+
+    def test_footer_contact_details_come_from_company_settings(self):
+        from core.models import CompanySettings
+        footer = self.footer()
+        for text in ('href="tel:+971541981593"', "+971 54 198 1593", "https://wa.me/971541981593",
+                     "mailto:info@opalgalaxy.ae", "Port Saeed", "Saturday – Thursday 8:00 – 18:00",
+                     "img/opal-galaxy-logo-v1-reversed.svg", "opalgalaxy.ae"):
+            self.assertIn(text, footer)
+        self.assertEqual(footer.count('class="foot__ico"'), 5)
+        cs = CompanySettings.load()
+        cs.phone, cs.phone_display, cs.email, cs.address, cs.hours_short_en = "+97140000000", "+971 4 000 0000", "", "", ""
+        cs.save()
+        footer = self.footer()
+        self.assertIn('href="tel:+97140000000"', footer)
+        self.assertNotIn("mailto:", footer)                        # nothing is shown for an empty field
+        self.assertEqual(footer.count('class="foot__ico"'), 2)
+
+    def test_footer_links_exist_and_none_is_a_placeholder(self):
+        import re
+        for prefix in ("", "/ar"):
+            footer = self.footer(prefix + "/products/vrf/")
+            self.assertNotIn('href="#"', footer)
+            self.assertNotIn('href=""', footer)
+            for href in set(re.findall(r'href="(/[^"#]*)', footer)):
+                if not href.startswith(("/static/", "/media/")):
+                    with self.subTest(href=href):
+                        self.assertEqual(self.client.get(href).status_code, 200)
+            self.assertIn(f'href="{prefix}/privacy/"', footer)
+            self.assertIn('hreflang="', footer)
+        self.assertEqual(self.footer().count('<details class="foot__group'), 4)
+        self.assertEqual(self.footer().count(" open>"), 4)        # open without JavaScript
+
+    def test_social_buttons_are_links_only_when_a_url_is_set(self):
+        from core.models import CompanySettings
+        social = self.footer().split('class="social"')[1].split("</ul>")[0]
+        self.assertEqual((social.count("<a "), social.count("<span")), (0, 4))
+        cs = CompanySettings.load()
+        cs.facebook_url, cs.tiktok_url = "https://www.facebook.com/example", "https://www.tiktok.com/@example"
+        cs.save()
+        social = self.footer().split('class="social"')[1].split("</ul>")[0]
+        self.assertEqual((social.count("<a "), social.count("<span")), (2, 2))
+        self.assertIn('aria-label="Facebook"', social)
+
+    def test_motion_uses_tokens_and_respects_reduced_motion(self):
+        import re
+        from django.conf import settings
+        css = (settings.BASE_DIR / "static/css/components.css").read_text()
+        css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+        tokens = (settings.BASE_DIR / "static/css/tokens.css").read_text()
+        # Durations are the three tokens; the only literals are zero and the reduced-motion override.
+        literals = set(re.findall(r"(?<![\w.-])(\d*\.?\d+m?s)\b", css))
+        self.assertLessEqual(literals, {"0s", ".001ms"})
+        for name in ("t-fast", "t", "t-slow", "stagger", "lift", "zoom", "reveal-y"):
+            self.assertIn(f"--{name}:", tokens)
+        self.assertIn("--t-fast:0s;--t:0s;--t-slow:0s;--stagger:0s;--lift:0px;--zoom:1;--reveal-y:0px", tokens)
+        self.assertIn("@media (prefers-reduced-motion:reduce){", css)
+        self.assertIn("animation-duration:.001ms!important", css)
+        for banned in ("infinite", "marquee", "parallax", "background-attachment:fixed"):
+            self.assertNotIn(banned, css)
+        self.assertIn(".social a:hover,.social a:focus-visible{", css)
+
+    def test_reveal_never_hides_content_without_javascript(self):
+        import re
+        from django.conf import settings
+        css = (settings.BASE_DIR / "static/css/components.css").read_text()
+        for rule in re.findall(r"([^{}]*\[data-reveal\][^{}]*)\{[^}]*opacity:0", css):
+            self.assertIn(".js ", rule)     # hidden only when the script has marked the page
+        hero = self.client.get("/").content.decode().split('class="hero-x"')[1].split("</section>")[0]
+        self.assertNotIn("data-reveal", hero)

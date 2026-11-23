@@ -97,6 +97,22 @@
     }
   }
 
+  // Footer link groups: folded on phones, always open (and not toggles) on wider screens.
+  // Without JavaScript they are simply open everywhere.
+  var groups = document.querySelectorAll('.foot__group');
+  if (groups.length) {
+    var phone = window.matchMedia('(max-width: 640px)');
+    var syncGroups = function () {
+      Array.prototype.forEach.call(groups, function (g) {
+        var sum = g.querySelector('summary');
+        if (phone.matches) { g.removeAttribute('open'); sum.removeAttribute('tabindex'); }
+        else { g.setAttribute('open', ''); sum.setAttribute('tabindex', '-1'); }
+      });
+    };
+    syncGroups();
+    if (phone.addEventListener) phone.addEventListener('change', syncGroups);
+  }
+
   // Gallery viewer. Without JavaScript each photo is a plain link to the larger image.
   var box = document.getElementById('lightbox'), links = document.querySelectorAll('[data-lightbox]');
   if (box && links.length && typeof box.showModal === 'function') {
