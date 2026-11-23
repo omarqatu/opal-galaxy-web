@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% load i18n opal %}
+{% block title %}{{ page|tr:"title" }} — Opal Galaxy{% if lang == 'ar' %}، دبي{% else %}, Dubai{% endif %}{% endblock %}
+{% block description %}{{ page|tr:"lead" }}{% endblock %}
+{% block content %}
+{% with s=settings.core.CompanySettings t=settings.core.SiteCopy %}
+{% include "includes/crumbs.html" with current_label=page|tr:"title" %}
+{% include "includes/page_hero.html" with title=page|tr:"title" lead=page|tr:"lead" %}
+
+{% if page.sections.all %}<section class="section section--white"><div class="container"><div class="prose">
+  {% for sec in page.sections.all %}<div class="prose__section">
+    {% if sec.heading_en %}<h2>{{ sec|tr:"heading" }}</h2>{% endif %}
+    {% for kind, value in sec.blocks %}{% if kind == "ul" %}<ul>{% for item in value %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>{{ value|urlize }}</p>{% endif %}{% endfor %}
+  </div>{% endfor %}
+</div></div></section>{% endif %}
+
+{% if page.kind == "faq" and faqs %}<section class="section section--white"><div class="container"><div class="prose">
+  <div class="accordion">{% for f in faqs %}<details{% if forloop.first %} open{% endif %}><summary>{{ f|tr:"question" }}</summary><div class="accordion__body"><p>{{ f|tr:"answer" }}</p></div></details>{% endfor %}</div>
+</div></div></section>{% endif %}
+
+{% if page.kind == "contact" %}<section class="section section--white"><div class="container split split--top">
+  <dl class="kv">
+    <dt>{% translate "Phone / WhatsApp" %}</dt><dd><a class="ltr" href="tel:{{ s.phone }}">{{ s.phone_display|default:s.phone }}</a></dd>
+    {% if s.email %}<dt>{% translate "Email" %}</dt><dd><a class="ltr" href="mailto:{{ s.email }}">{{ s.email }}</a></dd>{% endif %}
+    <dt>{% translate "Address" %}</dt><dd><span class="ltr">{{ s.address }}</span></dd>
+    <dt>{% translate "Business hours" %}</dt><dd>{{ s|tr:"hours_full" }}</dd>
+    {% if s.licence_en %}<dt>{% translate "Licence" %}</dt><dd>{{ s|tr:"licence" }}</dd>{% endif %}
+  </dl>
+  <div class="contact-actions">
+    <a class="btn btn-wa" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{{ t|tr:"footer_whatsapp" }}</span></a>
+    <a class="btn btn-outline" href="tel:{{ s.phone }}">{% include "includes/phone.svg" %}<span class="ltr">{{ s.phone_display|default:s.phone }}</span></a>
+    {% if s.email %}<a class="btn btn-outline" href="mailto:{{ s.email }}"><span class="ltr">{{ s.email }}</span></a>{% endif %}
+  </div>
+</div></section>{% endif %}
+{% endwith %}
+{% endblock %}
+{% block quote_form %}{% if page.show_quote_form %}{{ block.super }}{% endif %}{% endblock %}

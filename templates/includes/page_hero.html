@@ -1,0 +1,15 @@
+{% load i18n opal %}{# Shared hero of internal pages. Pass: title, lead, and optionally art_icon / art_cat / art_text, primary_label, wa_text #}
+<section class="page-hero"><div class="container split split--wide-start">
+  <div class="page-hero__copy">
+    <h1>{{ title }}</h1>
+    {% if lead %}<p class="lead">{{ lead }}</p>{% endif %}
+    {% if primary_label %}<div class="page-hero__cta">
+      <a class="btn btn-primary" href="#contact">{{ primary_label }}</a>
+      {% if wa_text %}<a class="btn btn-wa" href="https://wa.me/{{ settings.core.CompanySettings.whatsapp }}?text={{ wa_text|urlencode }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% translate "WhatsApp" %}</span></a>{% endif %}
+    </div>{% endif %}
+    {% if meta %}<p class="page-hero__meta"><span class="ltr">{{ meta }}</span></p>{% endif %}
+  </div>
+  {% if art_cat or art_icon or art_text %}<div class="page-hero__art" aria-hidden="true">
+    {% if art_cat %}{% cat_icon art_cat %}{% elif art_icon %}{% icon art_icon %}{% else %}<span class="page-hero__wordmark">{{ art_text }}</span>{% endif %}
+  </div>{% endif %}
+</div></section>

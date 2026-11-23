@@ -35,7 +35,7 @@
         <select name="unit" id="f-unit">
           <option value="">{% translate "Choose a product" %}</option>
           {% for c in nav_categories %}<option value="{{ c.slug }}" data-brands="{{ c|brand_ids }}"{% if category.slug == c.slug %} selected{% endif %}>{{ c|tr:"name" }}</option>{% endfor %}
-          <option value="maintenance"{% if page_kind == 'service' %} selected{% endif %}>{% translate "Maintenance / spare parts" %}</option>
+          {% for sp in service_pages %}<option value="{{ sp.form_value }}"{% if page_kind == 'service' and page.form_value == sp.form_value %} selected{% endif %}>{{ sp|tr:"form_label"|default:sp.title }}</option>{% endfor %}
         </select></label>
       <label class="f"><span>{% translate "Brand" %}</span>
         <select name="brand" id="f-brand">

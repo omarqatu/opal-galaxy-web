@@ -10,7 +10,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone, translation
 
 from catalog.models import Brand, ProductCategory
-from .models import QuoteRequest, ServicePage
+from .models import HomePage, QuoteRequest
 
 log = logging.getLogger(__name__)
 
@@ -78,7 +78,9 @@ def sitemap_xml(request):
     paths = ["/"]
     paths += [f"/products/{c.slug}/" for c in ProductCategory.objects.live()]
     paths += [f"/brands/{b.slug}/" for b in Brand.objects.all()]
-    paths += [f"/{p.slug}/" for p in ServicePage.objects.live()]
+    home = HomePage.objects.live().first()
+    if home:  # every published page under the home page: services, about, FAQ, contact, privacy…
+        paths += [f"/{p.slug}/" for p in home.get_children().live().order_by("path")]
     return render(request, "sitemap.xml", {"base": base, "paths": paths,
                                            "today": timezone.localdate()}, content_type="application/xml")
 

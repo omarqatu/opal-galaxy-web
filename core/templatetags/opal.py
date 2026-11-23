@@ -51,3 +51,9 @@ def brand_ids(category):
 def slugpath(slug):
     """'maintenance' → '/maintenance/' for {% lurl %}."""
     return f"/{slug}/"
+
+
+@register.filter
+def fmt(text, name):
+    """'Request a {name} quote'|fmt:brand.name — fills the {name} placeholder of a site text."""
+    return str(text).replace("{name}", str(name))

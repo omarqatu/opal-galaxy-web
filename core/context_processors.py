@@ -28,6 +28,9 @@ def site_context(request):
         "service_pages": _service_pages(),
         "privacy_url": _page_url("privacy", lang),
         "faq_url": _page_url("faq", lang),
+        "about_url": _page_url("about", lang),
+        "contact_url": _page_url("contact", lang),
+        "duct_url": _page_url("duct-cleaning", lang),
         "quote_sent": request.GET.get("sent") == "1",
         "quote_error": request.GET.get("sent") == "0",
     }

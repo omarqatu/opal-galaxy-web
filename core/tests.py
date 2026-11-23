@@ -293,8 +293,8 @@ class HomeRedesignTests(TestCase):
             self.assertIn(title, en)
         self.assertIn("تنظيف مجاري التكييف", ar)
         self.assertIn('href="/maintenance/"', en.split('id="services"')[1].split("</section>")[0])
-        # The duct cleaning page does not exist yet: the button leads to the quote form.
-        self.assertIn('href="#contact">Ask about duct cleaning', en)
+        self.assertIn('href="/duct-cleaning/">Ask about duct cleaning', en)
+        self.assertIn('href="/ar/duct-cleaning/">الاستفسار عن تنظيف مجاري التكييف', ar)
 
     def test_unverified_claims_are_not_headlines(self):
         html = self.client.get("/").content.decode()
@@ -332,10 +332,11 @@ class HomeRedesignTests(TestCase):
 
     def test_privacy_note_links_to_the_policy_once_the_page_exists(self):
         from core.models import HomePage, ServicePage
-        self.assertContains(self.client.get("/"), '<span class="alt">We never share your details.</span>')
-        HomePage.objects.get().add_child(instance=ServicePage(title="Privacy", slug="privacy", title_en="Privacy"))
+        from wagtail.models import Page
         self.assertContains(self.client.get("/"), '<a href="/privacy/">We never share your details.</a>')
         self.assertContains(self.client.get("/ar/"), 'href="/ar/privacy/"')
+        Page.objects.get(slug="privacy").specific.unpublish()
+        self.assertContains(self.client.get("/"), '<span class="alt">We never share your details.</span>')
 
     def test_social_icons_link_only_when_a_url_is_set(self):
         from core.models import CompanySettings
@@ -363,7 +364,8 @@ class HomeRedesignTests(TestCase):
     def test_existing_destinations_are_still_in_the_menu(self):
         html = self.client.get("/products/wall/").content.decode()
         menu = html.split('id="menu"')[1].split("</ul>")[0]
-        for href in ('/#products"', '/#brands"', '/#contractors"', '/#install"', '"/maintenance/"', '"#contact"'):
+        for href in ('/#products"', '/#brands"', '/#contractors"', '/#install"', '"/maintenance/"',
+                     '"/duct-cleaning/"', '"/about/"', '"/contact/"'):
             self.assertIn(href, menu)
 
     def test_one_h1_and_no_external_requests(self):
@@ -465,3 +467,176 @@ class HomeContentMigrationTests(TestCase):
         self.assertEqual(home.services.count(), 1)
         # A field the operator emptied is filled again only because it is empty: documented behaviour.
         self.assertEqual(home.duct_title_en, "AC duct cleaning")
+
+
+class InternalPagesTests(TestCase):
+    """Phase 3 of the redesign: category, brand and service pages, and the five new pages."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    NEW = ("duct-cleaning", "contact", "faq", "about", "privacy")
+
+    def test_new_pages_exist_in_both_languages_with_canonical_and_hreflang(self):
+        for slug in self.NEW:
+            for prefix, lang in (("", "en"), ("/ar", "ar")):
+                with self.subTest(slug=slug, lang=lang):
+                    r = self.client.get(f"{prefix}/{slug}/")
+                    self.assertEqual(r.status_code, 200)
+                    html = r.content.decode()
+                    self.assertIn(f'<html lang="{lang}"', html)
+                    self.assertEqual(html.count("<h1"), 1)
+                    self.assertIn(f'<link rel="canonical" href="http://testserver{prefix}/{slug}/">', html)
+                    self.assertIn(f'hreflang="en" href="http://testserver/{slug}/"', html)
+                    self.assertIn(f'hreflang="ar" href="http://testserver/ar/{slug}/"', html)
+
+    def test_new_pages_are_in_the_sitemap_and_existing_urls_are_kept(self):
+        xml = self.client.get("/sitemap.xml").content.decode()
+        for slug in self.NEW + ("maintenance",):
+            self.assertIn(f"<loc>http://testserver/{slug}/</loc>", xml)
+            self.assertIn(f"<loc>http://testserver/ar/{slug}/</loc>", xml)
+        for path in ("/products/vrf/", "/brands/carrier/", "/maintenance/"):
+            self.assertEqual(self.client.get(path).status_code, 200)
+
+    def test_duct_cleaning_uses_the_approved_arabic_name_and_invents_nothing(self):
+        en = self.client.get("/duct-cleaning/").content.decode()
+        ar = self.client.get("/ar/duct-cleaning/").content.decode()
+        self.assertIn("<h1>تنظيف مجاري التكييف</h1>", ar)
+        self.assertIn('<option value="duct-cleaning" selected>AC duct cleaning</option>', en)
+        body = en.split('id="app"')[1].split('id="contact"')[0]
+        for banned in ("AED", "hours", "guarantee", "certified", "warranty", "%"):
+            self.assertNotIn(banned, body)
+
+    def test_duct_cleaning_request_is_saved_with_its_service(self):
+        self.client.post("/quote/", {"phone": "+971501234567", "unit": "duct-cleaning",
+                                     "source_page": "/duct-cleaning/"})
+        self.assertEqual(QuoteRequest.objects.get().product, "duct-cleaning")
+
+    def test_faq_page_shows_every_question_even_when_not_featured(self):
+        from core.models import FaqItem
+        FaqItem.objects.update(featured=False)
+        html = self.client.get("/ar/faq/").content.decode()
+        self.assertEqual(html.count("<details"), 6)
+        self.assertIn("ما معنى تصنيف T3", html)
+
+    def test_contact_page_shows_company_details_and_the_form(self):
+        html = self.client.get("/contact/").content.decode()
+        for text in ("tel:+971541981593", "mailto:info@opalgalaxy.ae", "Port Saeed", 'id="quote"', "wa.me/971541981593"):
+            self.assertIn(text, html)
+
+    def test_about_page_repeats_the_existing_company_text_only(self):
+        from core.models import HomePage
+        home = HomePage.objects.get()
+        html = self.client.get("/about/").content.decode()
+        first, second = [p.strip() for p in home.about_text_en.split("\n\n")]
+        self.assertIn(first, html)
+        self.assertIn(second.replace("\u2019", "&#x27;"), html.replace("’", "&#x27;") if "\u2019" in second else html)
+        self.assertIn('href="/about/"', self.client.get("/").content.decode())
+
+    def test_privacy_policy_states_only_what_the_site_does(self):
+        en = self.client.get("/privacy/").content.decode()
+        body = en.split('id="app"')[1].split("<footer")[0]
+        for text in ("Phone number", "Quantity", "Emirate", "saved in the website", "one cookie", "Cloudflare",
+                     "info@opalgalaxy.ae"):
+            self.assertIn(text, body)
+        for banned in ("GDPR", "PDPL", "Federal Decree", "days", "months", "years", "Google Analytics", "pixel"):
+            self.assertNotIn(banned, body)
+        self.assertIn("سياسة الخصوصية", self.client.get("/ar/privacy/").content.decode())
+
+    def test_category_page_has_no_counts_and_keeps_catalogue_rows_verbatim(self):
+        en = self.client.get("/products/vrf/").content.decode()
+        ar = self.client.get("/ar/products/vrf/").content.decode()
+        for html in (en, ar):
+            self.assertNotIn("Available from <b>", html)
+            self.assertNotIn("علامات تجارية</span>", html)
+            for s in Supply.objects.filter(category__slug="vrf"):
+                self.assertIn(s.models_text.replace("&", "&amp;"), html)
+        self.assertIn('<div class="supply-row__data" dir="ltr" lang="en">', ar)
+        self.assertNotIn("vrf systems", en)   # the old lower-cased button text
+        self.assertIn("Request a quote for this equipment", en)
+
+    def test_brand_page_texts_come_from_site_texts(self):
+        from core.models import SiteCopy
+        self.assertContains(self.client.get("/brands/carrier/"), "What we supply from Carrier")
+        self.assertContains(self.client.get("/ar/brands/carrier/"), "ما نورّده من Carrier")
+        copy = SiteCopy.load()
+        copy.brand_supply_title_en = "{name}: our range"
+        copy.save()
+        self.assertContains(self.client.get("/brands/carrier/"), "Carrier: our range")
+
+    def test_arabic_language_corrections(self):
+        from core.models import ServiceItem
+        ar = self.client.get("/ar/").content.decode()
+        for banned in ("(Ducted)", "(Package)", "مجاري الهواء", "(BOQ)", "(Submittals)", "46° مئوية",
+                       "الخيار خليجي الصنع", "وحدتان Inverter<"):
+            self.assertNotIn(banned, ar)
+        self.assertIn("مجاري التكييف", ar)
+        self.assertIn("شيلرات ووحدات مناولة الهواء وفان كويل", ar)
+        self.assertIn("46 °م", ar)
+        self.assertNotIn("مجاري الهواء", self.client.get("/ar/products/package/").content.decode())
+        self.assertFalse(ServiceItem.objects.filter(text_en__contains="seven brands").exists())
+        self.assertNotIn("السبع", self.client.get("/ar/maintenance/").content.decode())
+
+    def test_catalogue_rows_are_untouched_by_the_content_migrations(self):
+        import json
+        from django.conf import settings
+        seed = json.loads((settings.BASE_DIR / "seed/opal.json").read_text(encoding="utf-8"))
+        for cat in seed["categories"]:
+            for row in cat.get("supply", []):
+                s = Supply.objects.get(category__slug=cat["slug"], brand__slug=row["brand"])
+                self.assertEqual((s.models_text, s.specs), (row["models"], "\n".join(row.get("specs", []))))
+
+
+class PagesContentMigrationTests(TestCase):
+    """core 0005: creates the new pages once and corrects phrases only where they still stand."""
+
+    def apply(self):
+        import importlib
+        from django.apps import apps
+        importlib.import_module("core.migrations.0005_redesign_pages_content").apply_content(apps, None)
+
+    def test_empty_database_is_left_alone(self):
+        from wagtail.models import Page
+        before = Page.objects.count()
+        self.apply()
+        self.assertEqual(Page.objects.count(), before)
+
+    def test_idempotent_and_respects_edits_and_existing_pages(self):
+        from wagtail.models import Page
+        from catalog.models import ProductCategory
+        from core.models import ContentPage, ContentSection, HomePage
+        call_command("seed_site", verbosity=0)
+        pages, sections = Page.objects.count(), ContentSection.objects.count()
+        privacy = ContentPage.objects.get(slug="privacy")
+        privacy.sections.all().delete()
+        privacy.lead_en = "Edited by Omar"
+        privacy.save()
+        ducted = ProductCategory.objects.get(slug="ducted")
+        ducted.name_ar = "وحدات مخفية"
+        ducted.lead_ar = "نص كتبه عمر عن مجاري الهواء"   # a later edit that uses the old term on purpose
+        ducted.save()
+        home = HomePage.objects.get()
+        home.faq_page = None
+        home.about_page = Page.objects.get(slug="contact")
+        home.save()
+        self.apply()
+        self.assertEqual(Page.objects.count(), pages)
+        self.assertEqual(ContentSection.objects.count(), sections - 8)
+        self.assertEqual(ContentPage.objects.get(slug="privacy").lead_en, "Edited by Omar")
+        home = HomePage.objects.get()
+        self.assertEqual(home.about_page.slug, "contact")   # an operator's choice is kept
+        self.assertEqual(home.faq_page.slug, "faq")         # an empty link is filled
+        # Treebeard bookkeeping stays consistent after pages created by the migration.
+        self.assertEqual(home.numchild, home.get_children().count())
+        self.assertEqual(Page.find_problems(), ([], [], [], [], []))
+
+    def test_latest_revisions_get_the_corrections_too(self):
+        from catalog.models import ProductCategory
+        from core.models import HomePage
+        call_command("seed_site", verbosity=0)
+        draft = HomePage.objects.get().get_latest_revision_as_object()
+        self.assertIn("بوصفها حلقة وصل", draft.about_text_ar)
+        self.assertEqual(draft.duct_page.slug, "duct-cleaning")
+        self.assertIn("46 °م", " ".join(f.answer_ar for f in draft.faqs.all()))
+        self.assertEqual(ProductCategory.objects.get(slug="ducted").name_ar, "وحدات مخفية")
