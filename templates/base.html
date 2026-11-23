@@ -23,25 +23,29 @@
 <link rel="stylesheet" href="{% static 'css/components.css' %}">
 {% block head_extra %}{% endblock %}</head>
 <body>
+{% with s=settings.core.CompanySettings t=settings.core.SiteCopy %}
 <a class="skip" href="#app">{% translate "Skip to content" %}</a>
-<header id="site-header">
-  <div class="wrap nav">
-    <a class="logo" href="{{ home_url }}" aria-label="Opal Galaxy">
+<header id="site-header" class="site-header">
+  <div class="container container--wide nav">
+    <a class="logo" href="{{ home_url }}" aria-label="{{ s.short_name }}">
       {% include "includes/logo.svg" %}
-      <span><b>{{ settings.core.CompanySettings.short_name }}</b><small>{{ settings.core.CompanySettings|tr:"tagline" }}</small></span>
+      <span><b>{{ s.short_name }}</b><small>{{ s|tr:"tagline" }}</small></span>
     </a>
     <button class="burger" aria-label="{% translate 'Main menu' %}" aria-expanded="false" aria-controls="menu" id="burger">{% include "includes/burger.svg" %}</button>
+    <nav aria-label="{% translate 'Main menu' %}">
     <ul class="menu" id="menu">
-      <li><a href="{{ home_url }}#products">{% T "Products" "المنتجات" %}</a></li>
-      <li><a href="{{ home_url }}#brands">{% T "Brands" "العلامات التجارية" %}</a></li>
-      <li><a href="{{ home_url }}#contractors">{% T "For contractors" "للمقاولين والمشاريع" %}</a></li>
-      <li><a href="{{ home_url }}#install">{% T "With installation" "التوريد مع التركيب" %}</a></li>
-      <li><a href="{% lurl '/maintenance/' %}">{% T "Maintenance and parts" "الصيانة وقطع الغيار" %}</a></li>
-      <li><a href="#contact">{% T "Contact" "تواصل معنا" %}</a></li>
+      <li><a href="{{ home_url }}#products">{{ t|tr:"nav_products" }}</a></li>
+      <li><a href="{{ home_url }}#brands">{{ t|tr:"nav_brands" }}</a></li>
+      <li><a href="{{ home_url }}#contractors">{{ t|tr:"nav_contractors" }}</a></li>
+      <li><a href="{{ home_url }}#install">{{ t|tr:"nav_services" }}</a></li>
+      <li><a href="{% lurl '/maintenance/' %}">{{ t|tr:"nav_maintenance" }}</a></li>
+      <li><a href="#contact">{{ t|tr:"nav_contact" }}</a></li>
     </ul>
+    </nav>
     <div class="tools">
       <a class="lang" href="{{ other_lang_url }}" hreflang="{{ other_lang }}" lang="{{ other_lang }}" aria-label="{% if lang == 'ar' %}Switch to English{% else %}التحويل إلى العربية{% endif %}">{% if lang == 'ar' %}EN{% else %}العربية{% endif %}</a>
-      <a class="btn btn-wa" href="https://wa.me/{{ settings.core.CompanySettings.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% translate "WhatsApp" %}</span></a>
+      <a class="btn btn-wa btn-sm nav-wa" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener" aria-label="{% translate 'WhatsApp' %}">{% include "includes/wa.svg" %}</a>
+      <a class="btn btn-primary btn-sm nav-quote" href="#contact">{{ t|tr:"nav_quote" }}</a>
     </div>
   </div>
 </header>
@@ -51,37 +55,50 @@
   {% block quote_form %}{% include "includes/contact.html" %}{% endblock %}
 </main>
 
-{% with s=settings.core.CompanySettings %}
 <div class="mbar" id="mbar" aria-label="{% translate 'Quick actions' %}">
   <a class="call" href="tel:{{ s.phone }}">{% include "includes/phone.svg" %}<span>{% translate "Call" %}</span></a>
   <a class="wa" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% translate "WhatsApp" %}</span></a>
-  <a class="quote" href="#contact"><span>{% T "Request a quote" "طلب عرض سعر" %}</span></a>
+  <a class="quote" href="#contact"><span>{{ t|tr:"nav_quote" }}</span></a>
 </div>
 
-<footer>
-  <div class="wrap">
-    <div class="cols">
-      <div>
+<footer class="site-footer">
+  <div class="container container--wide">
+    <div class="site-footer__top">
+      <div class="site-footer__brand">
         <a class="logo" href="{{ home_url }}">{% include "includes/logo.svg" %}<span><b>{{ s.short_name }}</b><small>{{ s|tr:"tagline" }}</small></span></a>
         <p>{{ s|tr:"footer_about" }}</p>
-        <p class="ltr">{{ s.address }}</p>
+        <a class="btn btn-wa" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{{ t|tr:"footer_whatsapp" }}</span></a>
+        <ul class="social" aria-label="{% translate 'Social media' %}">{% for name, url in s.social_links %}
+          <li>{% if url %}<a href="{{ url }}" target="_blank" rel="noopener" aria-label="{{ name|capfirst }}">{% include "includes/icons/social.html" %}</a>{% else %}<span title="{{ name|capfirst }}">{% include "includes/icons/social.html" %}</span>{% endif %}</li>{% endfor %}
+        </ul>
       </div>
-      <div>
-        <h4>{% T "Products" "المنتجات" %}</h4>
-        {% for c in nav_categories %}<p><a href="{{ c.get_url }}">{{ c|tr:"name" }}</a></p>{% endfor %}
-      </div>
-      <div>
-        <h4>{% T "Brands" "العلامات التجارية" %}</h4>
-        {% for b in nav_brands %}<p><a href="{{ b.get_url }}">{{ b.name }}</a></p>{% endfor %}
-      </div>
-      <div>
-        <h4>{% T "Contact" "تواصل معنا" %}</h4>
-        <p><a class="ltr" href="tel:{{ s.phone }}">{{ s.phone_display|default:s.phone }}</a></p>
-        {% if s.email %}<p><a class="ltr" href="mailto:{{ s.email }}">{{ s.email }}</a></p>{% endif %}
-        <p>{{ s|tr:"hours_short" }}</p>
-        <p><a href="{{ home_url }}#contractors">{% T "For contractors" "للمقاولين والمشاريع" %}</a></p>
-        <p><a href="{% lurl '/maintenance/' %}">{% T "Maintenance and parts" "الصيانة وقطع الغيار" %}</a></p>
-        <p><a href="{{ home_url }}#faq">{% T "FAQ" "أسئلة شائعة" %}</a></p>
+      <nav class="site-footer__col" aria-label="{{ t|tr:'footer_products' }}">
+        <h2>{{ t|tr:"footer_products" }}</h2>
+        <ul>{% for c in nav_categories %}<li><a href="{{ c.get_url }}">{{ c|tr:"name" }}</a></li>{% endfor %}</ul>
+      </nav>
+      <nav class="site-footer__col" aria-label="{{ t|tr:'footer_brands' }}">
+        <h2>{{ t|tr:"footer_brands" }}</h2>
+        <ul class="site-footer__brands">{% for b in nav_brands %}<li><a href="{{ b.get_url }}">{{ b.name }}</a></li>{% endfor %}</ul>
+      </nav>
+      <nav class="site-footer__col" aria-label="{{ t|tr:'footer_services' }}">
+        <h2>{{ t|tr:"footer_services" }}</h2>
+        <ul>
+          {% for sp in service_pages %}<li><a href="{% lurl sp.slug|slugpath %}">{{ sp|tr:"title" }}</a></li>{% endfor %}
+          <li><a href="{{ home_url }}#contractors">{{ t|tr:"nav_contractors" }}</a></li>
+          <li><a href="{{ home_url }}#install">{{ t|tr:"nav_services" }}</a></li>
+          <li><a href="{% if faq_url %}{{ faq_url }}{% else %}{{ home_url }}#faq{% endif %}">{{ t|tr:"footer_faq" }}</a></li>
+          {% if privacy_url %}<li><a href="{{ privacy_url }}">{{ t|tr:"footer_privacy" }}</a></li>{% endif %}
+        </ul>
+      </nav>
+      <div class="site-footer__col">
+        <h2>{{ t|tr:"footer_contact" }}</h2>
+        <ul>
+          <li><a class="ltr" href="tel:{{ s.phone }}">{{ s.phone_display|default:s.phone }}</a></li>
+          {% if s.email %}<li><a class="ltr" href="mailto:{{ s.email }}">{{ s.email }}</a></li>{% endif %}
+          <li><span class="ltr">{{ s.address }}</span></li>
+        </ul>
+        <h2>{{ t|tr:"footer_hours" }}</h2>
+        <ul><li>{{ s|tr:"hours_short" }}</li></ul>
       </div>
     </div>
     <div class="copy-bar">

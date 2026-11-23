@@ -1,58 +1,61 @@
-{% load opal %}{% with s=settings.core.CompanySettings %}
-<section id="contact" class="contact">
-  <div class="wrap">
-    <div>
-      <h2>{% T "Request a quote" "طلب عرض سعر" %}</h2>
+{% load i18n opal %}{% with s=settings.core.CompanySettings t=settings.core.SiteCopy %}
+<section id="contact" class="quote section section--dark">
+  <div class="container split split--top">
+    <div class="quote__intro">
+      <h2>{{ t|tr:"quote_title" }}</h2>
       <p class="lead">{{ s|tr:"quote_reply" }}</p>
-      <a class="btn btn-wa wa-big" href="https://wa.me/{{ s.whatsapp }}?text={% if lang == 'ar' %}%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%B9%D8%B1%D8%B6%20%D8%B3%D8%B9%D8%B1{% else %}Hello%2C%20I%20would%20like%20a%20quote{% endif %}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% T "Send your BOQ on WhatsApp" "إرسال جدول الكميات عبر واتساب" %}</span></a>
-      {% if s.email %}<p class="alt" style="margin-top:18px">{% T "Or by email:" "أو عبر البريد الإلكتروني:" %} <a class="ltr" href="mailto:{{ s.email }}">{{ s.email }}</a></p>{% endif %}
+      <a class="btn btn-wa" href="https://wa.me/{{ s.whatsapp }}?text={% if lang == 'ar' %}%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D8%8C%20%D8%A3%D8%B1%D9%8A%D8%AF%20%D8%B9%D8%B1%D8%B6%20%D8%B3%D8%B9%D8%B1{% else %}Hello%2C%20I%20would%20like%20a%20quote{% endif %}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{{ t|tr:"quote_whatsapp" }}</span></a>
+      <dl class="quote__contacts">
+        <dt>{% translate "Phone / WhatsApp" %}</dt><dd><a class="ltr" href="tel:{{ s.phone }}">{{ s.phone_display|default:s.phone }}</a></dd>
+        {% if s.email %}<dt>{{ t|tr:"quote_email_label" }}</dt><dd><a class="ltr" href="mailto:{{ s.email }}">{{ s.email }}</a></dd>{% endif %}
+      </dl>
     </div>
-    <form id="quote" method="post" action="/quote/">
+    <form id="quote" class="quote__form" method="post" action="/quote/">
       {% csrf_token %}
       <input type="hidden" name="lang" value="{{ lang }}">
       <input type="hidden" name="source_page" value="{{ request.path }}">
       <label class="hp" aria-hidden="true">Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
       <div class="form-ctx{% if category or brand or page_kind == 'service' %} show{% endif %}" id="form-ctx">
-        {% if category %}{% T "Quote for:" "الطلب عن:" %} <b>{{ category|tr:"name" }}</b>
-        {% elif brand %}{% T "Quote for:" "الطلب عن منتجات:" %} <b>{{ brand.name }}</b>
-        {% elif page_kind == 'service' %}{% T "Request:" "الطلب عن:" %} <b>{% T "maintenance / spare parts" "صيانة / قطع غيار" %}</b>{% endif %}
+        {% if category %}{% translate "Quote for:" %} <b>{{ category|tr:"name" }}</b>
+        {% elif brand %}{% translate "Quote for:" %} <b>{{ brand.name }}</b>
+        {% elif page_kind == 'service' %}{% translate "Request:" %} <b>{{ page|tr:"title" }}</b>{% endif %}
       </div>
-      <label class="f"><span>{% T "Name" "الاسم" %}</span><input type="text" name="name" autocomplete="name" maxlength="120"></label>
-      <label class="f"><span>{% T "Phone" "رقم الهاتف" %}</span><input type="tel" name="phone" autocomplete="tel" dir="ltr" placeholder="+971" required maxlength="40"></label>
-      <div class="f full"><span>{% T "Customer type" "صفة العميل" %}</span>
+      {% if quote_sent %}<div class="notice ok" role="status">{{ t|tr:"quote_success" }}</div>
+      {% elif quote_error %}<div class="notice err" role="alert">{{ t|tr:"quote_error" }}</div>{% endif %}
+      <label class="f"><span>{% translate "Name" %}</span><input type="text" name="name" autocomplete="name" maxlength="120"></label>
+      <label class="f"><span>{% translate "Phone" %} <abbr title="{% translate 'required' %}">*</abbr></span><input type="tel" name="phone" autocomplete="tel" dir="ltr" placeholder="+971" required maxlength="40"></label>
+      <fieldset class="f full"><legend>{% translate "Customer type" %}</legend>
         <div class="seg">
-          <label><input type="radio" name="type" value="contractor" checked><span>{% T "Contractor" "مقاول" %}</span></label>
-          <label><input type="radio" name="type" value="company"><span>{% T "Company" "شركة" %}</span></label>
-          <label><input type="radio" name="type" value="owner"><span>{% T "End user" "عميل فرد" %}</span></label>
+          <label><input type="radio" name="type" value="contractor" checked><span>{% translate "Contractor" %}</span></label>
+          <label><input type="radio" name="type" value="company"><span>{% translate "Company" %}</span></label>
+          <label><input type="radio" name="type" value="owner"><span>{% translate "End user" %}</span></label>
         </div>
-      </div>
-      <label class="f"><span>{% T "Product" "نوع الوحدة" %}</span>
+      </fieldset>
+      <label class="f"><span>{% translate "Product" %}</span>
         <select name="unit" id="f-unit">
-          <option value="">{% T "Choose a product" "اختر نوع الوحدة" %}</option>
+          <option value="">{% translate "Choose a product" %}</option>
           {% for c in nav_categories %}<option value="{{ c.slug }}" data-brands="{{ c|brand_ids }}"{% if category.slug == c.slug %} selected{% endif %}>{{ c|tr:"name" }}</option>{% endfor %}
-          <option value="maintenance"{% if page_kind == 'service' %} selected{% endif %}>{% T "Maintenance / spare parts" "صيانة / قطع غيار" %}</option>
+          <option value="maintenance"{% if page_kind == 'service' %} selected{% endif %}>{% translate "Maintenance / spare parts" %}</option>
         </select></label>
-      <label class="f"><span>{% T "Brand" "العلامة التجارية" %}</span>
+      <label class="f"><span>{% translate "Brand" %}</span>
         <select name="brand" id="f-brand">
-          <option value="">{% T "Any brand" "أي علامة تجارية" %}</option>
+          <option value="">{% translate "Any brand" %}</option>
           {% for b in nav_brands %}<option value="{{ b.slug }}"{% if brand.slug == b.slug %} selected{% endif %}>{{ b.name }}</option>{% endfor %}
-          <option value="other">{% T "Other brand" "علامة تجارية أخرى" %}</option>
+          <option value="other">{% translate "Other brand" %}</option>
         </select></label>
-      <label class="f"><span>{% T "Quantity" "الكمية" %}</span><input type="number" name="qty" min="1" max="100000" dir="ltr"></label>
-      <label class="f"><span>{% T "Emirate" "الإمارة" %}</span><select name="emirate">
-        <option value="Dubai">{% T "Dubai" "دبي" %}</option><option value="Sharjah">{% T "Sharjah" "الشارقة" %}</option><option value="Ajman">{% T "Ajman" "عجمان" %}</option><option value="Abu Dhabi">{% T "Abu Dhabi" "أبوظبي" %}</option><option value="Other">{% T "Other" "أخرى" %}</option></select></label>
-      <div class="f full"><span>{% T "With installation?" "هل يشمل الطلب التركيب؟" %}</span>
+      <label class="f"><span>{% translate "Quantity" %}</span><input type="number" name="qty" min="1" max="100000" dir="ltr"></label>
+      <label class="f"><span>{% translate "Emirate" %}</span><select name="emirate">
+        <option value="Dubai">{% translate "Dubai" %}</option><option value="Sharjah">{% translate "Sharjah" %}</option><option value="Ajman">{% translate "Ajman" %}</option><option value="Abu Dhabi">{% translate "Abu Dhabi" %}</option><option value="Other">{% translate "Other" %}</option></select></label>
+      <fieldset class="f full"><legend>{% translate "With installation?" %}</legend>
         <div class="seg">
-          <label><input type="radio" name="install" value="no" checked><span>{% T "Supply only" "توريد فقط" %}</span></label>
-          <label><input type="radio" name="install" value="yes"><span>{% T "Supply and install" "التوريد والتركيب" %}</span></label>
+          <label><input type="radio" name="install" value="no" checked><span>{% translate "Supply only" %}</span></label>
+          <label><input type="radio" name="install" value="yes"><span>{% translate "Supply and install" %}</span></label>
         </div>
-      </div>
-      <label class="f full"><span>{% T "Notes / project details" "ملاحظات / تفاصيل المشروع" %}</span><textarea name="notes" maxlength="4000"></textarea></label>
-      {% if quote_sent %}<div class="notice ok" role="status">{% T "Request sent. We reply within one working day." "تم إرسال الطلب، وسنوافيكم بالرد خلال يوم عمل واحد." %}</div>
-      {% elif quote_error %}<div class="notice err" role="alert">{% T "Please enter a phone number we can reach you on." "يُرجى إدخال رقم هاتف صحيح للتواصل معكم." %}</div>{% endif %}
+      </fieldset>
+      <label class="f full"><span>{% translate "Notes / project details" %}</span><textarea name="notes" maxlength="4000"></textarea></label>
       <div class="form-foot">
-        <button class="btn btn-accent" type="submit">{% T "Send request" "إرسال الطلب" %}</button>
-        <span class="alt">{% T "We never share your details." "لن تتم مشاركة بياناتكم مع أي جهة." %}</span>
+        <button class="btn btn-accent" type="submit">{{ t|tr:"quote_submit" }}</button>
+        <span class="alt">{% if privacy_url %}<a href="{{ privacy_url }}">{{ t|tr:"quote_privacy" }}</a>{% else %}{{ t|tr:"quote_privacy" }}{% endif %}</span>
       </div>
     </form>
   </div>

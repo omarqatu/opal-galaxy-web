@@ -1,6 +1,6 @@
 # Open questions — Opal Galaxy website
 
-Maintained through the redesign (last update: Phase 1, 23 Nov 2026). Catalogue questions stay in `review/questions.md`.
+Maintained through the redesign (last update: Phase 2, 23 Nov 2026). Catalogue questions stay in `review/questions.md`.
 
 Each row: the exact text affected · what needs confirming · the placeholder used meanwhile. "Ahmad" = business owner; "Omar" = operator.
 
@@ -24,18 +24,23 @@ Each row: the exact text affected · what needs confirming · the placeholder us
 
 | # | Text affected | To confirm | Placeholder meanwhile |
 |---|---|---|---|
+| 8d | Hero and contractors photographs | Phase 2 uses two genuine gallery photos (two outdoor units beside a villa; crane lift). Both are small phone photos (675×900). Ahmad: new photographs as listed in the Phase 0 report. | Existing gallery photos in portrait frames. |
 | 9 | New hero: "…for commercial, residential and industrial developments across the UAE." | Ahmad: does Opal Galaxy serve industrial developments? | Text as supplied in the brief. |
-| 10 | "Delivery within 48 hours — Dubai, Sharjah and Ajman. Other emirates by order size." (facts strip and FAQ) | Ahmad: is this a commitment, for which items and areas? | Kept as plain text, not emphasised. |
-| 11 | "Volume quote within one working day"; "We reply within one working day." (contractor points, quote section, FAQ, form success notice) | Ahmad: confirm the response time. | Kept as plain text, not emphasised. |
+| 10 | "Delivery within 48 hours — Dubai, Sharjah and Ajman. Other emirates by order size." (facts strip and FAQ) | Ahmad: is this a commitment, for which items and areas? | Kept as a small note under the hero and in the FAQ; no longer a headline band. |
+| 11 | "Volume quote within one working day"; "We reply within one working day." (contractor points, quote section, FAQ, form success notice) | Ahmad: confirm the response time. | Kept in the line under the quote heading and in the FAQ. Removed from the contractors heading and from the form's success notice (now "Your request has been sent. Thank you."). |
 | 12 | "Trade pricing for contractors — Volume quotes with tax invoice and manufacturer warranty" | Ahmad: confirm each element. | Kept, not emphasised. |
 | 13 | "Genuine units through authorised UAE distributors, with manufacturer warranty and original spare parts." | Ahmad: true for every brand listed? | Kept. |
-| 14 | "Staged deliveries — We reserve the quantity and deliver as the site progresses, no storage on your side." | Ahmad: confirm terms for scheduled delivery. | Kept; new section says "subject to agreed terms". |
-| 15 | "Submittals, compliance certificates and warranty cards in the project name." | Ahmad: which documents are actually provided. | Kept. |
+| 14 | "Staged deliveries — We reserve the quantity and deliver as the site progresses, no storage on your side." | Ahmad: confirm terms for scheduled delivery. | Rewritten in Phase 2 as "Scheduled delivery — Deliveries follow the site programme, on the terms agreed in the quotation." The reservation / no-storage promise is not stated until confirmed. |
+| 15 | "Submittals, compliance certificates and warranty cards in the project name." | Ahmad: which documents are actually provided. | Kept, split into "Technical documentation" and "Warranty documentation". |
 | 16 | "From your BOQ or HVAC drawings, with alternatives from two brands on request." | Ahmad: confirm. | Kept. |
 | 17 | "Installation or supervision when needed — Our team installs, or supervises yours through commissioning and handover." | Ahmad: own installation team or subcontracted? Is commissioning offered? | Kept. |
 | 18 | "built on years of supplying and installing HVAC"; "distributor pricing with the speed of a small supplier"; "on the agreed date, with a warranty card in your name" | Ahmad: founding year / years in business; confirm the three promises. | Kept unchanged (no factual changes to About). |
 | 19 | Hero photo and caption "Rooftop package units · Supplied at project scale · Dubai" | Origin of the current image is unconfirmed. Decision (23 Nov): the new hero uses a genuine gallery photo in a portrait frame until Ahmad supplies new photographs. | Genuine gallery photo. |
 | 20 | Gallery captions: "O General 5 ton", "Midea Package 15 ton", "Commercial compound", "Warehouse", "Private villa", "Occupied villa", "Villa under construction", "Residential project", "Twin Inverter units" | Ahmad: brand, capacity and site type for each photo; permission to show people (photos 5 and 6) and the vehicle plate (photo 5). | Neutral captions describing only what is visible. |
+
+| 20a | New contractor point "BOQ support — We review the bill of quantities and match its items to models from the brands we supply." | Ahmad: confirm this describes what Opal does with a BOQ. | As written. |
+| 20b | New services section (HVAC supply, Installation, Maintenance and spare parts, AC duct cleaning, Project quotations, Contractor and commercial project support) | Ahmad: confirm the six services and their one-line descriptions. | As written; no prices, durations or guarantees. |
+| 20c | "Duct cleaning is offered as a dedicated service. Tell us about the property and we will get back to you with the details." | Ahmad: see the Duct cleaning section below. | Button leads to the quote form until the page exists. |
 
 ## Product category pages
 

@@ -33,6 +33,10 @@ class CompanySettings(BaseGenericSetting):
     domain_label = models.CharField(max_length=80, blank=True, help_text="Shown in the footer")
     quote_reply_en = models.CharField(max_length=200, blank=True, help_text="Reply-time promise under the form title")
     quote_reply_ar = models.CharField(max_length=200, blank=True)
+    facebook_url = models.URLField(blank=True, help_text="Leave empty to show the icon without a link")
+    instagram_url = models.URLField(blank=True)
+    linkedin_url = models.URLField(blank=True)
+    tiktok_url = models.URLField(blank=True)
 
     panels = [
         MultiFieldPanel([FieldPanel("legal_name"), FieldPanel("short_name"), bi("tagline"),
@@ -41,10 +45,61 @@ class CompanySettings(BaseGenericSetting):
                          FieldPanel("email"), FieldPanel("address")], heading="Contact"),
         MultiFieldPanel([bi("hours_short"), bi("hours_full"), bi("licence"), bi("footer_about"),
                          bi("quote_reply")], heading="Texts"),
+        MultiFieldPanel([FieldPanel("facebook_url"), FieldPanel("instagram_url"), FieldPanel("linkedin_url"),
+                         FieldPanel("tiktok_url")], heading="Social media (footer icons)"),
     ]
+
+    def social_links(self):
+        return [(name, getattr(self, f"{name}_url")) for name in ("facebook", "instagram", "linkedin", "tiktok")]
 
     class Meta:
         verbose_name = "Company details"
+
+
+# ---------------------------------------------------------------- site copy
+# Short texts shared by every page: menu, buttons, quote section, footer headings.
+# (group, field, English default, Arabic default). Defaults fill the texts on first use;
+# from then on they are edited in the admin under Settings → Site texts.
+SITE_COPY = [
+    ("Menu", "nav_products", "Products", "المنتجات"),
+    ("Menu", "nav_brands", "Brands", "العلامات التجارية"),
+    ("Menu", "nav_contractors", "Contractors", "المقاولون والمشاريع"),
+    ("Menu", "nav_services", "Services", "الخدمات"),
+    ("Menu", "nav_maintenance", "Maintenance and parts", "الصيانة وقطع الغيار"),
+    ("Menu", "nav_contact", "Contact", "تواصل معنا"),
+    ("Menu", "nav_quote", "Request a quote", "طلب عرض سعر"),
+    ("Quote section", "quote_title", "Request a project quote", "طلب عرض سعر لمشروعكم"),
+    ("Quote section", "quote_whatsapp", "Send your BOQ on WhatsApp", "إرسال جدول الكميات عبر واتساب"),
+    ("Quote section", "quote_email_label", "Or by email:", "أو عبر البريد الإلكتروني:"),
+    ("Quote section", "quote_submit", "Send request", "إرسال الطلب"),
+    ("Quote section", "quote_success", "Your request has been sent. Thank you.", "تم إرسال طلبكم، وشكراً لكم."),
+    ("Quote section", "quote_error", "Please enter a phone number we can reach you on.",
+     "يُرجى إدخال رقم هاتف صحيح للتواصل معكم."),
+    ("Quote section", "quote_privacy", "We never share your details.", "لن تتم مشاركة بياناتكم مع أي جهة."),
+    ("Footer", "footer_products", "Products", "المنتجات"),
+    ("Footer", "footer_brands", "Brands", "العلامات التجارية"),
+    ("Footer", "footer_services", "Services", "الخدمات"),
+    ("Footer", "footer_contact", "Contact", "تواصل معنا"),
+    ("Footer", "footer_hours", "Business hours", "ساعات العمل"),
+    ("Footer", "footer_whatsapp", "Chat on WhatsApp", "تواصل عبر واتساب"),
+    ("Footer", "footer_faq", "Frequently asked questions", "الأسئلة الشائعة"),
+    ("Footer", "footer_privacy", "Privacy Policy", "سياسة الخصوصية"),
+]
+
+
+@register_setting(icon="edit")
+class SiteCopy(BaseGenericSetting):
+    class Meta:
+        verbose_name = "Site texts"
+
+
+for _group, _name, _en, _ar in SITE_COPY:
+    SiteCopy.add_to_class(f"{_name}_en", models.CharField(f"{_name} (EN)", max_length=200, default=_en))
+    SiteCopy.add_to_class(f"{_name}_ar", models.CharField(f"{_name} (AR)", max_length=200, default=_ar))
+SiteCopy.panels = [
+    MultiFieldPanel([bi(n) for g, n, _e, _a in SITE_COPY if g == group], heading=group)
+    for group in dict.fromkeys(g for g, *_ in SITE_COPY)
+]
 
 
 # ---------------------------------------------------------------- home page
@@ -70,6 +125,10 @@ class HomePage(RoutablePageMixin, Page):
     hero_caption_ar = models.CharField(max_length=120, blank=True)
     hero_subcaption_en = models.CharField(max_length=120, blank=True)
     hero_subcaption_ar = models.CharField(max_length=120, blank=True)
+    hero_cta_primary_en = models.CharField(max_length=80, blank=True, help_text="Button to the equipment section")
+    hero_cta_primary_ar = models.CharField(max_length=80, blank=True)
+    hero_cta_secondary_en = models.CharField(max_length=80, blank=True, help_text="Button to the quote form")
+    hero_cta_secondary_ar = models.CharField(max_length=80, blank=True)
 
     products_title_en = models.CharField(max_length=120, default="Products")
     products_title_ar = models.CharField(max_length=120, blank=True)
@@ -83,6 +142,24 @@ class HomePage(RoutablePageMixin, Page):
     contractors_title_ar = models.CharField(max_length=160, blank=True)
     contractors_lead_en = models.TextField(blank=True)
     contractors_lead_ar = models.TextField(blank=True)
+    contractors_cta_en = models.CharField(max_length=80, blank=True)
+    contractors_cta_ar = models.CharField(max_length=80, blank=True)
+    contractors_image = models.ForeignKey("wagtailimages.Image", null=True, blank=True,
+                                          on_delete=models.SET_NULL, related_name="+")
+    contractors_image_alt_en = models.CharField(max_length=200, blank=True)
+    contractors_image_alt_ar = models.CharField(max_length=200, blank=True)
+    services_title_en = models.CharField(max_length=160, blank=True)
+    services_title_ar = models.CharField(max_length=160, blank=True)
+    services_lead_en = models.TextField(blank=True)
+    services_lead_ar = models.TextField(blank=True)
+    duct_title_en = models.CharField(max_length=160, blank=True)
+    duct_title_ar = models.CharField(max_length=160, blank=True)
+    duct_text_en = models.TextField(blank=True)
+    duct_text_ar = models.TextField(blank=True)
+    duct_cta_en = models.CharField(max_length=80, blank=True)
+    duct_cta_ar = models.CharField(max_length=80, blank=True)
+    duct_page = models.ForeignKey("wagtailcore.Page", null=True, blank=True, on_delete=models.SET_NULL,
+                                  related_name="+", help_text="Empty: the button leads to the quote form")
     install_title_en = models.CharField(max_length=160, blank=True)
     install_title_ar = models.CharField(max_length=160, blank=True)
     install_lead_en = models.TextField(blank=True)
@@ -97,30 +174,51 @@ class HomePage(RoutablePageMixin, Page):
     about_title_ar = models.CharField(max_length=120, blank=True)
     about_text_en = models.TextField(blank=True, help_text="Blank line between paragraphs")
     about_text_ar = models.TextField(blank=True)
+    about_cta_en = models.CharField(max_length=80, blank=True)
+    about_cta_ar = models.CharField(max_length=80, blank=True)
+    about_page = models.ForeignKey("wagtailcore.Page", null=True, blank=True, on_delete=models.SET_NULL,
+                                   related_name="+", help_text="Empty: no button is shown")
     faq_title_en = models.CharField(max_length=120, blank=True)
     faq_title_ar = models.CharField(max_length=120, blank=True)
     faq_lead_en = models.TextField(blank=True)
     faq_lead_ar = models.TextField(blank=True)
+    faq_cta_en = models.CharField(max_length=80, blank=True)
+    faq_cta_ar = models.CharField(max_length=80, blank=True)
+    faq_page = models.ForeignKey("wagtailcore.Page", null=True, blank=True, on_delete=models.SET_NULL,
+                                 related_name="+", help_text="Empty: no button is shown")
 
     content_panels = Page.content_panels + [
         MultiFieldPanel([bi("hero_title"), bi("hero_lead"), FieldPanel("hero_image"), bi("hero_alt"),
-                         bi("hero_caption"), bi("hero_subcaption")], heading="Hero"),
+                         bi("hero_caption"), bi("hero_subcaption"), bi("hero_cta_primary"),
+                         bi("hero_cta_secondary")], heading="Hero"),
         InlinePanel("facts", heading="Facts strip", label="Fact"),
         MultiFieldPanel([bi("products_title"), bi("products_lead")], heading="Products section"),
         MultiFieldPanel([bi("brands_title"), bi("brands_lead")], heading="Brands section"),
-        MultiFieldPanel([bi("contractors_title"), bi("contractors_lead")], heading="Contractors section"),
+        MultiFieldPanel([bi("contractors_title"), bi("contractors_lead"), bi("contractors_cta"),
+                         FieldPanel("contractors_image"), bi("contractors_image_alt")],
+                        heading="Contractors section"),
         InlinePanel("contractor_points", heading="Contractor points", label="Point"),
+        MultiFieldPanel([bi("services_title"), bi("services_lead")], heading="Services section"),
+        InlinePanel("services", heading="Services", label="Service"),
+        MultiFieldPanel([bi("duct_title"), bi("duct_text"), bi("duct_cta"), FieldPanel("duct_page")],
+                        heading="Duct cleaning feature"),
         MultiFieldPanel([bi("install_title"), bi("install_lead"), bi("install_link")], heading="Installation section"),
         InlinePanel("install_steps", heading="Installation steps", label="Step"),
         MultiFieldPanel([bi("projects_title"), bi("projects_lead")], heading="Gallery section"),
         InlinePanel("gallery", heading="Gallery photos", label="Photo"),
-        MultiFieldPanel([bi("about_title"), bi("about_text")], heading="About"),
-        MultiFieldPanel([bi("faq_title"), bi("faq_lead")], heading="FAQ section"),
+        MultiFieldPanel([bi("about_title"), bi("about_text"), bi("about_cta"), FieldPanel("about_page")],
+                        heading="About"),
+        MultiFieldPanel([bi("faq_title"), bi("faq_lead"), bi("faq_cta"), FieldPanel("faq_page")],
+                        heading="FAQ section"),
         InlinePanel("faqs", heading="Questions", label="Question"),
     ]
     promote_panels = Page.promote_panels + [
         MultiFieldPanel([bi("seo_title"), bi("meta_description")], heading="Bilingual SEO"),
     ]
+
+    def home_faqs(self):
+        """Questions shown on the home page; every question stays on the FAQ page."""
+        return [f for f in self.faqs.all() if f.featured]
 
     def about_paragraphs(self):
         return [p.strip() for p in tr(self, "about_text").split("\n\n") if p.strip()]
@@ -172,6 +270,24 @@ class ContractorPoint(_Bi):
     panels = [bi("title"), bi("text")]
 
 
+SERVICE_ICONS = [
+    ("supply", "Equipment supply"), ("install", "Installation"), ("parts", "Maintenance and spare parts"),
+    ("duct-cleaning", "Duct cleaning"), ("quote", "Project quotations"), ("project", "Project support"),
+]
+
+
+class HomeService(_Bi):
+    page = ParentalKey(HomePage, on_delete=models.CASCADE, related_name="services")
+    icon = models.CharField(max_length=20, choices=SERVICE_ICONS, blank=True)
+    title_en = models.CharField(max_length=120)
+    title_ar = models.CharField(max_length=120, blank=True)
+    text_en = models.CharField(max_length=240, blank=True)
+    text_ar = models.CharField(max_length=240, blank=True)
+    link_page = models.ForeignKey("wagtailcore.Page", null=True, blank=True, on_delete=models.SET_NULL,
+                                  related_name="+", help_text="Empty: the card is not a link")
+    panels = [FieldPanel("icon"), bi("title"), bi("text"), FieldPanel("link_page")]
+
+
 class InstallStep(_Bi):
     page = ParentalKey(HomePage, on_delete=models.CASCADE, related_name="install_steps")
     title_en = models.CharField(max_length=120)
@@ -199,7 +315,8 @@ class FaqItem(_Bi):
     question_ar = models.CharField(max_length=200, blank=True)
     answer_en = models.TextField()
     answer_ar = models.TextField(blank=True)
-    panels = [bi("question"), bi("answer")]
+    featured = models.BooleanField("Show on the home page", default=True)
+    panels = [bi("question"), bi("answer"), FieldPanel("featured")]
 
 
 # ---------------------------------------------------------------- service page

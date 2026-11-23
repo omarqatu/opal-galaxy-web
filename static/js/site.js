@@ -63,6 +63,31 @@
     }
   }
 
+  // Gallery viewer. Without JavaScript each photo is a plain link to the larger image.
+  var box = document.getElementById('lightbox'), links = document.querySelectorAll('[data-lightbox]');
+  if (box && links.length && typeof box.showModal === 'function') {
+    var img = box.querySelector('img'), cap = box.querySelector('figcaption'), at = 0, opener = null;
+    var show = function (i) {
+      at = (i + links.length) % links.length;
+      var a = links[at], thumb = a.querySelector('img');
+      img.src = a.href; img.alt = thumb ? thumb.alt : ''; cap.textContent = a.dataset.caption || '';
+    };
+    Array.prototype.forEach.call(links, function (a, i) {
+      a.addEventListener('click', function (e) { e.preventDefault(); opener = a; show(i); box.showModal(); });
+    });
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('button');
+      if (b && b.dataset.step) show(at + Number(b.dataset.step));
+      else if (b || e.target === box) box.close();
+    });
+    box.addEventListener('keydown', function (e) {
+      var rtl = document.documentElement.dir === 'rtl';
+      if (e.key === 'ArrowRight') show(at + (rtl ? -1 : 1));
+      if (e.key === 'ArrowLeft') show(at + (rtl ? 1 : -1));
+    });
+    box.addEventListener('close', function () { img.removeAttribute('src'); if (opener) opener.focus(); });
+  }
+
   // Remove ?sent= from the address bar once the notice is shown.
   if (/[?&]sent=/.test(location.search) && history.replaceState) {
     history.replaceState(null, '', location.pathname + location.hash);

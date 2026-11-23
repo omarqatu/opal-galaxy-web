@@ -29,11 +29,13 @@ class Brand(index.Indexed, models.Model):
     line_ar = models.CharField("Positioning line (AR)", max_length=200, blank=True)
     about_en = models.TextField(blank=True)
     about_ar = models.TextField(blank=True)
+    logo = models.ForeignKey("wagtailimages.Image", null=True, blank=True, on_delete=models.SET_NULL,
+                             related_name="+", help_text="Approved logo file only. Empty: the name is shown in type.")
     sort_order = models.PositiveIntegerField(default=0)
 
     panels = [
         FieldRowPanel([FieldPanel("name"), FieldPanel("slug"), FieldPanel("sort_order")]),
-        bi("line"), bi("about"),
+        bi("line"), bi("about"), FieldPanel("logo"),
     ]
     search_fields = [index.SearchField("name"), index.AutocompleteField("name")]
 

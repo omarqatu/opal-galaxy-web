@@ -48,3 +48,111 @@ msgstr "حدث خطأ غير متوقع"
 
 msgid "The page could not be displayed. Please try again in a few minutes."
 msgstr "تعذّر عرض الصفحة. يُرجى المحاولة مرة أخرى بعد بضع دقائق."
+
+msgid "Social media"
+msgstr "وسائل التواصل الاجتماعي"
+
+msgid "Phone / WhatsApp"
+msgstr "الهاتف / واتساب"
+
+msgid "Quote for:"
+msgstr "الطلب عن:"
+
+msgid "Request:"
+msgstr "الطلب عن:"
+
+msgid "Name"
+msgstr "الاسم"
+
+msgid "Phone"
+msgstr "رقم الهاتف"
+
+msgid "required"
+msgstr "حقل مطلوب"
+
+msgid "Customer type"
+msgstr "صفة العميل"
+
+msgid "Contractor"
+msgstr "مقاول"
+
+msgid "Company"
+msgstr "شركة"
+
+msgid "End user"
+msgstr "فرد"
+
+msgid "Product"
+msgstr "نوع الوحدة"
+
+msgid "Choose a product"
+msgstr "اختيار نوع الوحدة"
+
+msgid "Maintenance / spare parts"
+msgstr "صيانة / قطع غيار"
+
+msgid "Brand"
+msgstr "العلامة التجارية"
+
+msgid "Any brand"
+msgstr "أي علامة تجارية"
+
+msgid "Other brand"
+msgstr "علامة تجارية أخرى"
+
+msgid "Quantity"
+msgstr "الكمية"
+
+msgid "Emirate"
+msgstr "الإمارة"
+
+msgid "Dubai"
+msgstr "دبي"
+
+msgid "Sharjah"
+msgstr "الشارقة"
+
+msgid "Ajman"
+msgstr "عجمان"
+
+msgid "Abu Dhabi"
+msgstr "أبوظبي"
+
+msgid "Other"
+msgstr "أخرى"
+
+msgid "With installation?"
+msgstr "هل يشمل الطلب التركيب؟"
+
+msgid "Supply only"
+msgstr "توريد فقط"
+
+msgid "Supply and install"
+msgstr "التوريد والتركيب"
+
+msgid "Notes / project details"
+msgstr "ملاحظات / تفاصيل المشروع"
+
+msgid "Photo viewer"
+msgstr "عارض الصور"
+
+msgid "Close"
+msgstr "إغلاق"
+
+msgid "Previous photo"
+msgstr "الصورة السابقة"
+
+msgid "Next photo"
+msgstr "الصورة التالية"
+
+msgid "Address"
+msgstr "العنوان"
+
+msgid "Business hours"
+msgstr "ساعات العمل"
+
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+msgid "Licence"
+msgstr "الرخصة"
