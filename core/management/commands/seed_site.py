@@ -14,7 +14,7 @@ from wagtail.images.models import Image
 from wagtail.models import Page, Site
 
 from catalog.models import Brand, KnowItem, ProductCategory, Supply
-from core.models import (CompanySettings, ContractorPoint, FaqItem, GalleryItem, HomeFact, HomePage,
+from core.models import (CompanySettings, ContractorPoint, FaqItem, FieldPhoto, HomeFact, HomePage,
                          InstallStep, ServiceItem, ServicePage)
 
 
@@ -99,11 +99,10 @@ class Command(BaseCommand):
             o = ContractorPoint(sort_order=j); bi(o, "title", x["title"]); bi(o, "text", x["text"]); home.contractor_points.add(o)
         for j, x in enumerate(h.get("install_steps", [])):
             o = InstallStep(sort_order=j); bi(o, "title", x["title"]); bi(o, "text", x["text"]); home.install_steps.add(o)
-        for j, x in enumerate(h.get("gallery", [])):
-            o = GalleryItem(sort_order=j, image=self.image(x["image"], f"Gallery: {x['alt']['en']}"))
-            for f in ("alt", "caption", "subcaption"):
-                bi(o, f, x.get(f))
-            home.gallery.add(o)
+        for j, x in enumerate(h.get("gallery", [])):   # field photos: unapproved until reviewed in the admin
+            o = FieldPhoto(sort_order=j, image=self.image(x["image"], f"Gallery: {x['alt']['en']}"))
+            bi(o, "alt", x.get("alt")); bi(o, "title", x.get("caption")); bi(o, "caption", x.get("subcaption"))
+            o.save()
         for j, x in enumerate(h.get("faqs", [])):
             o = FaqItem(sort_order=j); bi(o, "question", x["q"]); bi(o, "answer", x["a"]); home.faqs.add(o)
         # Wagtail's default welcome page also uses slug "home": remove plain Page leftovers first.
@@ -137,11 +136,8 @@ class Command(BaseCommand):
         import importlib
         from django.apps import apps as live_apps
         for name in ("core.migrations.0003_redesign_home_content", "core.migrations.0005_redesign_pages_content",
-                     "core.migrations.0007_home_hero_content", "core.migrations.0008_gallery_lead_photos"):
+                     "core.migrations.0007_home_hero_content"):
             importlib.import_module(name).apply_content(live_apps, None)
-        from core import gallery
-        from core.models import FieldPhoto
-        gallery.sync_field_photos(GalleryItem, FieldPhoto)   # a fresh site gets its field photos like an existing one
 
         self.stdout.write(self.style.SUCCESS(
             f"Seeded: {Brand.objects.count()} brands, {ProductCategory.objects.count()} categories, "

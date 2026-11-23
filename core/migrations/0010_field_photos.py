@@ -9,7 +9,7 @@ import django.db.models.deletion
 import django.utils.timezone
 from django.db import migrations, models
 
-from core import gallery
+from . import _legacy_gallery as gallery
 
 
 def mirror(apps, schema_editor):

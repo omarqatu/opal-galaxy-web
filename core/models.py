@@ -377,29 +377,6 @@ class InstallStep(_Bi):
     panels = [bi("title"), bi("text")]
 
 
-class GalleryItem(_Bi):
-    page = ParentalKey(HomePage, on_delete=models.CASCADE, related_name="gallery")
-    image = models.ForeignKey("wagtailimages.Image", on_delete=models.CASCADE, related_name="+")
-    alt_en = models.CharField(max_length=200, blank=True)
-    alt_ar = models.CharField(max_length=200, blank=True)
-    caption_en = models.CharField(max_length=120, blank=True)
-    caption_ar = models.CharField(max_length=120, blank=True)
-    subcaption_en = models.CharField(max_length=120, blank=True)
-    subcaption_ar = models.CharField(max_length=120, blank=True)
-    category = models.ForeignKey("core.GalleryCategory", null=True, blank=True, on_delete=models.SET_NULL,
-                                 related_name="photos", help_text="Optional. Managed under Snippets → Gallery categories.")
-    featured = models.BooleanField("Featured photo", default=False,
-                                   help_text="Shown larger in the gallery. Only the first two featured photos lead.")
-    approved_for_publication = models.BooleanField(
-        "Approved for publication", default=False,
-        help_text="The photo appears on the site only when this is ticked and the page is published. "
-                  "Tick it after checking that the photo shows no identifiable face or vehicle number plate, "
-                  "or that permission was given or the photo was redacted.")
-    panels = [FieldPanel("image"), bi("alt"), bi("caption"), bi("subcaption"),
-              FieldRowPanel([FieldPanel("category"), FieldPanel("featured")]),
-              FieldPanel("approved_for_publication")]
-
-
 class GalleryCategory(models.Model):
     """A group of gallery photos (for example installations or maintenance). Created and edited in the admin."""
     name_en = models.CharField("Name (EN)", max_length=80)
@@ -427,8 +404,7 @@ class FieldPhoto(models.Model):
     """One field photograph, managed on its own under Field gallery in the admin.
 
     The file lives once, in Wagtail Images; this record adds the bilingual texts, the category and
-    the publication controls. Until the switch described in docs/field-gallery-transition.md the
-    public pages still read GalleryItem, and photos carrying a legacy_item_id mirror those rows.
+    the publication controls. legacy_item_id is the id a photo had in the former home page gallery.
     """
     image = models.ForeignKey("wagtailimages.Image", on_delete=models.PROTECT, related_name="+")
     alt_en = models.CharField("Alt text (EN)", max_length=200, blank=True,
@@ -458,7 +434,7 @@ class FieldPhoto(models.Model):
     updated = models.DateTimeField(auto_now=True)
     legacy_item_id = models.PositiveIntegerField(
         null=True, blank=True, unique=True, editable=False,
-        help_text="The home page gallery row this photo was imported from, if any")
+        help_text="The id this photo had in the former home page gallery, if any")
 
     panels = [
         FieldPanel("image"),
