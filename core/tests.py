@@ -6,9 +6,18 @@ from core.models import QuoteRequest
 
 
 def approve_gallery():
-    """What Omar does in the admin: tick "Approved for publication" on the photos."""
-    from core.models import GalleryItem
-    GalleryItem.objects.update(approved_for_publication=True)
+    """What Omar does in the admin: approve the photos and mark them for the homepage in their order."""
+    from django.db.models import F
+    from core.models import FieldPhoto, GalleryItem
+    GalleryItem.objects.update(approved_for_publication=True)          # the retired rows, kept for reference
+    FieldPhoto.objects.exclude(sort_order=None).update(approved_for_publication=True, show_on_homepage=True,
+                                                       home_order=F("sort_order") + 1)
+    FieldPhoto.objects.filter(sort_order=None).update(approved_for_publication=True)
+
+
+def field_photos():
+    from core.models import FieldPhoto
+    return list(FieldPhoto.objects.all())
 
 
 class SiteTests(TestCase):
@@ -1291,204 +1300,6 @@ class PremiumInternalPagesTests(TestCase):
         self.assertNotIn(" ton", vrf.split('class="cat-cards"')[1].split("</ul>")[0])
 
 
-class GalleryApprovalTests(TestCase):
-    """PR A of the field gallery: categories, featured photos and per-photo approval."""
-
-    @classmethod
-    def setUpTestData(cls):
-        call_command("seed_site", verbosity=0)
-
-    def home(self):
-        from core.models import HomePage
-        return HomePage.objects.get()
-
-    def gallery_html(self):
-        html = self.client.get("/").content.decode()
-        return html.split('id="gallery"')[1].split("</ul>")[0] if 'id="gallery"' in html else ""
-
-    def run_migration_step(self):
-        import importlib
-        from django.apps import apps
-        importlib.import_module("core.migrations.0009_gallery_categories_and_approval").approve_existing(apps, None)
-
-    def test_photos_that_exist_at_migration_time_stay_published_and_are_kept(self):
-        """The eight photos already on the home page keep their state: the migration marks them approved."""
-        from core.models import GalleryCategory, GalleryItem
-        home = self.home()
-        revision = home.save_revision()                       # a draft saved before the new fields existed
-        for entry in revision.content["gallery"]:
-            entry.pop("approved_for_publication", None)
-        revision.save()
-        before = list(GalleryItem.objects.order_by("pk").values_list(
-            "pk", "image_id", "sort_order", "alt_en", "alt_ar", "caption_en", "caption_ar", "subcaption_en", "subcaption_ar"))
-        self.assertEqual(self.gallery_html(), "")
-        self.run_migration_step()
-        self.assertEqual(GalleryItem.objects.filter(approved_for_publication=True).count(), 8)
-        self.assertEqual(list(GalleryItem.objects.order_by("pk").values_list(
-            "pk", "image_id", "sort_order", "alt_en", "alt_ar", "caption_en", "caption_ar", "subcaption_en", "subcaption_ar")), before)
-        self.assertEqual(GalleryItem.objects.filter(featured=True).count(), 0)
-        self.assertEqual(GalleryItem.objects.exclude(category=None).count(), 0)
-        self.assertEqual(GalleryCategory.objects.count(), 0)          # categories are created in the admin only
-        for g in GalleryItem.objects.select_related("image"):
-            self.assertTrue(g.image.file.storage.exists(g.image.file.name))   # original files are still there
-        # The home page shows the same eight photos as before the change.
-        gallery = self.gallery_html()
-        self.assertEqual(gallery.count("data-lightbox"), 8)
-        self.assertEqual(gallery.count('class="is-lead"'), 2)
-        # The saved draft carries the approval too, so publishing it later does not withdraw the photos.
-        revision.refresh_from_db()
-        self.assertTrue(all(e["approved_for_publication"] for e in revision.content["gallery"]))
-        revision.publish()
-        self.assertEqual(self.home().approved_gallery().count(), 8)
-
-    def test_a_photo_added_after_the_migration_is_not_approved_by_it(self):
-        from core.models import GalleryItem
-        self.run_migration_step()
-        late = GalleryItem.objects.create(page=self.home(), image=self.home().gallery.first().image, sort_order=50,
-                                          alt_en="Uploaded later")
-        self.assertFalse(late.approved_for_publication)
-        self.assertNotIn("Uploaded later", self.gallery_html())
-        self.assertEqual(self.gallery_html().count("data-lightbox"), 8)
-
-    def test_a_fresh_site_approves_nothing(self):
-        from core.models import GalleryItem
-        self.assertEqual(GalleryItem.objects.count(), 8)       # seeded after the migrations ran
-        self.assertEqual(GalleryItem.objects.filter(approved_for_publication=True).count(), 0)
-
-    def test_new_photos_are_unapproved_by_default(self):
-        from core.models import GalleryItem
-        self.assertFalse(GalleryItem._meta.get_field("approved_for_publication").default)
-        g = GalleryItem(page=self.home(), image=self.home().gallery.first().image, sort_order=99)
-        g.save()
-        self.assertFalse(g.approved_for_publication)
-
-    def test_home_gallery_is_hidden_until_photos_are_approved(self):
-        html = self.client.get("/").content.decode()
-        self.assertEqual(self.client.get("/").status_code, 200)
-        self.assertNotIn('id="projects"', html)
-        self.assertNotIn("data-lightbox", html)
-        self.assertNotIn('id="lightbox"', html)
-        for path in ("/", "/ar/"):
-            self.assertNotIn('href="#projects"', self.client.get(path).content.decode())   # nothing points at the hidden section
-
-    def test_only_approved_photos_are_shown_in_the_editors_order(self):
-        home = self.home()
-        items = list(home.gallery.all())
-        for g in (items[5], items[0], items[3]):
-            g.approved_for_publication = True
-            g.save()
-        self.assertEqual([g.pk for g in home.home_gallery()], [items[0].pk, items[3].pk, items[5].pk])
-        gallery = self.gallery_html()
-        self.assertEqual(gallery.count("data-lightbox"), 3)
-        self.assertEqual(gallery.count('class="is-lead"'), 2)
-        shown = [gallery.index(items[i].alt_en) for i in (0, 3, 5)]
-        self.assertEqual(shown, sorted(shown))
-        for i in (1, 2, 4, 6, 7):
-            self.assertNotIn(items[i].alt_en, gallery)
-        arabic = self.client.get("/ar/").content.decode()
-        self.assertEqual(arabic.split('id="gallery"')[1].split("</ul>")[0].count("data-lightbox"), 3)
-        # Reordering in the admin changes the order on the page.
-        items[5].sort_order, items[0].sort_order = items[0].sort_order, items[5].sort_order
-        items[5].save(); items[0].save()
-        self.assertEqual([g.pk for g in home.home_gallery()], [items[5].pk, items[3].pk, items[0].pk])
-
-    def test_home_shows_at_most_eight_approved_photos(self):
-        from core.models import GalleryItem
-        home = self.home()
-        first = home.gallery.first()
-        for n in range(3):
-            GalleryItem.objects.create(page=home, image=first.image, sort_order=20 + n, alt_en=f"Extra photo {n}")
-        approve_gallery()
-        self.assertEqual(home.approved_gallery().count(), 11)
-        self.assertEqual(len(home.home_gallery()), 8)
-        gallery = self.gallery_html()
-        self.assertEqual(gallery.count("data-lightbox"), 8)
-        self.assertNotIn("Extra photo", gallery)
-
-    def test_withdrawing_approval_removes_the_photo_but_keeps_the_record(self):
-        from core.models import GalleryItem
-        approve_gallery()
-        g = self.home().gallery.all()[2]
-        self.assertIn(g.alt_en, self.gallery_html())
-        GalleryItem.objects.filter(pk=g.pk).update(approved_for_publication=False)
-        self.assertNotIn(g.alt_en, self.gallery_html())
-        self.assertEqual(GalleryItem.objects.count(), 8)
-
-    def test_approval_through_the_page_editor_draft_then_publish(self):
-        """Ticking the box in a draft changes nothing until the home page is published."""
-        home = self.home()
-        first = home.gallery.first()
-        before = (first.caption_en, first.caption_ar, first.alt_en, first.alt_ar, first.image_id)
-        draft = home.latest_revision.as_object() if home.latest_revision else home
-        target = next(g for g in draft.gallery.all() if g.pk == first.pk)
-        target.approved_for_publication = True
-        revision = draft.save_revision()
-        self.assertEqual(self.gallery_html(), "")                    # still a draft
-        revision.publish()
-        gallery = self.gallery_html()
-        self.assertEqual(gallery.count("data-lightbox"), 1)
-        first.refresh_from_db()
-        self.assertTrue(first.approved_for_publication)
-        self.assertEqual((first.caption_en, first.caption_ar, first.alt_en, first.alt_ar, first.image_id), before)
-        self.assertEqual(self.home().gallery.count(), 8)             # the other seven are kept, unapproved
-
-    def test_a_revision_saved_before_the_new_fields_publishes_without_losing_photos(self):
-        """Revisions stored before this change have no approval key; publishing one keeps every photo, unapproved."""
-        home = self.home()
-        revision = home.save_revision()
-        for entry in revision.content["gallery"]:
-            for key in ("approved_for_publication", "featured", "category"):
-                entry.pop(key, None)
-        revision.save()
-        revision.publish()
-        self.assertEqual(self.home().gallery.count(), 8)
-        self.assertEqual(self.home().approved_gallery().count(), 0)
-
-    def test_categories_featured_and_ordering(self):
-        from core.models import GalleryCategory, GalleryItem
-        maintenance = GalleryCategory.objects.create(name_en="Maintenance", name_ar="الصيانة", slug="maintenance", sort_order=2)
-        installs = GalleryCategory.objects.create(name_en="HVAC Installations", name_ar="تركيبات التكييف",
-                                                  slug="installations", sort_order=1)
-        empty = GalleryCategory.objects.create(name_en="Field Operations", slug="field-operations", sort_order=0)
-        self.assertEqual(list(GalleryCategory.objects.all()), [empty, installs, maintenance])
-        items = list(self.home().gallery.all())
-        GalleryItem.objects.filter(pk=items[0].pk).update(category=installs, featured=True, approved_for_publication=True)
-        GalleryItem.objects.filter(pk=items[1].pk).update(category=installs, approved_for_publication=True)
-        GalleryItem.objects.filter(pk=items[2].pk).update(category=maintenance)        # not approved
-        # Only categories holding an approved photo are offered to visitors.
-        self.assertEqual(list(GalleryCategory.with_approved_photos()), [installs])
-        self.assertEqual(self.home().approved_gallery().filter(featured=True).count(), 1)
-        # Deleting a category never deletes its photos.
-        installs.delete()
-        self.assertEqual(GalleryItem.objects.count(), 8)
-        self.assertIsNone(GalleryItem.objects.get(pk=items[0].pk).category)
-        self.assertTrue(GalleryItem.objects.get(pk=items[0].pk).approved_for_publication)
-
-    def test_admin_offers_the_new_controls(self):
-        from django.contrib.auth import get_user_model
-        get_user_model().objects.create_superuser("omar", "o@example.com", "pw")
-        self.client.login(username="omar", password="pw")
-        edit = self.client.get(f"/admin/pages/{self.home().pk}/edit/")
-        self.assertEqual(edit.status_code, 200)
-        html = edit.content.decode()
-        for name in ("gallery-0-approved_for_publication", "gallery-0-featured", "gallery-0-category",
-                     "gallery-0-caption_en", "gallery-0-caption_ar", "gallery-0-alt_en", "gallery-0-alt_ar",
-                     "gallery-0-ORDER"):
-            self.assertIn(name, html)
-        self.assertEqual(self.client.get("/admin/snippets/core/gallerycategory/").status_code, 200)
-        add = self.client.post("/admin/snippets/core/gallerycategory/add/",
-                               {"name_en": "Maintenance", "name_ar": "الصيانة", "slug": "maintenance", "sort_order": 1})
-        self.assertEqual(add.status_code, 302)
-        from core.models import GalleryCategory
-        self.assertEqual(GalleryCategory.objects.get().name_ar, "الصيانة")
-
-    def test_gallery_page_type_exists_but_no_page_is_created(self):
-        from core.models import CONTENT_KINDS, ContentPage
-        self.assertIn("gallery", dict(CONTENT_KINDS))
-        self.assertFalse(ContentPage.objects.filter(kind="gallery").exists())
-        self.assertEqual(self.client.get("/gallery/").status_code, 404)
-
-
 class FieldGalleryPageTests(TestCase):
     """PR B of the field gallery: the public page, its filter, the viewer markup, links and media rules."""
 
@@ -1563,12 +1374,12 @@ class FieldGalleryPageTests(TestCase):
         self.assertEqual(header.count("nav-drop"), 3)
 
     def test_only_approved_photos_are_shown(self):
-        from core.models import GalleryItem
+        from core.models import FieldPhoto
         self.make_page()
         self.assertEqual(self.wall(), "")                           # nothing approved: no grid, no viewer
         html = self.client.get("/gallery/").content.decode()
         self.assertNotIn('id="lightbox"', html)
-        items = list(self.home().gallery.all())
+        items = field_photos()
         for g in items[:5]:
             g.approved_for_publication = True
             g.save()
@@ -1579,7 +1390,7 @@ class FieldGalleryPageTests(TestCase):
         for g in items[5:]:
             self.assertNotIn(g.alt_en, wall)
             self.assertNotIn(g.image.file.name.split("/")[-1].rsplit(".", 1)[0] + ".", wall)
-        GalleryItem.objects.filter(pk=items[0].pk).update(approved_for_publication=False)
+        FieldPhoto.objects.filter(pk=items[0].pk).update(approved_for_publication=False)
         self.assertNotIn(items[0].alt_en, self.wall())
         arabic = self.wall("/ar/gallery/")
         self.assertEqual(arabic.count("data-lightbox"), 4)
@@ -1587,14 +1398,14 @@ class FieldGalleryPageTests(TestCase):
         self.assertIn(items[1].caption_ar, arabic)
 
     def test_category_filter_lists_only_categories_with_approved_photos(self):
-        from core.models import GalleryItem
+        from core.models import FieldPhoto
         self.make_page()
         duct, field, maintenance = self.categories()
-        items = list(self.home().gallery.all())
-        GalleryItem.objects.filter(pk__in=[items[0].pk, items[1].pk]).update(category=field, approved_for_publication=True)
-        GalleryItem.objects.filter(pk=items[2].pk).update(category=maintenance, approved_for_publication=True)
-        GalleryItem.objects.filter(pk=items[3].pk).update(category=duct)                    # not approved
-        GalleryItem.objects.filter(pk=items[4].pk).update(approved_for_publication=True)   # approved, no category
+        items = field_photos()
+        FieldPhoto.objects.filter(pk__in=[items[0].pk, items[1].pk]).update(category=field, approved_for_publication=True)
+        FieldPhoto.objects.filter(pk=items[2].pk).update(category=maintenance, approved_for_publication=True)
+        FieldPhoto.objects.filter(pk=items[3].pk).update(category=duct)                    # not approved
+        FieldPhoto.objects.filter(pk=items[4].pk).update(approved_for_publication=True)   # approved, no category
         html = self.client.get("/gallery/").content.decode()
         nav = html.split('class="gallery-filter"')[1].split("</nav>")[0]
         self.assertIn('aria-current="true">All photos', nav)
@@ -1623,21 +1434,21 @@ class FieldGalleryPageTests(TestCase):
         self.assertNotIn("gallery-filter", self.client.get("/gallery/").content.decode())
 
     def test_at_most_two_featured_photos_lead_and_the_grid_stays_balanced(self):
-        from core.models import GalleryItem
+        from core.models import FieldPhoto
         approve_gallery()
         self.make_page()
-        items = list(self.home().gallery.all())
+        items = field_photos()
         order = lambda: [a.split('"')[0] for a in self.wall().split('alt="')[1:]]
         self.assertEqual(self.wall().count('class="is-lead"'), 0)                 # none featured: uniform grid
         self.assertEqual(order(), [g.alt_en for g in items])                       # the editor's order
-        GalleryItem.objects.filter(pk=items[4].pk).update(featured=True)           # one featured: paired with the next photo
+        FieldPhoto.objects.filter(pk=items[4].pk).update(featured=True)           # one featured: paired with the next photo
         self.assertEqual(self.wall().count('class="is-lead"'), 2)
         self.assertEqual(order()[:3], [items[4].alt_en, items[0].alt_en, items[1].alt_en])
-        GalleryItem.objects.filter(pk__in=[items[2].pk, items[6].pk]).update(featured=True)   # three featured: two lead
+        FieldPhoto.objects.filter(pk__in=[items[2].pk, items[6].pk]).update(featured=True)   # three featured: two lead
         self.assertEqual(self.wall().count('class="is-lead"'), 2)
         self.assertEqual(order()[:4], [items[2].alt_en, items[4].alt_en, items[0].alt_en, items[1].alt_en])
         self.assertEqual(len(order()), 8)
-        GalleryItem.objects.exclude(pk=items[4].pk).update(approved_for_publication=False)    # a single photo
+        FieldPhoto.objects.exclude(pk=items[4].pk).update(approved_for_publication=False)    # a single photo
         self.assertEqual(self.wall().count("data-lightbox"), 1)
 
     def test_images_are_responsive_webp_renditions_and_never_enlarged(self):
@@ -1654,10 +1465,10 @@ class FieldGalleryPageTests(TestCase):
         self.assertTrue(urls)
         for url in urls:
             self.assertTrue(url.startswith("/media/images/") and url.endswith(".webp"), url)   # never the original file
-        widest = max(g.image.width for g in self.home().gallery.all())
+        widest = max(g.image.width for g in field_photos())
         for width in re.findall(r" (\d+)w", wall):
             self.assertLessEqual(int(width), widest)
-        for rendition in Rendition.objects.filter(image__in=[g.image for g in self.home().gallery.all()]):
+        for rendition in Rendition.objects.filter(image__in=[g.image for g in field_photos()]):
             self.assertLessEqual(rendition.width, rendition.image.width)
         self.assertIn('id="lightbox"', self.client.get("/gallery/").content.decode())
         self.assertIn('aria-label="Close"', self.client.get("/gallery/").content.decode())
@@ -1751,238 +1562,385 @@ class MediaFilesTests(TestCase):
             self.assertNotIn("original_images", self.client.get(path).content.decode(), path)
 
 
-class FieldPhotoTransitionTests(TestCase):
-    """PR 1 of the scalable field gallery: the standalone model, its admin area and the guarded mirror."""
+class FieldPhotoTests(TestCase):
+    """The standalone field gallery: what the site shows, the admin area, bulk actions and bulk upload."""
 
     @classmethod
     def setUpTestData(cls):
         call_command("seed_site", verbosity=0)
 
-    FIELDS = ("pk", "image_id", "sort_order", "alt_en", "alt_ar", "caption_en", "caption_ar", "subcaption_en",
-              "subcaption_ar", "category_id", "featured", "approved_for_publication")
+    def home_html(self, path="/"):
+        html = self.client.get(path).content.decode()
+        return html.split('id="gallery"')[1].split("</ul>")[0] if 'id="gallery"' in html else ""
 
-    def sync(self, **kw):
-        from core import gallery
-        from core.models import FieldPhoto, GalleryItem
-        return gallery.sync_field_photos(GalleryItem, FieldPhoto, **kw)
+    def image(self):
+        from core.models import FieldPhoto
+        return FieldPhoto.objects.first().image
 
-    def problems(self):
-        from core import gallery
-        from core.models import FieldPhoto, GalleryItem
-        return gallery.verify(GalleryItem, FieldPhoto)
-
-    def admin(self):
+    def login(self, *codenames, superuser=False):
         from django.contrib.auth import get_user_model
-        get_user_model().objects.create_superuser("omar", "o@example.com", "pw")
-        self.client.login(username="omar", password="pw")
+        from django.contrib.auth.models import Permission
+        User = get_user_model()
+        if superuser:
+            User.objects.create_superuser("omar", "o@example.com", "pw")
+            self.client.login(username="omar", password="pw")
+            return
+        user = User.objects.create_user("editor", password="pw")
+        user.user_permissions.add(*Permission.objects.filter(codename__in=["access_admin", *codenames]))
+        self.client.login(username="editor", password="pw")
+        return user
 
-    def test_every_gallery_row_is_mirrored_once_with_its_image_texts_and_order(self):
-        from core.models import FieldPhoto, GalleryItem
-        from wagtail.images.models import Image
-        self.assertEqual(GalleryItem.objects.count(), 8)
+    # ------------------------------------------------------------ public site
+    def test_a_fresh_site_shows_no_photo_until_one_is_approved(self):
+        from core.models import FieldPhoto
         self.assertEqual(FieldPhoto.objects.count(), 8)
-        self.assertEqual(self.problems(), [])
+        self.assertEqual(FieldPhoto.objects.filter(approved_for_publication=True).count(), 0)
+        html = self.client.get("/").content.decode()
+        self.assertNotIn('id="projects"', html)
+        self.assertNotIn("data-lightbox", html)
+
+    def test_homepage_shows_only_approved_photos_marked_for_it(self):
+        from core.models import FieldPhoto
+        photos = field_photos()
+        FieldPhoto.objects.filter(pk=photos[0].pk).update(approved_for_publication=True, show_on_homepage=True, home_order=2)
+        FieldPhoto.objects.filter(pk=photos[1].pk).update(approved_for_publication=True, show_on_homepage=True, home_order=1)
+        FieldPhoto.objects.filter(pk=photos[2].pk).update(approved_for_publication=True)                 # approved, not for home
+        FieldPhoto.objects.filter(pk=photos[3].pk).update(show_on_homepage=True, home_order=0)           # for home, not approved
+        gallery = self.home_html()
+        self.assertEqual(gallery.count("data-lightbox"), 2)
+        self.assertLess(gallery.index(photos[1].alt_en), gallery.index(photos[0].alt_en))                # homepage order
+        self.assertNotIn(photos[2].alt_en, gallery)
+        self.assertNotIn(photos[3].alt_en, gallery)
+        self.assertIn(photos[0].title_en, gallery)
+        arabic = self.home_html("/ar/")
+        self.assertEqual(arabic.count("data-lightbox"), 2)
+        self.assertIn(photos[0].title_ar, arabic)
+
+    def test_homepage_never_shows_more_than_eight(self):
+        from core.models import FieldPhoto
+        FieldPhoto.objects.bulk_create([FieldPhoto(image=self.image(), alt_en=f"Extra {n}", approved_for_publication=True,
+                                                   show_on_homepage=True, home_order=50 + n) for n in range(5)])
+        approve_gallery()
+        self.assertEqual(FieldPhoto.objects.filter(approved_for_publication=True, show_on_homepage=True).count(), 13)
+        gallery = self.home_html()
+        self.assertEqual(gallery.count("data-lightbox"), 8)
+        self.assertNotIn("Extra", gallery)
+
+    def test_withdrawing_approval_removes_the_photo_everywhere_and_keeps_the_record(self):
+        from core.models import ContentPage, FieldPhoto, HomePage
+        approve_gallery()
+        page = ContentPage(title="Gallery", slug="gallery", kind="gallery", title_en="Gallery")
+        HomePage.objects.get().add_child(instance=page)
+        page.save_revision().publish()
+        photo = field_photos()[0]
+        self.assertIn(photo.alt_en, self.home_html())
+        self.assertIn(photo.alt_en, self.client.get("/gallery/").content.decode())
+        FieldPhoto.objects.filter(pk=photo.pk).update(approved_for_publication=False)
+        self.assertNotIn(photo.alt_en, self.home_html())
+        self.assertNotIn(photo.alt_en, self.client.get("/gallery/").content.decode())
+        self.assertEqual(FieldPhoto.objects.count(), 8)
+
+    def test_gallery_is_paginated_and_reads_one_page_at_a_time(self):
+        from core.models import ContentPage, FieldPhoto, GalleryCategory, HomePage
+        page = ContentPage(title="Gallery", slug="gallery", kind="gallery", title_en="Gallery")
+        HomePage.objects.get().add_child(instance=page)
+        page.save_revision().publish()
+        category = GalleryCategory.objects.create(name_en="Maintenance", name_ar="الصيانة", slug="maintenance")
+        image = self.image()
+        FieldPhoto.objects.all().delete()
+        FieldPhoto.objects.bulk_create([FieldPhoto(image=image, alt_en=f"Photo {n:03d}", sort_order=n, approved_for_publication=True,
+                                                   category=category if n < 30 else None) for n in range(60)])
+        wall = lambda url: self.client.get(url).content.decode().split('id="gallery"')[1].split("</ul>")[0]
+        first = self.client.get("/gallery/")
+        self.assertEqual(wall("/gallery/").count("data-lightbox"), 24)
+        self.assertEqual(first.context["gallery_page"].paginator.num_pages, 3)
+        self.assertIn("Photo 000", wall("/gallery/"))
+        self.assertNotIn("Photo 024", wall("/gallery/"))
+        html = first.content.decode()
+        self.assertIn('rel="next" href="?page=2#photos"', html)
+        self.assertNotIn('rel="prev"', html)
+        self.assertIn("Page 1 of 3", html)
+        self.assertEqual(wall("/gallery/?page=3").count("data-lightbox"), 12)
+        self.assertIn("Photo 059", wall("/gallery/?page=3"))
+        self.assertEqual(self.client.get("/gallery/?page=99").status_code, 200)       # out of range: last page
+        self.assertEqual(self.client.get("/gallery/?page=abc").status_code, 200)      # nonsense: first page
+        filtered = self.client.get("/gallery/?category=maintenance")
+        self.assertEqual(filtered.context["gallery_page"].paginator.count, 30)
+        self.assertIn('href="?category=maintenance&amp;page=2#photos"', filtered.content.decode())
+        self.assertIn("الصفحة 1 من 3", self.client.get("/ar/gallery/").content.decode())
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+        with CaptureQueriesContext(connection) as queries:
+            self.client.get("/gallery/?page=2")
+        photo_selects = [q["sql"] for q in queries if 'FROM "core_fieldphoto"' in q["sql"] and "COUNT" not in q["sql"]]
+        self.assertTrue(any("LIMIT 24" in q for q in photo_selects))
+        self.assertFalse([q for q in photo_selects if "LIMIT" not in q and "EXISTS" not in q and "DISTINCT" not in q])
+
+    # ------------------------------------------------------------ transition
+    def test_gallery_rows_are_kept_and_each_has_exactly_one_photo(self):
+        from core.models import FieldPhoto, GalleryItem
+        self.assertEqual(GalleryItem.objects.count(), 8)
         for item in GalleryItem.objects.all():
             photo = FieldPhoto.objects.get(legacy_item_id=item.pk)
-            self.assertEqual(photo.image_id, item.image_id)                     # the same image record: no file copied
-            self.assertEqual((photo.alt_en, photo.alt_ar), (item.alt_en, item.alt_ar))
-            self.assertEqual((photo.title_en, photo.title_ar), (item.caption_en, item.caption_ar))
-            self.assertEqual((photo.caption_en, photo.caption_ar), (item.subcaption_en, item.subcaption_ar))
-            self.assertEqual(photo.sort_order, item.sort_order)
-            self.assertEqual(photo.approved_for_publication, item.approved_for_publication)
-        self.assertEqual([p.legacy_item_id for p in FieldPhoto.objects.all()],
-                         list(GalleryItem.objects.order_by("sort_order").values_list("pk", flat=True)))
-        self.assertEqual(Image.objects.count(), 20)
+            self.assertEqual(photo.image_id, item.image_id)
+            self.assertEqual((photo.title_en, photo.title_ar, photo.caption_en, photo.caption_ar, photo.alt_en, photo.alt_ar),
+                             (item.caption_en, item.caption_ar, item.subcaption_en, item.subcaption_ar, item.alt_en, item.alt_ar))
 
-    def test_the_mirror_can_run_again_without_duplicates_or_changes(self):
-        from core.models import FieldPhoto, GalleryItem
-        from wagtail.images.models import Image
-        import os
-        before_items = list(GalleryItem.objects.order_by("pk").values_list(*self.FIELDS))
-        before_photos = list(FieldPhoto.objects.order_by("pk").values_list("pk", "legacy_item_id", "image_id", "updated"))
-        files = sorted(os.listdir(os.path.dirname(Image.objects.first().file.path)))
-        for _ in range(3):
-            report = self.sync()
-            self.assertEqual((report["created"], report["updated"], report["unchanged"], report["withdrawn"]), (0, 0, 8, 0))
+    def test_the_final_copy_brings_photos_up_to_date_and_marks_the_home_selection(self):
+        """What core 0011 does on an existing site: the old editor's last state wins, once."""
         import importlib
         from django.apps import apps
-        importlib.import_module("core.migrations.0010_field_photos").mirror(apps, None)   # the migration step itself
-        self.assertEqual(list(FieldPhoto.objects.order_by("pk").values_list("pk", "legacy_item_id", "image_id", "updated")),
-                         before_photos)
-        self.assertEqual(list(GalleryItem.objects.order_by("pk").values_list(*self.FIELDS)), before_items)   # never touched
-        self.assertEqual(sorted(os.listdir(os.path.dirname(Image.objects.first().file.path))), files)       # no new files
-
-    def test_changes_made_in_the_old_editor_reach_the_mirror(self):
         from core.models import FieldPhoto, GalleryCategory, GalleryItem, HomePage
-        category = GalleryCategory.objects.create(name_en="Maintenance", name_ar="الصيانة", slug="maintenance")
-        items = list(GalleryItem.objects.order_by("sort_order"))
-        GalleryItem.objects.filter(pk=items[0].pk).update(caption_ar="عنوان جديد", category=category, featured=True,
-                                                          approved_for_publication=True)
-        added = GalleryItem.objects.create(page=HomePage.objects.get(), image=items[0].image, sort_order=40, alt_en="Added later")
-        self.assertEqual(self.sync(dry_run=True)["created"], 1)
-        self.assertEqual(FieldPhoto.objects.count(), 8)                          # a dry run writes nothing
-        report = self.sync()
-        self.assertEqual((report["created"], report["updated"], report["unchanged"]), (1, 1, 7))
-        mirror = FieldPhoto.objects.get(legacy_item_id=items[0].pk)
-        self.assertEqual((mirror.title_ar, mirror.category, mirror.featured, mirror.approved_for_publication),
-                         ("عنوان جديد", category, True, True))
-        self.assertEqual((mirror.show_on_homepage, mirror.home_order), (True, 1))
-        late = FieldPhoto.objects.get(legacy_item_id=added.pk)
-        self.assertFalse(late.approved_for_publication)                          # unapproved stays unapproved
-        self.assertFalse(late.show_on_homepage)
-        self.assertEqual(self.problems(), [])
-
-    def test_a_row_removed_from_the_old_gallery_is_withdrawn_not_deleted(self):
-        from core.models import FieldPhoto, GalleryItem
-        approve_gallery()
-        self.sync()
-        gone = GalleryItem.objects.order_by("sort_order").first()
-        gone_pk = gone.pk
-        gone.delete()
-        report = self.sync()
-        self.assertEqual(report["withdrawn"], 1)
-        mirror = FieldPhoto.objects.get(legacy_item_id=gone_pk)                  # the record and its image are kept
-        self.assertFalse(mirror.approved_for_publication)
-        self.assertFalse(mirror.show_on_homepage)
-        self.assertEqual(FieldPhoto.objects.count(), 8)
-        self.assertEqual(self.sync()["withdrawn"], 0)
-
-    def test_home_selection_matches_what_the_home_page_shows_today(self):
-        from core.models import FieldPhoto, GalleryItem, HomePage
-        home = HomePage.objects.get()
-        first = home.gallery.first()
-        for n in range(3):
-            GalleryItem.objects.create(page=home, image=first.image, sort_order=30 + n, alt_en=f"Extra {n}")
-        approve_gallery()
-        self.sync()
-        on_home = FieldPhoto.objects.filter(show_on_homepage=True, approved_for_publication=True).order_by("home_order")
-        self.assertEqual([p.legacy_item_id for p in on_home], [g.pk for g in home.home_gallery()])
-        self.assertEqual(on_home.count(), 8)
-        self.assertEqual(FieldPhoto.objects.count(), 11)
-
-    def test_photos_created_in_the_new_area_are_left_alone_by_the_mirror(self):
-        from core.models import FieldPhoto, GalleryItem
-        own = FieldPhoto.objects.create(image=GalleryItem.objects.first().image, title_en="Uploaded in the new area")
-        self.assertFalse(own.approved_for_publication)                           # unapproved by default
-        self.assertFalse(own.show_on_homepage)
-        self.assertFalse(own.featured)
-        self.sync()
-        own.refresh_from_db()
-        self.assertEqual((own.title_en, own.legacy_item_id), ("Uploaded in the new area", None))
-        self.assertEqual(FieldPhoto.objects.count(), 9)
-
-    def test_order_is_manual_numbers_first_then_newest(self):
-        from datetime import timedelta
-        from django.utils import timezone
-        from core.models import FieldPhoto, GalleryItem
-        image = GalleryItem.objects.first().image
-        FieldPhoto.objects.all().delete()
-        now = timezone.now()
-        old = FieldPhoto.objects.create(image=image, title_en="old", created=now - timedelta(days=9))
-        new = FieldPhoto.objects.create(image=image, title_en="new", created=now)
-        second = FieldPhoto.objects.create(image=image, title_en="second", sort_order=2, created=now - timedelta(days=30))
-        first = FieldPhoto.objects.create(image=image, title_en="first", sort_order=1, created=now - timedelta(days=40))
-        self.assertEqual(list(FieldPhoto.objects.all()), [first, second, new, old])
-
-    def test_the_public_site_still_reads_the_old_gallery(self):
-        """Until the switch the new table changes nothing a visitor sees."""
-        from core.models import FieldPhoto
-        approve_gallery()
-        before = self.client.get("/").content.decode()
-        FieldPhoto.objects.update(approved_for_publication=False, title_en="Changed in the new area")
-        after = self.client.get("/").content.decode()
-        self.assertEqual(before.split('id="gallery"')[1].split("</ul>")[0], after.split('id="gallery"')[1].split("</ul>")[0])
-        self.assertNotIn("Changed in the new area", after)
-
-    def test_an_image_in_use_cannot_be_deleted_from_under_a_photo(self):
-        from django.db.models import ProtectedError
-        from core.models import FieldPhoto, GalleryItem
-        image = GalleryItem.objects.first().image
-        GalleryItem.objects.filter(image=image).delete()
-        with self.assertRaises(ProtectedError):
-            image.delete()
-        self.assertTrue(FieldPhoto.objects.filter(image=image).exists())
-
-    def test_admin_area_lists_filters_searches_and_paginates(self):
-        from core.models import FieldPhoto, GalleryCategory, GalleryItem
-        self.admin()
-        menu = self.client.get("/admin/").content.decode()
-        self.assertIn("Field gallery", menu)
+        from wagtail.images.models import Image
         category = GalleryCategory.objects.create(name_en="Maintenance", slug="maintenance")
-        image = GalleryItem.objects.first().image
-        FieldPhoto.objects.bulk_create([FieldPhoto(image=image, title_en=f"Bulk {n}", category=category if n % 2 else None)
+        items = list(GalleryItem.objects.order_by("sort_order"))
+        GalleryItem.objects.update(approved_for_publication=True)
+        GalleryItem.objects.filter(pk=items[1].pk).update(caption_ar="عنوان محدّث", category=category, featured=True)
+        added = GalleryItem.objects.create(page=HomePage.objects.get(), image=items[0].image, sort_order=40,
+                                           alt_en="Added in the old editor", approved_for_publication=True)
+        images = Image.objects.count()
+        importlib.import_module("core.migrations.0011_field_photos_switch").final_copy(apps, None)
+        self.assertEqual(FieldPhoto.objects.count(), 9)
+        self.assertEqual(Image.objects.count(), images)                              # no image or file duplicated
+        updated = FieldPhoto.objects.get(legacy_item_id=items[1].pk)
+        self.assertEqual((updated.title_ar, updated.category, updated.featured), ("عنوان محدّث", category, True))
+        on_home = FieldPhoto.objects.filter(show_on_homepage=True).order_by("home_order")
+        self.assertEqual([p.legacy_item_id for p in on_home], [i.pk for i in items])   # the eight the home page showed
+        self.assertFalse(FieldPhoto.objects.get(legacy_item_id=added.pk).show_on_homepage)
+        self.assertEqual(self.home_html().count("data-lightbox"), 8)
+        importlib.import_module("core.migrations.0011_field_photos_switch").final_copy(apps, None)   # running it again
+        self.assertEqual(FieldPhoto.objects.count(), 9)
+        self.assertEqual(GalleryItem.objects.count(), 9)                             # the old rows are all still there
+
+    def test_after_the_switch_the_copy_never_overwrites_or_withdraws_a_photo(self):
+        from io import StringIO
+        from core.models import FieldPhoto, GalleryItem
+        photo = FieldPhoto.objects.exclude(legacy_item_id=None).first()
+        FieldPhoto.objects.filter(pk=photo.pk).update(title_en="Edited in the new area", approved_for_publication=True)
+        GalleryItem.objects.exclude(pk=photo.legacy_item_id).first().delete()        # an old row disappears
+        before = list(FieldPhoto.objects.order_by("pk").values_list("pk", "title_en", "approved_for_publication", "updated"))
+        out = StringIO()
+        call_command("sync_field_photos", stdout=out)
+        self.assertIn("created 0, updated 0", out.getvalue())
+        self.assertEqual(list(FieldPhoto.objects.order_by("pk").values_list("pk", "title_en", "approved_for_publication", "updated")), before)
+
+    def test_the_old_editor_is_gone_from_the_home_page_and_revisions_still_publish(self):
+        from core.models import GalleryItem, HomePage
+        self.login(superuser=True)
+        home = HomePage.objects.get()
+        html = self.client.get(f"/admin/pages/{home.pk}/edit/").content.decode()
+        self.assertNotIn("gallery-0-", html)
+        self.assertNotIn("Gallery photos", html)
+        self.assertIn("projects_title_en", html)                                     # the section's texts stay editable
+        home.save_revision().publish()                                               # a revision still holding the old rows
+        self.assertEqual(GalleryItem.objects.count(), 8)
+        self.assertEqual(self.client.get("/").status_code, 200)
+
+    # ------------------------------------------------------------ admin area
+    def test_listing_filters_searches_and_paginates(self):
+        from core.models import FieldPhoto, GalleryCategory
+        self.login(superuser=True)
+        dashboard = self.client.get("/admin/").content.decode()
+        self.assertIn("Field gallery", dashboard)
+        self.assertIn("Upload photos", dashboard)
+        self.assertIn("/admin/field-gallery/upload/", dashboard)
+        category = GalleryCategory.objects.create(name_en="Maintenance", slug="maintenance")
+        FieldPhoto.objects.bulk_create([FieldPhoto(image=self.image(), title_en=f"Bulk {n}", category=category if n % 2 else None)
                                         for n in range(60)])
         url = "/admin/snippets/core/fieldphoto/"
         page = self.client.get(url)
         self.assertEqual(page.status_code, 200)
-        html = page.content.decode()
-        self.assertIn("<img", html)                                              # thumbnails
+        self.assertIn("<img", page.content.decode())
         self.assertEqual(page.context["page_obj"].paginator.per_page, 50)
         self.assertEqual(page.context["page_obj"].paginator.count, 68)
-        self.assertEqual(len(page.context["page_obj"].object_list), 50)          # never the whole table in one request
+        self.assertEqual(len(page.context["page_obj"].object_list), 50)
         self.assertEqual(self.client.get(url + "?p=2").status_code, 200)
-        filtered = self.client.get(url, {"category": category.pk})
-        self.assertEqual(filtered.context["page_obj"].paginator.count, 30)
-        approved = self.client.get(url, {"approved_for_publication": "true"})
-        self.assertEqual(approved.context["page_obj"].paginator.count, 0)
-        found = self.client.get(url, {"q": "Bulk 59"})
-        self.assertEqual(found.context["page_obj"].paginator.count, 1)
-        self.assertEqual(self.client.get("/admin/snippets/core/gallerycategory/").status_code, 200)
+        self.assertEqual(self.client.get(url, {"category": category.pk}).context["page_obj"].paginator.count, 30)
+        self.assertEqual(self.client.get(url, {"approved_for_publication": "true"}).context["page_obj"].paginator.count, 0)
+        self.assertEqual(self.client.get(url, {"q": "Bulk 59"}).context["page_obj"].paginator.count, 1)
+        html = page.content.decode()
+        for label in ("Approve", "Withdraw approval", "Show on home", "Remove from home", "Set category"):
+            self.assertIn(label, html)
 
-    def test_each_photo_is_edited_on_its_own(self):
-        from core.models import FieldPhoto
-        self.admin()
-        photo = FieldPhoto.objects.first()
-        edit = self.client.get(f"/admin/snippets/core/fieldphoto/edit/{photo.pk}/")
-        self.assertEqual(edit.status_code, 200)
-        html = edit.content.decode()
-        for name in ("alt_en", "alt_ar", "title_en", "title_ar", "caption_en", "caption_ar", "category", "featured",
-                     "show_on_homepage", "home_order", "sort_order", "approved_for_publication"):
-            self.assertIn(f'name="{name}"', html)
-
-    def test_only_users_with_the_approval_permission_can_approve(self):
-        from django.contrib.auth import get_user_model
+    def test_each_photo_is_edited_on_its_own_and_only_approvers_can_approve(self):
         from django.contrib.auth.models import Permission
         from core.models import FieldPhoto
-        editor = get_user_model().objects.create_user("editor", password="pw")
-        editor.user_permissions.add(*Permission.objects.filter(
-            codename__in=["access_admin", "add_fieldphoto", "change_fieldphoto", "view_fieldphoto"]))
-        self.client.login(username="editor", password="pw")
+        editor = self.login("add_fieldphoto", "change_fieldphoto", "view_fieldphoto")
         photo = FieldPhoto.objects.first()
         url = f"/admin/snippets/core/fieldphoto/edit/{photo.pk}/"
         html = self.client.get(url).content.decode()
-        self.assertIn('name="title_en"', html)
+        for name in ("alt_en", "alt_ar", "title_en", "title_ar", "caption_en", "caption_ar", "category", "featured",
+                     "show_on_homepage", "home_order", "sort_order"):
+            self.assertIn(f'name="{name}"', html)
         self.assertNotIn('name="approved_for_publication"', html)
-        data = {"image": photo.image_id, "title_en": "Edited by an editor", "home_order": 0,
-                "approved_for_publication": "on"}                                # a forged tick is ignored
+        data = {"image": photo.image_id, "title_en": "Edited by an editor", "home_order": 0, "approved_for_publication": "on"}
         self.assertEqual(self.client.post(url, data).status_code, 302)
         photo.refresh_from_db()
         self.assertEqual(photo.title_en, "Edited by an editor")
-        self.assertFalse(photo.approved_for_publication)
+        self.assertFalse(photo.approved_for_publication)                             # a forged tick is ignored
         editor.user_permissions.add(Permission.objects.get(codename="approve_fieldphoto"))
         self.client.logout(); self.client.login(username="editor", password="pw")
-        self.assertIn('name="approved_for_publication"', self.client.get(url).content.decode())
         self.assertEqual(self.client.post(url, data).status_code, 302)
         photo.refresh_from_db()
         self.assertTrue(photo.approved_for_publication)
 
-    def test_check_command_reports_counts_and_fails_on_a_difference(self):
-        from io import StringIO
-        from django.core.management.base import CommandError
-        from core.models import GalleryItem
-        out = StringIO()
-        call_command("sync_field_photos", "--check", stdout=out)
-        self.assertIn("gallery rows: 8, mirrored field photos: 8", out.getvalue())
-        GalleryItem.objects.filter(pk=GalleryItem.objects.first().pk).update(alt_en="Changed in the old editor")
-        with self.assertRaises(CommandError):
-            call_command("sync_field_photos", "--check", stdout=StringIO())
-        call_command("sync_field_photos", stdout=StringIO())
-        call_command("sync_field_photos", "--check", stdout=StringIO())
+    # ------------------------------------------------------------ bulk actions
+    def bulk(self, action, ids, data=None):
+        url = f"/admin/bulk/core/fieldphoto/{action}/?" + "&".join(f"id={i}" for i in ids)
+        return url, self.client.post(url, data or {})
 
-    def test_old_editor_and_its_records_are_still_in_place(self):
-        from core.models import GalleryItem, HomePage
-        self.admin()
-        html = self.client.get(f"/admin/pages/{HomePage.objects.get().pk}/edit/").content.decode()
-        self.assertIn("gallery-0-approved_for_publication", html)
-        self.assertEqual(GalleryItem.objects.count(), 8)
+    def test_bulk_approve_and_withdraw(self):
+        from core.models import FieldPhoto
+        self.login(superuser=True)
+        ids = [p.pk for p in field_photos()[:5]]
+        confirm = self.client.get(f"/admin/bulk/core/fieldphoto/approve/?" + "&".join(f"id={i}" for i in ids))
+        self.assertEqual(confirm.status_code, 200)
+        self.assertIn("identifiable face", confirm.content.decode())                 # the reminder before approving
+        self.assertEqual(FieldPhoto.objects.filter(approved_for_publication=True).count(), 0)   # opening the page changes nothing
+        _, response = self.bulk("approve", ids)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(set(FieldPhoto.objects.filter(approved_for_publication=True).values_list("pk", flat=True)), set(ids))
+        _, response = self.bulk("withdraw", ids[:2])
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(FieldPhoto.objects.filter(approved_for_publication=True).count(), 3)
+        self.assertEqual(FieldPhoto.objects.count(), 8)
+
+    def test_bulk_approval_needs_the_approval_permission(self):
+        from core.models import FieldPhoto
+        self.login("add_fieldphoto", "change_fieldphoto", "view_fieldphoto")
+        ids = [p.pk for p in field_photos()[:3]]
+        self.bulk("approve", ids)
+        self.assertEqual(FieldPhoto.objects.filter(approved_for_publication=True).count(), 0)
+        FieldPhoto.objects.update(approved_for_publication=True)
+        self.bulk("withdraw", ids)
+        self.assertEqual(FieldPhoto.objects.filter(approved_for_publication=True).count(), 8)
+        _, response = self.bulk("home_on", ids)                                      # ordinary edits are allowed
+        self.assertEqual(FieldPhoto.objects.filter(show_on_homepage=True).count(), 3)
+
+    def test_bulk_actions_are_closed_to_users_without_edit_permission(self):
+        from core.models import FieldPhoto
+        self.login("view_fieldphoto")
+        ids = [p.pk for p in field_photos()[:3]]
+        for action in ("approve", "home_on", "set_category"):
+            self.bulk(action, ids)
+        self.assertEqual(FieldPhoto.objects.filter(approved_for_publication=True).count(), 0)
+        self.assertEqual(FieldPhoto.objects.filter(show_on_homepage=True).count(), 0)
+        self.client.logout()
+        _, response = self.bulk("approve", ids)
+        self.assertEqual(response.status_code, 302)                                  # sent to the login page
+        self.assertEqual(FieldPhoto.objects.filter(approved_for_publication=True).count(), 0)
+
+    def test_bulk_homepage_and_category(self):
+        from core.models import FieldPhoto, GalleryCategory
+        self.login(superuser=True)
+        category = GalleryCategory.objects.create(name_en="Field Operations", slug="field-operations")
+        ids = [p.pk for p in field_photos()[:4]]
+        self.bulk("home_on", ids)
+        self.assertEqual(FieldPhoto.objects.filter(show_on_homepage=True).count(), 4)
+        self.bulk("home_off", ids[:1])
+        self.assertEqual(FieldPhoto.objects.filter(show_on_homepage=True).count(), 3)
+        self.bulk("set_category", ids, {"category": category.pk})
+        self.assertEqual(FieldPhoto.objects.filter(category=category).count(), 4)
+        self.bulk("set_category", ids[:2], {"category": ""})
+        self.assertEqual(FieldPhoto.objects.filter(category=category).count(), 2)
+        self.assertEqual(FieldPhoto.objects.filter(approved_for_publication=True).count(), 0)   # none of this approves anything
+
+    # ------------------------------------------------------------ bulk upload
+    def jpeg(self, name, size=(800, 600)):
+        import io
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image as PILImage
+        data = io.BytesIO()
+        PILImage.new("RGB", size, (40, 90, 140)).save(data, "JPEG")
+        return SimpleUploadedFile(name, data.getvalue(), content_type="image/jpeg")
+
+    def cleanup_images(self, before):
+        from wagtail.images.models import Image
+        for image in Image.objects.exclude(pk__in=before):
+            for rendition in image.renditions.all():
+                rendition.file.delete(False)
+            image.file.delete(False)
+
+    def test_bulk_upload_uses_wagtails_uploader_and_creates_unapproved_photos(self):
+        from core.models import FIELD_GALLERY_COLLECTION, FieldPhoto
+        from wagtail.images.models import Image
+        from wagtail.models import Collection
+        before = set(Image.objects.values_list("pk", flat=True))
+        self.addCleanup(self.cleanup_images, before)
+        self.login(superuser=True)
+        self.assertFalse(Collection.objects.filter(name=FIELD_GALLERY_COLLECTION).exists())     # no migration creates it
+        go = self.client.get("/admin/field-gallery/upload/")
+        collection = Collection.objects.get(name=FIELD_GALLERY_COLLECTION)
+        self.assertRedirects(go, f"/admin/images/multiple/add/?collection_id={collection.pk}", fetch_redirect_response=False)
+        page = self.client.get(go.url)
+        self.assertEqual(page.status_code, 200)
+        self.assertIn("multiple", page.content.decode())                             # Wagtail's multi-file input
+        self.assertRegex(page.content.decode(), rf'<option value="{collection.pk}"\s*selected')
+        for n in range(3):                                                           # the uploader posts one file per request
+            response = self.client.post("/admin/images/multiple/add/", {"files[]": self.jpeg(f"site-{n}.jpg"),
+                                                                        "collection": collection.pk},
+                                        HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+            self.assertTrue(response.json()["success"], response.json())
+        new = FieldPhoto.objects.filter(legacy_item_id=None)
+        self.assertEqual(new.count(), 3)
+        self.assertEqual(Image.objects.count(), len(before) + 3)                     # one image per file, no copies
+        for photo in new:
+            self.assertFalse(photo.approved_for_publication)
+            self.assertFalse(photo.show_on_homepage)
+            self.assertFalse(photo.featured)
+            self.assertEqual(photo.image.collection_id, collection.pk)
+        self.assertEqual(self.client.get("/admin/field-gallery/upload/").url, go.url)   # the collection is created once
+        self.assertEqual(Collection.objects.filter(name=FIELD_GALLERY_COLLECTION).count(), 1)
+        self.assertEqual(self.home_html(), "")                                       # nothing is published by uploading
+        # Saving an image again never gives it a second photo.
+        image = new.first().image
+        image.title = "Renamed"
+        image.save()
+        self.assertEqual(FieldPhoto.objects.filter(image=image).count(), 1)
+        # Newest first among photos without a manual order.
+        self.assertEqual([p.image.title for p in FieldPhoto.objects.filter(sort_order=None)][-1], "site-0.jpg")
+
+    def test_images_uploaded_elsewhere_do_not_become_field_photos(self):
+        from core.models import FieldPhoto, field_gallery_collection
+        from wagtail.images.models import Image
+        before = set(Image.objects.values_list("pk", flat=True))
+        self.addCleanup(self.cleanup_images, before)
+        self.login(superuser=True)
+        field_gallery_collection(create=True)
+        from wagtail.models import Collection
+        root = Collection.get_first_root_node()
+        response = self.client.post("/admin/images/multiple/add/", {"files[]": self.jpeg("brand-logo.jpg"), "collection": root.pk},
+                                    HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertTrue(response.json()["success"])
+        self.assertEqual(FieldPhoto.objects.count(), 8)
+
+    def test_upload_validation_is_wagtails(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from django.test import override_settings
+        from core.models import FieldPhoto, field_gallery_collection
+        from wagtail.images.models import Image
+        before = set(Image.objects.values_list("pk", flat=True))
+        self.addCleanup(self.cleanup_images, before)
+        self.login(superuser=True)
+        collection = field_gallery_collection(create=True)
+        post = lambda f: self.client.post("/admin/images/multiple/add/", {"files[]": f, "collection": collection.pk},
+                                          HTTP_X_REQUESTED_WITH="XMLHttpRequest").json()
+        not_an_image = post(SimpleUploadedFile("notes.jpg", b"this is not a picture", content_type="image/jpeg"))
+        self.assertFalse(not_an_image["success"])
+        wrong_type = post(SimpleUploadedFile("script.exe", b"MZ", content_type="application/octet-stream"))
+        self.assertFalse(wrong_type["success"])
+        with override_settings(WAGTAILIMAGES_MAX_UPLOAD_SIZE=1024):
+            too_big = post(self.jpeg("huge.jpg", (1600, 1200)))
+        self.assertFalse(too_big["success"])
+        self.assertIn("too big", too_big["error_message"].lower())
+        self.assertEqual(FieldPhoto.objects.count(), 8)
+        self.assertEqual(Image.objects.count(), len(before))
+
+    def test_upload_is_closed_without_permission(self):
+        from core.models import FIELD_GALLERY_COLLECTION
+        from wagtail.models import Collection
+        self.assertEqual(self.client.get("/admin/field-gallery/upload/").status_code, 302)      # not signed in: login
+        self.login("view_fieldphoto")
+        self.assertIn(self.client.get("/admin/field-gallery/upload/").status_code, (302, 403))
+        self.assertFalse(Collection.objects.filter(name=FIELD_GALLERY_COLLECTION).exists())
 

@@ -23,8 +23,12 @@ def mirror_values(item, home_position):
     }
 
 
-def sync_field_photos(GalleryItem, FieldPhoto, dry_run=False):
-    """Mirror every GalleryItem into FieldPhoto. Safe to run any number of times.
+def sync_field_photos(GalleryItem, FieldPhoto, dry_run=False, update_existing=False):
+    """Copy GalleryItem rows into FieldPhoto. Safe to run any number of times.
+
+    Field photos are now what the site shows and what Omar edits, so by default only rows that have
+    no field photo yet are created; existing photos are never overwritten or withdrawn. The final
+    run of the switch (core 0011) passed update_existing=True once, while GalleryItem still led.
 
     The model classes are passed in so the same code serves the migration (historical models),
     the management command and the tests. Returns a report of what was, or would be, done.
@@ -44,14 +48,14 @@ def sync_field_photos(GalleryItem, FieldPhoto, dry_run=False):
             report["created"] += 1
             if not dry_run:
                 FieldPhoto.objects.create(legacy_item_id=item.pk, **values)
-        elif any(getattr(photo, k) != v for k, v in values.items()):
+        elif update_existing and any(getattr(photo, k) != v for k, v in values.items()):
             report["updated"] += 1
             if not dry_run:
                 FieldPhoto.objects.filter(pk=photo.pk).update(**values)
         else:
             report["unchanged"] += 1
     # A row removed from the home page gallery must not stay public through its mirror. The mirror is kept.
-    gone = [p for legacy_id, p in existing.items() if legacy_id not in {i.pk for i in items}
+    gone = [p for legacy_id, p in existing.items() if update_existing and legacy_id not in {i.pk for i in items}
             and (p.approved_for_publication or p.show_on_homepage)]
     report["withdrawn"] = len(gone)
     if gone and not dry_run:

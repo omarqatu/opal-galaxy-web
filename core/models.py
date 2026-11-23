@@ -245,7 +245,6 @@ class HomePage(RoutablePageMixin, Page):
         MultiFieldPanel([bi("install_title"), bi("install_lead"), bi("install_link")], heading="Installation section"),
         InlinePanel("install_steps", heading="Installation steps", label="Step"),
         MultiFieldPanel([bi("projects_title"), bi("projects_lead")], heading="Gallery section"),
-        InlinePanel("gallery", heading="Gallery photos", label="Photo"),
         MultiFieldPanel([bi("about_title"), bi("about_text"), bi("about_cta"), FieldPanel("about_page")],
                         heading="About"),
         MultiFieldPanel([bi("faq_title"), bi("faq_lead"), bi("faq_cta"), FieldPanel("faq_page")],
@@ -259,11 +258,14 @@ class HomePage(RoutablePageMixin, Page):
     HOME_GALLERY_LIMIT = 8
 
     def approved_gallery(self):
-        """Photos a visitor may see: approved ones only, in the editor's order."""
-        return self.gallery.filter(approved_for_publication=True)
+        """Photos a visitor may see: approved field photos, manual order first, then newest."""
+        return FieldPhoto.objects.filter(approved_for_publication=True)
 
     def home_gallery(self):
-        return list(self.approved_gallery()[:self.HOME_GALLERY_LIMIT])
+        """Up to eight approved photos explicitly marked "Show on homepage", in their homepage order."""
+        photos = (self.approved_gallery().filter(show_on_homepage=True).select_related("image")
+                  .order_by("home_order", models.F("sort_order").asc(nulls_last=True), "-created", "-pk"))
+        return list(photos[:self.HOME_GALLERY_LIMIT])
 
     def home_faqs(self):
         """Questions shown on the home page; every question stays on the FAQ page."""
@@ -418,7 +420,7 @@ class GalleryCategory(models.Model):
     @classmethod
     def with_approved_photos(cls):
         """Only categories that have at least one approved photo are offered to visitors."""
-        return cls.objects.filter(photos__approved_for_publication=True).distinct()
+        return cls.objects.filter(field_photos__approved_for_publication=True).distinct()
 
 
 class FieldPhoto(models.Model):
@@ -564,32 +566,41 @@ class ContentPage(Page):
             home = HomePage.objects.live().first()
             ctx["faqs"] = home.faqs.all() if home else []
         if self.kind == "gallery":
-            ctx.update(self.gallery_context(request.GET.get("category", "")))
+            ctx.update(self.gallery_context(request.GET.get("category", ""), request.GET.get("page", 1)))
         return ctx
 
     GALLERY_LEADS = 2
+    GALLERY_PAGE_SIZE = 24
 
     @classmethod
-    def gallery_context(cls, category_slug=""):
-        """Approved photos of the home page, optionally narrowed to one category.
+    def gallery_context(cls, category_slug="", page_number=1):
+        """One page of approved field photos, optionally narrowed to one category.
 
-        Up to two featured photos lead the grid. A single featured photo is paired with the next
-        photo so the leading row is never lopsided; with no featured photo the grid is uniform.
+        Only the requested page is read from the database. On the first page up to two featured
+        photos lead the grid; a single featured photo is paired with the next photo so the leading
+        row is never lopsided, and with no featured photo the grid is uniform.
         """
-        home = HomePage.objects.live().first()
-        approved = (home.approved_gallery().select_related("image", "category")
-                    .prefetch_related("image__renditions") if home else GalleryItem.objects.none())
-        categories = list(GalleryCategory.objects.filter(pk__in=approved.exclude(category=None).values("category")))
+        from django.core.paginator import Paginator
+        approved = FieldPhoto.objects.filter(approved_for_publication=True)
+        categories = list(GalleryCategory.with_approved_photos())
         active = next((c for c in categories if c.slug == category_slug), None)
-        photos = [g for g in approved if not active or g.category_id == active.pk]
-        leads = [g for g in photos if g.featured][:cls.GALLERY_LEADS]
-        if len(leads) == 1 and len(photos) > 1:
-            leads.append(next(g for g in photos if g is not leads[0]))
+        if active:
+            approved = approved.filter(category=active)
+        approved = approved.select_related("image").prefetch_related("image__renditions")
+        page = Paginator(approved, cls.GALLERY_PAGE_SIZE).get_page(page_number)
+        photos = list(page.object_list)
+        leads = []
+        if page.number == 1:
+            leads = list(approved.filter(featured=True)[:cls.GALLERY_LEADS])
+            if len(leads) == 1:
+                partner = next((g for g in photos if g.pk != leads[0].pk), None)
+                leads += [partner] if partner else []
         lead_ids = {g.pk for g in leads}
-        for g in photos:
-            g.is_lead = g.pk in lead_ids
-        return {"photos": leads + [g for g in photos if g.pk not in lead_ids],
-                "gallery_categories": categories, "active_category": active}
+        rest = [g for g in photos if g.pk not in lead_ids]
+        for g in leads:
+            g.is_lead = True
+        return {"photos": leads + rest, "gallery_categories": categories, "active_category": active,
+                "gallery_page": page}
 
     def serve(self, request, *args, **kwargs):
         response = super().serve(request, *args, **kwargs)
@@ -644,3 +655,38 @@ class QuoteRequest(models.Model):
 
     def __str__(self):
         return f"{self.created:%Y-%m-%d %H:%M} · {self.name or self.phone} · {self.product or '-'}"
+
+
+# ---------------------------------------------------------------- field gallery uploads
+FIELD_GALLERY_COLLECTION = "Field gallery"
+
+
+def field_gallery_collection(create=False):
+    """The image collection that holds field photographs, kept apart from product and brand images."""
+    from wagtail.models import Collection
+    found = Collection.objects.filter(name=FIELD_GALLERY_COLLECTION).first()
+    if found is None and create:
+        found = Collection.get_first_root_node().add_child(name=FIELD_GALLERY_COLLECTION)
+    return found
+
+
+def photo_for_uploaded_image(sender, instance, **kwargs):
+    """Every image placed in the Field gallery collection gets one field photo, unapproved.
+
+    This is what makes Wagtail's own multi-file upload the gallery's bulk upload: nothing is
+    published by uploading, and an image never gets a second photo.
+    """
+    if kwargs.get("raw"):
+        return
+    collection = field_gallery_collection()
+    if collection and instance.collection_id == collection.pk and not FieldPhoto.objects.filter(image=instance).exists():
+        FieldPhoto.objects.create(image=instance)
+
+
+def _connect_upload_signal():
+    from django.db.models.signals import post_save
+    from wagtail.images import get_image_model
+    post_save.connect(photo_for_uploaded_image, sender=get_image_model(), dispatch_uid="field-photo-for-upload")
+
+
+_connect_upload_signal()
