@@ -1063,20 +1063,49 @@ class PremiumInternalPagesTests(TestCase):
         self.assertTemplateUsed(self.client.get("/brands/midea/"), "catalog/brand.html")
         self.assertTemplateUsed(self.client.get("/products/wall/"), "catalog/category.html")
 
+    @staticmethod
+    def text_of(markup):
+        """What a reader (or a screen reader) gets: the markup with every tag removed."""
+        import html as htmllib, re
+        return re.sub(r"\s+", " ", htmllib.unescape(re.sub(r"<[^>]+>", "", markup)))
+
     def test_catalogue_text_is_printed_verbatim_in_both_languages(self):
-        import html as htmllib
-        from core.templatetags.opal import model_groups
+        import re
         for path, rows in (("/brands/carrier/", Supply.objects.filter(brand__slug="carrier", category__live=True)),
                            ("/ar/products/vrf/", Supply.objects.filter(category__slug="vrf"))):
-            page = htmllib.unescape(self.client.get(path).content.decode())
+            html = self.client.get(path).content.decode()
+            page = self.text_of(html)
+            from core.templatetags.opal import model_groups
             for row in rows:
                 for _label, items in model_groups(row):
                     for item in items:
-                        self.assertIn(item, page)
+                        self.assertIn(re.sub(r"\s+", " ", item), page)
                 if not row.pending:
                     for line in row.spec_list():
-                        self.assertIn(line, page)
+                        self.assertIn(re.sub(r"\s+", " ", line), page)       # separators included
+            # each specification row, tags removed, is exactly one stored line
+            stored = {re.sub(r"\s+", " ", l) for r in rows if not r.pending for l in r.spec_list()}
+            shown = [self.text_of(li).strip() for ul in re.findall(r'<ul class="tech__specs"[^>]*>(.*?)</ul>', html, re.S)
+                     for li in re.findall(r"<li[^>]*>(.*?)</li>", ul, re.S)]
+            self.assertTrue(shown)
+            self.assertLessEqual(set(shown), stored)
         self.assertIn('<div class="tech__data" dir="ltr" lang="en">', self.client.get("/ar/products/vrf/").content.decode())
+
+    def test_identifier_and_separator_styling_changes_no_character(self):
+        from core.templatetags.opal import mark_ids, spec_parts
+        samples = ["XPower 38VT008168HTMM – 38VT020168HTMM (8 – 20 HP, single module)",
+                   "4-way cassette 40VU___S-4S-TEE1", "Optimax™ Pro 38KHCT/42KHCT", "50TCM A07", "IVCF Series",
+                   "AquaForce® 30XA", "SGS 181i5", "A <b> & C"]
+        for text in samples:
+            self.assertEqual(self.text_of(str(mark_ids(text))), text)
+        self.assertIn('<b class="tech__id">38VT008168HTMM</b>', mark_ids(samples[0]))
+        self.assertIn('<b class="tech__id">40VU___S-4S-TEE1</b>', mark_ids(samples[1]))
+        self.assertIn('<b class="tech__id">38KHCT/42KHCT</b>', mark_ids(samples[2]))
+        self.assertNotIn("tech__id", mark_ids("IVCF Series"))        # a name, not an identifier
+        self.assertNotIn("tech__id", mark_ids("8 – 20 HP"))           # a figure, not an identifier
+        self.assertIn("&lt;b&gt; &amp; C", mark_ids("A <b> & C"))
+        line = "Refrigerant R410A · heat pump · 380-415/3/50"
+        self.assertEqual(" · ".join(spec_parts(line)), line)
 
     def test_model_groups_only_split_at_the_catalogue_separators(self):
         from core.templatetags.opal import model_groups, spec_rows
@@ -1116,28 +1145,54 @@ class PremiumInternalPagesTests(TestCase):
         self.assertNotIn('class="tech"', page)
         self.assertNotIn("cat-index", page)
 
-    def test_draft_copy_is_shown_only_on_request_on_staging_and_never_saved(self):
+    def test_draft_copy_is_only_for_signed_in_reviewers_and_is_never_saved(self):
+        from django.contrib.auth import get_user_model
         from django.test import override_settings
         from catalog import preview
         before = (Brand.objects.get(slug="carrier").about_en, Brand.objects.get(slug="carrier").line_ar,
                   ProductCategory.objects.get(slug="vrf").lead_en)
         draft_en = preview.DEMO[("brand", "carrier")]["intro"]["en"]
         draft_ar = preview.DEMO[("category", "vrf")]["intro"]["ar"]
-        plain = self.client.get("/brands/carrier/").content.decode()
-        self.assertNotIn(draft_en, plain)
-        self.assertNotIn("draft-banner", plain)
-        self.assertIn(before[0][:60], plain)                       # the CMS text is what is published
-        with override_settings(SITE_NOINDEX=True):
-            page = self.client.get("/brands/carrier/?draft=1").content.decode()
-            self.assertIn(draft_en, page)
-            self.assertIn('class="draft-banner"', page)
-            self.assertIn("is-draft", page)
-            self.assertIn(draft_ar, self.client.get("/ar/products/vrf/?draft=1").content.decode())
-            self.assertNotIn("draft-banner", self.client.get("/brands/midea/?draft=1").content.decode())
-        with override_settings(SITE_NOINDEX=False):                # an indexed site never shows drafts
-            self.assertNotIn(draft_en, self.client.get("/brands/carrier/?draft=1").content.decode())
+        url = "/brands/carrier/?draft=1"
+        # the public, on staging or anywhere else: the normal page
+        for noindex in (True, False):
+            with override_settings(SITE_NOINDEX=noindex):
+                page = self.client.get(url)
+                self.assertNotContains(page, draft_en)
+                self.assertNotContains(page, "draft-banner")
+                self.assertContains(page, before[0][:60])
+                self.assertNotIn("no-store", page.headers.get("Cache-Control", ""))
+        # a signed-in visitor without admin access: still the normal page
+        User = get_user_model()
+        self.client.force_login(User.objects.create_user("visitor", "v@example.com", "pw"))
+        self.assertNotContains(self.client.get(url), draft_en)
+        # a reviewer (Wagtail admin access): the draft, marked, uncached
+        self.client.force_login(User.objects.create_superuser("omar", "o@example.com", "pw"))
+        page = self.client.get(url)
+        self.assertContains(page, draft_en)
+        self.assertContains(page, 'class="draft-banner"')
+        self.assertContains(page, "is-draft")
+        self.assertEqual(page.headers["Cache-Control"], "private, no-store")
+        self.assertContains(self.client.get("/ar/products/vrf/?draft=1"), draft_ar)
+        self.assertNotContains(self.client.get("/brands/carrier/"), draft_en)        # only on request
+        self.assertNotContains(self.client.get("/brands/midea/?draft=1"), "draft-banner")
+        self.client.logout()
+        with override_settings(DEBUG=True):                                          # local development
+            self.assertContains(self.client.get(url), draft_en)
         self.assertEqual(before, (Brand.objects.get(slug="carrier").about_en, Brand.objects.get(slug="carrier").line_ar,
                                   ProductCategory.objects.get(slug="vrf").lead_en))
+
+    def test_quotation_band_keeps_the_general_site_texts(self):
+        from django.contrib.auth import get_user_model
+        from catalog import preview
+        for page in preview.DEMO.values():
+            self.assertNotIn("cta_title", page)
+            self.assertNotIn("cta_text", page)
+        self.client.force_login(get_user_model().objects.create_superuser("rev", "r@example.com", "pw"))
+        for url in ("/brands/carrier/?draft=1", "/products/vrf/?draft=1"):
+            band = self.client.get(url).content.decode().split('class="cta-band"')[1].split("</section>")[0]
+            self.assertIn("Request a project quote", band)
+            self.assertNotIn("is-draft", band)
 
     def test_draft_copy_states_no_specification_or_commercial_claim(self):
         import re
