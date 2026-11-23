@@ -1,0 +1,123 @@
+"""Field gallery: categories, featured flag and per-photo approval.
+
+Schema changes, plus one step for the photos that already exist: they are on the public home page
+today by Omar's decision, so they keep that state and are marked approved. Photos added afterwards
+are unapproved until the box is ticked in the admin. The same value is written into the home page's
+saved revisions, so the editor shows the photos as approved and a later publish does not withdraw them.
+No photo, caption, image or file is changed or removed. Reversing does nothing.
+"""
+import django.db.models.deletion
+from django.db import migrations, models
+
+
+def approve_existing(apps, schema_editor):
+    GalleryItem = apps.get_model("core", "GalleryItem")
+    existing = set(GalleryItem.objects.values_list("pk", flat=True))
+    if not existing:
+        return
+    GalleryItem.objects.filter(pk__in=existing).update(approved_for_publication=True)
+    HomePage = apps.get_model("core", "HomePage")
+    Revision = apps.get_model("wagtailcore", "Revision")
+    for home in HomePage.objects.all():
+        for rev in Revision.objects.filter(pk__in=[i for i in (home.latest_revision_id, home.live_revision_id) if i]):
+            changed = False
+            for entry in rev.content.get("gallery", []):
+                if entry.get("pk") in existing and "approved_for_publication" not in entry:
+                    entry["approved_for_publication"] = True
+                    changed = True
+            if changed:
+                rev.save(update_fields=["content"])
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ("core", "0008_gallery_lead_photos"),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name="GalleryCategory",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name_en", models.CharField(max_length=80, verbose_name="Name (EN)")),
+                (
+                    "name_ar",
+                    models.CharField(
+                        blank=True, max_length=80, verbose_name="Name (AR)"
+                    ),
+                ),
+                (
+                    "slug",
+                    models.SlugField(
+                        help_text="Used in the gallery address, e.g. installations",
+                        unique=True,
+                    ),
+                ),
+                (
+                    "sort_order",
+                    models.PositiveIntegerField(
+                        default=0, help_text="Lower numbers come first"
+                    ),
+                ),
+            ],
+            options={
+                "verbose_name": "Gallery category",
+                "verbose_name_plural": "Gallery categories",
+                "ordering": ["sort_order", "name_en"],
+            },
+        ),
+        migrations.AddField(
+            model_name="galleryitem",
+            name="approved_for_publication",
+            field=models.BooleanField(
+                default=False,
+                help_text="The photo appears on the site only when this is ticked and the page is published. Tick it after checking that the photo shows no identifiable face or vehicle number plate, or that permission was given or the photo was redacted.",
+                verbose_name="Approved for publication",
+            ),
+        ),
+        migrations.AddField(
+            model_name="galleryitem",
+            name="featured",
+            field=models.BooleanField(
+                default=False,
+                help_text="Shown larger in the gallery. Only the first two featured photos lead.",
+                verbose_name="Featured photo",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="contentpage",
+            name="kind",
+            field=models.CharField(
+                choices=[
+                    ("text", "Text only (About, Privacy Policy)"),
+                    ("faq", "Text, then every question from the home page"),
+                    ("contact", "Text, then the company's contact details"),
+                    ("gallery", "Text, then the gallery of approved photos"),
+                ],
+                default="text",
+                max_length=10,
+            ),
+        ),
+        migrations.AddField(
+            model_name="galleryitem",
+            name="category",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Optional. Managed under Snippets → Gallery categories.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="photos",
+                to="core.gallerycategory",
+            ),
+        ),
+        migrations.RunPython(approve_existing, migrations.RunPython.noop),
+    ]
