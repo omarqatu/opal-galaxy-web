@@ -156,3 +156,15 @@ msgstr "البريد الإلكتروني"
 
 msgid "Licence"
 msgstr "الرخصة"
+
+msgid "All categories"
+msgstr "جميع الفئات"
+
+msgid "All brands"
+msgstr "جميع العلامات التجارية"
+
+msgid "All services"
+msgstr "جميع الخدمات"
+
+msgid "Capacity"
+msgstr "السعة"

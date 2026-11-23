@@ -137,7 +137,7 @@ class Command(BaseCommand):
         import importlib
         from django.apps import apps as live_apps
         for name in ("core.migrations.0003_redesign_home_content", "core.migrations.0005_redesign_pages_content",
-                     "core.migrations.0007_home_hero_content"):
+                     "core.migrations.0007_home_hero_content", "core.migrations.0008_gallery_lead_photos"):
             importlib.import_module(name).apply_content(live_apps, None)
 
         self.stdout.write(self.style.SUCCESS(

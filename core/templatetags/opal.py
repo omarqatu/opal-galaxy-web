@@ -79,10 +79,22 @@ def plain(text):
 
 @register.filter
 def card_range(category):
-    """Capacity range for a category card. Shown only when the stored value is stated in BTU,
-    or in HP for VRF; other units stay off the cards until the unit audit is done. Never converted."""
+    """Capacity range for a category card, exactly as stored. A value stated in tons is not shown
+    (the cards carry BTU or a plain figure only); nothing is converted."""
     value = (category.capacity_range or "").strip()
-    upper = value.upper()
-    if "BTU" in upper or (category.slug == "vrf" and "HP" in upper):
-        return value
-    return ""
+    lowered = value.lower()
+    if "ton" in lowered or "طن" in value or " tr" in lowered:
+        return ""
+    return value
+
+
+# Where a service card leads when it has no page of its own: a section that exists on the home page.
+SERVICE_ANCHORS = {"supply": "#products", "install": "#install", "quote": "#contact", "project": "#contractors"}
+
+
+@register.simple_tag
+def service_href(service):
+    page = service.link_page
+    if page is not None and page.live:
+        return i18n.lang_url(f"/{page.slug}/")
+    return SERVICE_ANCHORS.get(service.icon, "")
