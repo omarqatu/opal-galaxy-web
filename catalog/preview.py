@@ -1,25 +1,16 @@
-"""Premium internal pages: which pages use the new templates, and draft copy for review.
+"""Draft copy for review on brand and category pages.
 
-REFERENCE PAGES
-    The redesigned brand and category templates are switched on page by page. While the two
-    reference designs are under review only Carrier and VRF systems use them; every other
-    brand and category page keeps the current template.
+DEMO holds proposed editorial wording in English and Arabic. It is NOT site content: it is
+never written to the database. It is shown only when ?draft=1 is added to the address of
+a page that has a draft AND the visitor is a signed-in user with access to the Wagtail
+admin (or the site runs in local development with DEBUG on), under a visible "Draft
+content for review" banner. Anyone else gets the normal page.
 
-DRAFT COPY
-    DEMO holds proposed editorial wording in English and Arabic. It is NOT site content:
-    it is never written to the database. It is shown only when ?draft=1 is added to the
-    address of a reference page AND the visitor is a signed-in user with access to the
-    Wagtail admin (or the site runs in local development with DEBUG on), under a visible
-    "Draft content for review" banner. Anyone else gets the normal page. Once Omar has edited and approved a text he enters
-    it in Wagtail Admin; this file is then deleted.
-
-    Nothing here states a specification, capacity, model, certification, warranty, price,
-    stock level or delivery time. Technical data on the pages always comes from the
-    catalogue rows in the database, unchanged.
+Once Omar has edited and approved a text he enters it in Wagtail Admin and its entry here
+is deleted. Nothing here states a specification, capacity, model, certification, warranty,
+price, stock level or delivery time. Technical data on the pages always comes from the
+catalogue rows in the database, unchanged.
 """
-
-PREMIUM_BRANDS = {"carrier"}
-PREMIUM_CATEGORIES = {"vrf"}
 
 DEMO = {
     ("brand", "carrier"): {

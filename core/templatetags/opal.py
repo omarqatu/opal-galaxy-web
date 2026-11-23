@@ -108,18 +108,29 @@ _GROUP_SPLIT = re.compile(r"\.\s+(?=[A-Z][\w &/()\-]{1,40}:\s)")
 _GROUP_LABEL = re.compile(r"^([A-Z][\w &/()\-]{1,40}):\s+(.+)$", re.S)
 
 
+# A fragment after " · " that only continues the item before it, rather than naming a new one:
+# "50ZPM 36 · 48 · 60", "Split 18,000 · 24,000 BTU", "50TCM A07 · D08", "SGCA 3600i · 4800i (cool & heat)".
+# It starts with a bare figure (at most a one- or two-letter suffix) or is a lone short code; a fragment
+# that opens with a model identifier of its own ("50TCM A07", "38VS008168HCMM") starts a new item.
+_CONTINUES = re.compile(r"^(?:[\d,.]+[A-Za-z]{0,2}(?![\w/-])(?:\s.*)?|[A-Z]{1,2}\d{1,3})$", re.S)
+
+
 @register.filter
 def model_groups(supply):
-    """[(label or "", [items…]), …] from Supply.models_text, text of every item verbatim."""
+    """[(label or "", [items…]), …] from Supply.models_text, text of every item verbatim.
+
+    The text is cut only at the catalogue's own separators, and a fragment that merely continues
+    the previous item stays attached to it (with its " · "), so no bare "48" or "60,000 BTU" is
+    ever shown as if it were a model."""
     groups = []
     for chunk in (supply.models_text or "").split(" · "):
-        for piece in _GROUP_SPLIT.split(chunk):
-            piece = piece.strip()
-            if not piece:
-                continue
+        pieces = [p.strip() for p in _GROUP_SPLIT.split(chunk) if p.strip()]
+        for n, piece in enumerate(pieces):
             match = _GROUP_LABEL.match(piece)
             if match:
                 groups.append((match.group(1), [match.group(2).strip()]))
+            elif groups and n == 0 and groups[-1][1] and _CONTINUES.match(piece):
+                groups[-1][1][-1] += " · " + piece
             elif groups:
                 groups[-1][1].append(piece)
             else:
@@ -134,8 +145,9 @@ def spec_rows(supply):
 
 
 # A model or series identifier: capitals and digits (with / - _), at least one of each, e.g. 38VT008168HTMM,
-# 40VU___S-4S-TEE1, 50TCM, SGS121AE. Used only to set identifiers in a distinct style; the text is unchanged.
-_MODEL_ID = re.compile(r"(?<![\w/-])(?=[A-Z0-9_/\-]*[A-Z])(?=[A-Z0-9_/\-]*\d)[A-Z0-9][A-Z0-9_/\-]{2,}(?![\w-])")
+# 40VU___S-4S-TEE1, 50TCM, SGS121AE. Refrigerant names (R410A, R-134A) are not identifiers. Used only to set
+# identifiers in a distinct style; the text is unchanged.
+_MODEL_ID = re.compile(r"(?<![\w/-])(?!R-?\d{2,3}[A-Z]?(?![\w-]))(?=[A-Z0-9_/\-]*[A-Z])(?=[A-Z0-9_/\-]*\d)[A-Z0-9][A-Z0-9_/\-]{2,}(?![\w-])")
 
 
 @register.filter

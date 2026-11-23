@@ -18,6 +18,23 @@ def row(**kw):
     base.update(kw)
     return base
 
+def shown_text(response):
+    """The page as a reader gets it: tags removed, whitespace collapsed."""
+    import html
+    import re
+    markup = re.sub(r"</?(?:span|b|i)\b[^>]*>", "", response.content.decode())   # inline wrappers add no space
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", markup)))
+
+
+def model_pieces(models_text):
+    """The pieces of a stored models string as the panels lay them out (cut at " · " and after "Label:")."""
+    import re
+    out = []
+    for part in re.split(r" · |\.\s+(?=[A-Z][\\w &/()\\-]{1,40}:\s)", models_text):
+        out.extend(x.strip() for x in re.split(r"(?<=:)\s", part, maxsplit=1) if x.strip())
+    return out
+
+
 
 class ImportCatalogueTests(TestCase):
     @classmethod
@@ -73,7 +90,9 @@ class ImportCatalogueTests(TestCase):
         self.assertTrue(cat.has_unpublished_changes)
         self.assertEqual(self.sg_window().models_text, before)  # live row untouched
         r = self.client.get("/products/window/")
-        self.assertContains(r, before)
+        text = shown_text(r)
+        for piece in model_pieces(before):
+            self.assertIn(piece, text)
         self.assertNotContains(r, "SGA25AE")
         # The draft holds the new values
         draft = cat.latest_revision.as_object()
