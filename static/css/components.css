@@ -854,3 +854,9 @@ a.service-row:hover .service-row__go svg,.cat-card:hover .cat-card__go svg{trans
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
   .js [data-reveal]{opacity:1!important;transform:none!important}
 }
+.foot__icons a{display:inline-flex;align-items:center;min-block-size:var(--tap)}
+.foot__icons a.ltr{display:inline-flex}
+@media (max-width:640px){
+  .foot__group a{display:flex;inline-size:100%}
+  .foot__meta a{min-inline-size:var(--tap)}
+}
