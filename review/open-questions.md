@@ -143,6 +143,11 @@ Every text below has its own Arabic field in the admin and can be edited there; 
 | L25 | Pages → Maintenance · item text (AR) | للعلامات السبع | States a count (approved correction 1); fixed in Phase 3. | للعلامات التجارية التي نورّدها |
 | L26 | Pages → Maintenance · item text (AR) | وفحص ضغط الغاز والكهرباء | "الغاز" as in L14. | وفحص ضغط غاز التبريد والتوصيلات الكهربائية |
 
+Display notes from the visual consistency audit (content, for Omar in the admin; not changed by the redesign):
+
+- Business hours on Arabic pages: "السبت – الخميس، 8:00 – 18:00 · الأحد عطلة" renders the time range as "18:00 – 8:00" because the digits and the dash sit inside right-to-left text. Writing it as "من 8:00 إلى 18:00" avoids the reversal. The contradiction itself is question 1.
+- English footer description begins with the legal name and a dash ("Opal Galaxy Air Condition Trading L.L.C — air-conditioning supplier…"); the Arabic one was corrected in Phase 3.
+
 Admin display note: Arabic fields in the admin are laid out left-to-right, so a full stop at the end of an Arabic sentence appears at the wrong end while editing. The public site shows it correctly. The fields can be given right-to-left direction in the admin in a later phase.
 
 Terminology decisions (Omar, 23 Nov 2026) — applied to all new copy, and to the existing texts above in Phase 3 through a guarded migration:
