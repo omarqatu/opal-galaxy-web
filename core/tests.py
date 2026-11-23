@@ -1306,17 +1306,54 @@ class GalleryApprovalTests(TestCase):
         html = self.client.get("/").content.decode()
         return html.split('id="gallery"')[1].split("</ul>")[0] if 'id="gallery"' in html else ""
 
-    def test_existing_photos_are_kept_and_none_is_approved_automatically(self):
+    def run_migration_step(self):
+        import importlib
+        from django.apps import apps
+        importlib.import_module("core.migrations.0009_gallery_categories_and_approval").approve_existing(apps, None)
+
+    def test_photos_that_exist_at_migration_time_stay_published_and_are_kept(self):
+        """The eight photos already on the home page keep their state: the migration marks them approved."""
         from core.models import GalleryCategory, GalleryItem
-        from wagtail.images.models import Image
-        self.assertEqual(GalleryItem.objects.count(), 8)
-        self.assertEqual(GalleryItem.objects.filter(approved_for_publication=True).count(), 0)
+        home = self.home()
+        revision = home.save_revision()                       # a draft saved before the new fields existed
+        for entry in revision.content["gallery"]:
+            entry.pop("approved_for_publication", None)
+        revision.save()
+        before = list(GalleryItem.objects.order_by("pk").values_list(
+            "pk", "image_id", "sort_order", "alt_en", "alt_ar", "caption_en", "caption_ar", "subcaption_en", "subcaption_ar"))
+        self.assertEqual(self.gallery_html(), "")
+        self.run_migration_step()
+        self.assertEqual(GalleryItem.objects.filter(approved_for_publication=True).count(), 8)
+        self.assertEqual(list(GalleryItem.objects.order_by("pk").values_list(
+            "pk", "image_id", "sort_order", "alt_en", "alt_ar", "caption_en", "caption_ar", "subcaption_en", "subcaption_ar")), before)
         self.assertEqual(GalleryItem.objects.filter(featured=True).count(), 0)
         self.assertEqual(GalleryItem.objects.exclude(category=None).count(), 0)
         self.assertEqual(GalleryCategory.objects.count(), 0)          # categories are created in the admin only
         for g in GalleryItem.objects.select_related("image"):
             self.assertTrue(g.image.file.storage.exists(g.image.file.name))   # original files are still there
-        self.assertTrue(Image.objects.filter(pk=self.home().hero_image_id).exists())
+        # The home page shows the same eight photos as before the change.
+        gallery = self.gallery_html()
+        self.assertEqual(gallery.count("data-lightbox"), 8)
+        self.assertEqual(gallery.count('class="is-lead"'), 2)
+        # The saved draft carries the approval too, so publishing it later does not withdraw the photos.
+        revision.refresh_from_db()
+        self.assertTrue(all(e["approved_for_publication"] for e in revision.content["gallery"]))
+        revision.publish()
+        self.assertEqual(self.home().approved_gallery().count(), 8)
+
+    def test_a_photo_added_after_the_migration_is_not_approved_by_it(self):
+        from core.models import GalleryItem
+        self.run_migration_step()
+        late = GalleryItem.objects.create(page=self.home(), image=self.home().gallery.first().image, sort_order=50,
+                                          alt_en="Uploaded later")
+        self.assertFalse(late.approved_for_publication)
+        self.assertNotIn("Uploaded later", self.gallery_html())
+        self.assertEqual(self.gallery_html().count("data-lightbox"), 8)
+
+    def test_a_fresh_site_approves_nothing(self):
+        from core.models import GalleryItem
+        self.assertEqual(GalleryItem.objects.count(), 8)       # seeded after the migrations ran
+        self.assertEqual(GalleryItem.objects.filter(approved_for_publication=True).count(), 0)
 
     def test_new_photos_are_unapproved_by_default(self):
         from core.models import GalleryItem
