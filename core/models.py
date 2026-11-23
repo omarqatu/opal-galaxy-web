@@ -289,6 +289,8 @@ class HomePage(RoutablePageMixin, Page):
         if (kwargs.get("context_overrides") or {}).get("draft_mode"):
             response["Cache-Control"] = "private, no-store"   # a reviewer's preview is never cached or shared
             response["X-Robots-Tag"] = "noindex, nofollow"
+        elif not response.has_header("Cache-Control"):
+            response["Cache-Control"] = "no-cache"            # pages are revalidated, so withdrawn photos never linger
         return response
 
     @path("products/<slug:slug>/")
@@ -500,7 +502,39 @@ class ContentPage(Page):
         if self.kind == "faq":
             home = HomePage.objects.live().first()
             ctx["faqs"] = home.faqs.all() if home else []
+        if self.kind == "gallery":
+            ctx.update(self.gallery_context(request.GET.get("category", "")))
         return ctx
+
+    GALLERY_LEADS = 2
+
+    @classmethod
+    def gallery_context(cls, category_slug=""):
+        """Approved photos of the home page, optionally narrowed to one category.
+
+        Up to two featured photos lead the grid. A single featured photo is paired with the next
+        photo so the leading row is never lopsided; with no featured photo the grid is uniform.
+        """
+        home = HomePage.objects.live().first()
+        approved = (home.approved_gallery().select_related("image", "category")
+                    .prefetch_related("image__renditions") if home else GalleryItem.objects.none())
+        categories = list(GalleryCategory.objects.filter(pk__in=approved.exclude(category=None).values("category")))
+        active = next((c for c in categories if c.slug == category_slug), None)
+        photos = [g for g in approved if not active or g.category_id == active.pk]
+        leads = [g for g in photos if g.featured][:cls.GALLERY_LEADS]
+        if len(leads) == 1 and len(photos) > 1:
+            leads.append(next(g for g in photos if g is not leads[0]))
+        lead_ids = {g.pk for g in leads}
+        for g in photos:
+            g.is_lead = g.pk in lead_ids
+        return {"photos": leads + [g for g in photos if g.pk not in lead_ids],
+                "gallery_categories": categories, "active_category": active}
+
+    def serve(self, request, *args, **kwargs):
+        response = super().serve(request, *args, **kwargs)
+        if self.kind == "gallery":
+            response["Cache-Control"] = "no-cache"   # always revalidated: a photo whose approval is withdrawn is gone at once
+        return response
 
 
 class ContentSection(_Bi):

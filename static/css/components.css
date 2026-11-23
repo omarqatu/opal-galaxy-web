@@ -971,3 +971,30 @@ a.service-row:hover .service-row__go svg,.cat-card:hover .cat-card__go svg{trans
 @media (max-width:399px){:lang(en) .site-header .logo small{display:none}}
 
 html[dir=ltr] p.tech__foot{max-width:none}
+
+/* ==========================================================================
+   Field gallery page: category filter, editorial wall, shared viewer
+   ========================================================================== */
+.gallery-filter{margin-block-end:var(--s-6)}
+.gallery-filter ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:var(--s-2)}
+.gallery-filter a{display:inline-flex;align-items:center;min-block-size:var(--tap);padding-inline:var(--s-4);border:1px solid var(--line);border-radius:var(--radius-btn);background:var(--white);color:var(--navy);font-size:var(--fs-small);font-weight:500;text-decoration:none;transition:border-color var(--t-fast) var(--ease),background-color var(--t-fast) var(--ease),color var(--t-fast) var(--ease)}
+.gallery-filter a:hover{border-color:var(--cyan)}
+.gallery-filter a[aria-current]{background:var(--navy);border-color:var(--navy);color:var(--white)}
+.gallery-wall{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--s-6) var(--grid-gap);align-items:start}
+.gallery-wall>li{grid-column:span 2;min-inline-size:0}
+.gallery-wall>li.is-lead{grid-column:span 3}
+.shot{margin:0}
+.shot .frame{display:block;border-radius:var(--radius)}
+.shot .frame:focus-visible{outline-offset:3px}
+.shot img{inline-size:100%;block-size:auto}
+.shot figcaption{padding-block-start:var(--s-3);font-size:var(--fs-small);line-height:1.45;color:var(--muted)}
+.shot figcaption b{display:block;color:var(--navy);font-weight:600}
+.shot figcaption span{display:block}
+.lightbox.is-single .lightbox__nav,.lightbox.is-single .lightbox__count{display:none}
+.lightbox figure{touch-action:pan-y}
+@media (max-width:640px){
+  .gallery-wall{gap:var(--s-5) var(--s-3)}
+  .gallery-wall>li{grid-column:span 3}
+  .gallery-wall>li.is-lead{grid-column:1/-1}
+  .gallery-wall>li:not(.is-lead) figcaption{font-size:var(--fs-micro)}
+}

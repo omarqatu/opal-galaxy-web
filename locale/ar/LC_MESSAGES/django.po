@@ -186,3 +186,15 @@ msgstr "النصوص المعلَّمة بكلمة «مسودة» مقترحات
 
 msgid "Draft"
 msgstr "مسودة"
+
+msgid "View full gallery"
+msgstr "عرض المعرض كاملاً"
+
+msgid "Photo gallery"
+msgstr "معرض الصور"
+
+msgid "All photos"
+msgstr "جميع الصور"
+
+msgid "Photo categories"
+msgstr "فئات الصور"

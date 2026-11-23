@@ -108,3 +108,23 @@ def styleguide(request):
     if not settings.SITE_NOINDEX:
         raise Http404
     return render(request, "styleguide.html", {"page_kind": "styleguide"})
+
+
+def media(request, path):
+    """Uploaded files.
+
+    Pages only ever link to WebP renditions (media/images/), which carry no EXIF data. The uploaded
+    originals may still hold camera data and a GPS position, so they are served to signed-in admin
+    users only. Renditions get a short, explicit cache lifetime: a replaced or withdrawn photo cannot
+    stay in a browser or proxy cache for longer than that.
+    """
+    from django.views.static import serve
+    if path.startswith("original_images/"):
+        if not (request.user.is_authenticated and request.user.has_perm("wagtailadmin.access_admin")):
+            raise Http404
+        response = serve(request, path, document_root=settings.MEDIA_ROOT)
+        response["Cache-Control"] = "private, no-store"
+        return response
+    response = serve(request, path, document_root=settings.MEDIA_ROOT)
+    response["Cache-Control"] = "public, max-age=3600"
+    return response

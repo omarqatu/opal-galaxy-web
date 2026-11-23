@@ -1,0 +1,8 @@
+{% load i18n %}{# Photo viewer shared by the home page and the gallery page. Links marked data-lightbox open in it. #}
+<dialog class="lightbox" id="lightbox" aria-label="{% translate 'Photo viewer' %}">
+  <figure><img alt=""><figcaption></figcaption></figure>
+  <p class="lightbox__count" aria-live="polite"></p>
+  <button type="button" class="lightbox__close" data-close aria-label="{% translate 'Close' %}">×</button>
+  <button type="button" class="lightbox__nav lightbox__prev" data-step="-1" aria-label="{% translate 'Previous photo' %}">{% include "includes/icons/arrow.svg" %}</button>
+  <button type="button" class="lightbox__nav lightbox__next" data-step="1" aria-label="{% translate 'Next photo' %}">{% include "includes/icons/arrow.svg" %}</button>
+</dialog>
