@@ -882,42 +882,67 @@ a.service-row:hover .service-row__go svg,.cat-card:hover .cat-card__go svg{trans
 .cat-index__name{font-weight:600;font-size:var(--fs-small);line-height:1.35}
 .brand-wall--index{justify-content:flex-start}
 
-/* technical panel: one catalogue row */
-.tech-list{display:grid;gap:var(--grid-gap)}
+/* technical panel: one catalogue row laid out as a sheet.
+   Three levels are kept visibly apart: the series name, the model identifiers, the specifications. */
+.tech-list{display:grid;gap:var(--s-5)}
 .tech{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);scroll-margin-block-start:calc(var(--header-h) + 1rem);overflow:hidden}
 .tech[open]{box-shadow:var(--shadow-1)}
-.tech__head{list-style:none;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:var(--s-3) var(--s-5);padding:var(--s-4) var(--card-pad);cursor:pointer;background:var(--off-white);border-block-end:1px solid transparent;min-block-size:4rem}
+.tech__head{list-style:none;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:var(--s-2) var(--s-5);padding:var(--s-4) var(--card-pad);cursor:pointer;background:var(--navy);color:var(--white);min-block-size:4rem}
 .tech__head::-webkit-details-marker{display:none}
-.tech[open]>.tech__head{border-block-end-color:var(--line)}
-.tech__title{font-size:var(--fs-h3);font-weight:600;color:var(--navy);line-height:1.3}
-.tech__title img{max-block-size:2.5rem;inline-size:auto}
-.tech__sub{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:.25rem .5rem;font-size:var(--fs-micro);font-weight:600;color:var(--cyan-ink);font-variant-numeric:tabular-nums}
+.tech__head:focus-visible{outline-color:var(--sky);outline-offset:-4px}
+.tech__title{font-size:var(--fs-h3);font-weight:600;line-height:1.3}
+.tech__title img{max-block-size:2.5rem;inline-size:auto;background:var(--white);border-radius:var(--radius-s);padding:.25rem .5rem}
+.tech__sub{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:.25rem .5rem;font-size:var(--fs-small);font-weight:600;color:var(--sky);font-variant-numeric:tabular-nums}
 .tech__label{font-weight:500;color:var(--muted)}
-.tech__toggle{display:grid;place-items:center;inline-size:2rem;block-size:2rem;border-radius:50%;border:1px solid var(--line);color:var(--navy);background:var(--white)}
+.tech__head .tech__label{color:var(--on-dark-muted)}
+.tech__toggle{display:grid;place-items:center;inline-size:2.25rem;block-size:2.25rem;border-radius:50%;border:1px solid rgba(255,255,255,.35);color:var(--white)}
 .tech__toggle svg{inline-size:1rem;block-size:1rem;transition:transform var(--t) var(--ease)}
 .tech[open] .tech__toggle svg{transform:rotate(180deg)}
-.tech__body{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:var(--s-6) var(--s-7);padding:var(--card-pad)}
-.tech__col{min-inline-size:0}
-.tech__col>h4{margin:0 0 var(--s-3);font-size:var(--fs-micro);font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
-:lang(ar) .tech__col>h4{letter-spacing:0;text-transform:none;font-size:var(--fs-small)}
-.tech__data,.tech__specs{text-align:left;font-size:var(--fs-small);font-variant-numeric:tabular-nums}
-.tech__group{margin:var(--s-4) 0 var(--s-2);font-weight:600;color:var(--navy);font-size:var(--fs-small)}
-.tech__group:first-child{margin-block-start:0}
-.tech__models{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:var(--s-2)}
-.tech__models li{padding:.375rem .75rem;background:var(--off-white);border:1px solid var(--line);border-radius:var(--radius-s);color:var(--navy);line-height:1.45;overflow-wrap:anywhere;max-inline-size:100%}
-.tech__specs{list-style:none;margin:0;padding:0;border-block-start:1px solid var(--line)}
-.tech__specs li{padding:.625rem 0;border-block-end:1px solid var(--line);color:var(--navy);line-height:1.5;overflow-wrap:anywhere}
-.tech__specs li.is-capacity{font-weight:600;padding-inline-start:.875rem;border-inline-start:3px solid var(--cyan);background:linear-gradient(90deg,rgba(143,211,230,.18),rgba(143,211,230,0))}
-.tech__pending{margin:0;padding:var(--s-4);background:var(--sand-soft);border-inline-start:3px solid var(--sand);border-radius:var(--radius-s);color:var(--navy);font-size:var(--fs-small)}
-.tech__foot{margin:0;padding:0 var(--card-pad) var(--s-4)}
+
+.tech__body{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:var(--s-5);padding:var(--card-pad);background:var(--off-white)}
+.tech__block{min-inline-size:0;padding:0;background:var(--white);border:1px solid var(--line);border-radius:var(--radius-s);overflow:hidden}
+.tech__heading{display:flex;align-items:center;gap:var(--s-3);margin:0;padding:var(--s-3) var(--s-4);font-size:var(--fs-small);font-weight:600;color:var(--navy);border-block-end:1px solid var(--line);letter-spacing:0;text-transform:none}
+.tech__heading-icon{display:grid;place-items:center;flex:none;inline-size:1.75rem;block-size:1.75rem;border-radius:50%;background:var(--off-white);color:var(--cyan-ink)}
+.tech__heading-icon svg{inline-size:1rem;block-size:1rem}
+.tech__block--specs .tech__heading-icon{background:var(--navy);color:var(--sky)}
+
+/* the data itself: always left-to-right, in its own frame */
+.tech__data,.tech__specs{text-align:left;font-size:var(--fs-small);line-height:1.55;font-variant-numeric:tabular-nums}
+.tech__data{padding:var(--s-4);display:grid;gap:var(--s-4)}
+/* level 1: series */
+.tech__series{display:grid;gap:var(--s-2)}
+.tech__series+.tech__series{padding-block-start:var(--s-4);border-block-start:1px dashed var(--line)}
+.tech__series-name{display:inline-flex;align-items:center;justify-self:start;gap:var(--s-2);margin:0;padding:.125rem .625rem;background:var(--navy);color:var(--white);font-size:var(--fs-micro);font-weight:600;letter-spacing:.06em;text-transform:uppercase;border-radius:var(--radius-s)}
+/* level 2: models; the identifier itself is set apart from the words around it */
+.tech__models{list-style:none;margin:0;padding:0;display:grid;gap:.375rem}
+.tech__models li{position:relative;padding:.5rem .75rem;padding-inline-start:1.5rem;background:var(--off-white);border-radius:var(--radius-s);color:var(--muted);overflow-wrap:anywhere}
+.tech__models li::before{content:"";position:absolute;inset-inline-start:.625rem;inset-block-start:1.05em;inline-size:.375rem;block-size:.375rem;border-radius:50%;background:var(--cyan)}
+.tech__id{font-weight:600;color:var(--navy);letter-spacing:.01em;white-space:nowrap}
+/* level 3: specifications, one per row; the parts of a line stay together when it wraps */
+.tech__specs{list-style:none;margin:0;padding:0}
+.tech__specs li{padding:.625rem var(--s-4);border-block-end:1px solid var(--line);color:var(--navy);overflow-wrap:anywhere}
+.tech__specs li:nth-child(even){background:var(--off-white)}
+.tech__specs li:last-child{border-block-end:0}
+.tech__specs li>span{display:inline-block;max-inline-size:100%}
+.tech__dot{font-style:normal;color:var(--cyan-ink);font-weight:700;white-space:pre}
+.tech__specs li.is-capacity{font-weight:600;background:var(--white);box-shadow:inset 4px 0 0 var(--cyan)}
+.tech__pending{margin:var(--s-4);padding:var(--s-4);background:var(--sand-soft);border-inline-start:3px solid var(--sand);border-radius:var(--radius-s);color:var(--navy);font-size:var(--fs-small)}
+.tech__foot{margin:0;max-inline-size:none;padding:var(--s-3) var(--card-pad);background:var(--white);border-block-start:1px solid var(--line)}
 .tech .link-arrow{font-size:var(--fs-small)}
-@media (max-width:860px){
-  .tech__body{grid-template-columns:minmax(0,1fr);gap:var(--s-5)}
-  .tech__head{grid-template-columns:minmax(0,1fr) auto;padding-inline:var(--card-pad-s)}
+@media (max-width:1024px){.tech__body{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){
+  .tech-list{gap:var(--s-4)}
+  .tech__head{grid-template-columns:minmax(0,1fr) auto;padding:var(--s-3) var(--card-pad-s)}
   .tech__sub{grid-column:1;grid-row:2}
   .tech__toggle{grid-column:2;grid-row:1 / span 2}
-  .tech__body{padding:var(--card-pad-s)}
+  .tech__body{padding:var(--s-3);gap:var(--s-3)}
   .tech__foot{padding-inline:var(--card-pad-s)}
+  /* comfortable reading size for Latin technical text on a phone, in either page direction */
+  .tech__data,.tech__specs{font-size:var(--fs-ui);line-height:1.6}
+  .tech__data{padding:var(--s-3)}
+  .tech__specs li{padding:.75rem var(--s-3)}
+  .tech__models li{padding-block:.625rem}
+  .tech__id{white-space:normal}
 }
 
 /* empty state: a brand with no catalogue rows yet */
@@ -948,3 +973,5 @@ a.service-row:hover .service-row__go svg,.cat-card:hover .cat-card__go svg{trans
 }
 @media (max-width:480px){:lang(en) .site-header .logo small{letter-spacing:.04em}}
 @media (max-width:399px){:lang(en) .site-header .logo small{display:none}}
+
+html[dir=ltr] p.tech__foot{max-width:none}

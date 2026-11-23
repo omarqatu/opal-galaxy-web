@@ -268,10 +268,17 @@ class HomePage(RoutablePageMixin, Page):
 
     @staticmethod
     def _draft_context(request, kind, slug, premium):
-        """Draft copy for review: only on a redesigned page, only with ?draft=1, never on an indexed site."""
-        if premium and settings.SITE_NOINDEX and request.GET.get("draft") == "1":
+        """Draft copy for review: only on a redesigned page, only with ?draft=1, only for a reviewer."""
+        if premium and request.GET.get("draft") == "1" and preview.may_preview(request):
             return {"draft_mode": True, "demo": preview.demo_for(kind, slug, current_lang())}
         return {"draft_mode": False, "demo": {}}
+
+    def render(self, request, *args, **kwargs):
+        response = super().render(request, *args, **kwargs)
+        if (kwargs.get("context_overrides") or {}).get("draft_mode"):
+            response["Cache-Control"] = "private, no-store"   # a reviewer's preview is never cached or shared
+            response["X-Robots-Tag"] = "noindex, nofollow"
+        return response
 
     @path("products/<slug:slug>/")
     def product(self, request, slug):

@@ -131,3 +131,26 @@ def model_groups(supply):
 def spec_rows(supply):
     """Spec lines as stored, each flagged when it states a capacity in BTU (shown emphasised)."""
     return [{"text": line, "btu": "btu" in line.lower()} for line in supply.spec_list()]
+
+
+# A model or series identifier: capitals and digits (with / - _), at least one of each, e.g. 38VT008168HTMM,
+# 40VU___S-4S-TEE1, 50TCM, SGS121AE. Used only to set identifiers in a distinct style; the text is unchanged.
+_MODEL_ID = re.compile(r"(?<![\w/-])(?=[A-Z0-9_/\-]*[A-Z])(?=[A-Z0-9_/\-]*\d)[A-Z0-9][A-Z0-9_/\-]{2,}(?![\w-])")
+
+
+@register.filter
+def mark_ids(text):
+    """Wrap model identifiers in <b class="tech__id">; every other character is output as stored."""
+    out, last = [], 0
+    for m in _MODEL_ID.finditer(text or ""):
+        out.append(conditional_escape(text[last:m.start()]))
+        out.append(f'<b class="tech__id">{conditional_escape(m.group(0))}</b>')
+        last = m.end()
+    out.append(conditional_escape((text or "")[last:]))
+    return mark_safe("".join(out))
+
+
+@register.filter
+def spec_parts(line):
+    """A spec line split at the catalogue's own " · " separators, for laying its parts out side by side."""
+    return [part for part in (line or "").split(" · ") if part]
