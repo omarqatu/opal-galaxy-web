@@ -5,12 +5,12 @@ from core.models import FieldPhoto, GalleryItem
 
 
 class Command(BaseCommand):
-    help = ("Mirror the home page gallery rows into field photos (transition period only). "
-            "Safe to repeat; never duplicates, deletes or changes the gallery rows, images or files.")
+    help = ("Create a field photo for any home page gallery row that has none. Field photos are the live "
+            "gallery now, so existing photos are never overwritten. Safe to repeat; never duplicates or deletes.")
 
     def add_arguments(self, parser):
         parser.add_argument("--dry-run", action="store_true", help="Report what would change and write nothing")
-        parser.add_argument("--check", action="store_true", help="Only compare the two tables; fail if they differ")
+        parser.add_argument("--check", action="store_true", help="Compare the two tables (meaningful only until photos are edited in the new area)")
 
     def handle(self, *args, **opts):
         if opts["check"]:

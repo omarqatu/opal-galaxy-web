@@ -102,9 +102,9 @@
 {% with photos=page.home_gallery %}{% if photos %}<section id="projects" class="section section--white"><div class="container">
   <div class="section-head"><div><h2>{{ page|tr:"projects_title"|accent }}</h2><p class="lead">{{ page|tr:"projects_lead" }}</p></div>{% if gallery_url %}<a class="link-arrow" href="{{ gallery_url }}">{% translate "View full gallery" %}{% icon "arrow" %}</a>{% endif %}</div>
   <ul class="gallery-ed" id="gallery">{% for g in photos %}{% image g.image width-1000 format-webp as full %}
-    <li{% if forloop.counter <= 2 %} class="is-lead"{% endif %}><a class="frame" href="{{ full.url }}" data-lightbox data-caption="{{ g|tr:'caption' }}{% if g.subcaption_en %} · {{ g|tr:'subcaption' }}{% endif %}">
+    <li{% if forloop.counter <= 2 %} class="is-lead"{% endif %}><a class="frame" href="{{ full.url }}" data-lightbox data-caption="{{ g|tr:'title' }}{% if g.caption_en %} · {{ g|tr:'caption' }}{% endif %}">
       {% if forloop.counter <= 2 %}{% image g.image width-480 format-webp as im %}{% image g.image width-720 format-webp as im2 %}<img src="{{ im.url }}" srcset="{{ im.url }} {{ im.width }}w, {{ im2.url }} {{ im2.width }}w" sizes="(max-width:700px) 92vw, 36rem" alt="{{ g|tr:'alt' }}" width="{{ im.width }}" height="{{ im.height }}" loading="lazy" decoding="async">{% else %}{% image g.image fill-240x320 format-webp as im %}{% image g.image fill-480x640 format-webp as im2 %}<img src="{{ im.url }}" srcset="{{ im.url }} {{ im.width }}w, {{ im2.url }} {{ im2.width }}w" sizes="(max-width:700px) 30vw, 12rem" alt="{{ g|tr:'alt' }}" width="{{ im.width }}" height="{{ im.height }}" loading="lazy" decoding="async">{% endif %}
-      <figcaption><b>{{ g|tr:"caption" }}</b>{{ g|tr:"subcaption" }}</figcaption></a></li>{% endfor %}
+      <figcaption><b>{{ g|tr:"title" }}</b>{{ g|tr:"caption" }}</figcaption></a></li>{% endfor %}
   </ul>
 </div></section>
 {% include "includes/lightbox.html" %}{% endif %}{% endwith %}

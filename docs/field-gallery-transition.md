@@ -6,21 +6,39 @@ Decision (Omar, 23 Nov 2026): the gallery moves to a native Wagtail model, `Fiel
 
 | Step | Content | State |
 |---|---|---|
-| PR 1 | `FieldPhoto` model, Field gallery admin area (listing, filters, search, pagination), approval permission, guarded mirror of the existing rows | this PR |
-| PR 2 | Bulk upload into the "Field gallery" image collection, bulk actions (approve, withdraw, category, homepage), paginated public gallery (24 per page), **the switch** | not started |
+| PR 1 | `FieldPhoto` model, Field gallery admin area, approval permission, guarded copy of the existing rows | merged |
+| PR 2 | Bulk upload, bulk actions, paginated public gallery (24 per page), **the switch** | this PR |
 | PR 3 | Removal of `GalleryItem` and its table | only after Omar's explicit approval |
 
-## How the existing gallery keeps working
+## How the gallery works after PR 2
 
-Until the switch in PR 2, nothing a visitor sees depends on the new table.
+- The home page and the gallery page read `FieldPhoto`. A photo is public only when "Approved for publication" is ticked.
+- The home page shows up to eight approved photos that have "Show on homepage", lowest "Homepage order" first.
+- The gallery lists manual numbers first (lowest first), then the rest newest first, 24 per page.
+- Photos are managed only under **Field gallery** in the admin. The "Gallery photos" panel is gone from the home page editor.
+- `GalleryItem` rows remain in the database, complete and unused.
 
-- The home page and the gallery page read `GalleryItem`, exactly as before.
-- Photos are still added, ordered and approved under Pages → Home → Gallery photos.
-- Field gallery → Photos shows mirrors of those rows. It is there for review. **Edits made there to a mirrored photo are overwritten by the next mirror run**, because the old editor is still the source of truth.
+### Adding photos
 
-## The mirror
+1. Field gallery → Upload photos. This opens Wagtail's multi-file uploader with the "Field gallery" collection selected (the collection is created on first use).
+2. Drop or choose any number of files. Each becomes one image and one field photo, unapproved, not featured, not on the home page.
+3. Field gallery → Photos, filter "Approved for publication: no". Open a photo to add alt text, title and caption in both languages and the category; or tick several and use the bar at the bottom: Approve, Withdraw approval, Show on home, Remove from home, Set category.
 
-`core/gallery.py: sync_field_photos()` copies every `GalleryItem` into `FieldPhoto`.
+Upload rules are Wagtail's: AVIF, GIF, JPG, PNG and WEBP, 10 MB per file, a pixel-count limit, duplicate detection. Leave the collection on "Field gallery"; an image uploaded to another collection is an ordinary library image and gets no field photo.
+
+### Permissions
+
+| Action | Needs |
+|---|---|
+| Upload | add field photo + add image |
+| Edit, set category, homepage on / off (single or bulk) | change field photo |
+| Approve, withdraw approval (single or bulk) | `approve_fieldphoto` |
+
+Superusers have all of them. No group is given `approve_fieldphoto` automatically.
+
+## The copy from the old gallery
+
+`core/gallery.py: sync_field_photos()` copies `GalleryItem` rows into `FieldPhoto`. Migration `core 0011` ran it one last time in full (creating missing photos and bringing existing ones up to date) and stops the deploy if the two tables then differ. Since then it only creates a photo for a row that has none and never overwrites or withdraws a photo.
 
 | Old field | New field |
 |---|---|
@@ -60,16 +78,10 @@ python manage.py sync_field_photos
 ```
 Brings the mirrors up to date.
 
-## The switch (PR 2)
-
-1. Final mirror run in a migration, then a count and row check.
-2. Home page and gallery page read `FieldPhoto` (approved photos; home page: up to eight with "Show on homepage").
-3. The "Gallery photos" panel leaves the home page editor. `GalleryItem` rows stay in the database, unused.
-4. From that point the mirror is disabled, so the new area becomes the only place photos are managed.
-
 ## Rollback and recovery
 
-- **PR 1:** the site does not read the new table. Deploying the previous image restores the previous state; the extra table is ignored by the older code. `python manage.py migrate core 0009` removes the table if wanted. No gallery data can be lost because none is modified.
-- **After the switch:** the `GalleryItem` rows are still present and complete, so deploying the pre-switch image brings the old editor and pages back with the data as it was at the switch. Photos added in the new area after the switch exist only in `FieldPhoto` and stay there for the next attempt.
+- **Back to the previous image:** the `GalleryItem` rows are untouched, so the previous image shows the old gallery and the old editor exactly as they were at the switch. `FieldPhoto` rows stay in their table, ignored by the older code, and are picked up again on the next deploy of this version.
+- **Photos uploaded after the switch** exist only as images and field photos. They survive a rollback (the table is not dropped) but are not shown by the older code.
+- **If `core 0011` stops the deploy** with "field photos do not match the gallery rows", nothing has been switched in the database: the migration is rolled back and `entrypoint.sh` stops, so the new container does not start. The message names the differing rows. Redeploy the previous image while the difference is looked at.
 - **Database:** the regular backup taken before each deploy remains the last resort.
 - The old table is dropped only in PR 3, after Omar's explicit approval.

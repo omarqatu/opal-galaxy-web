@@ -1,0 +1,17 @@
+{% extends "wagtailadmin/bulk_actions/confirmation/base.html" %}
+{% load wagtailadmin_tags %}
+{% block titletag %}{{ action_label }}{% endblock %}
+{% block header %}{% include "wagtailadmin/shared/header.html" with title=action_label icon="image" %}{% endblock header %}
+
+{% block items_with_access %}{% if items %}
+    <p>{{ question }}</p>
+    <ul>{% for row in items %}<li><a href="{{ row.edit_url }}" target="_blank" rel="noreferrer">{{ row.item }}</a></li>{% endfor %}</ul>
+{% endif %}{% endblock items_with_access %}
+
+{% block items_with_no_access %}{% if items_with_no_access %}
+    <p>You do not have permission to do this to {{ items_with_no_access|length }} of the selected photos; they are left unchanged.</p>
+{% endif %}{% endblock items_with_no_access %}
+
+{% block form_section %}{% if items %}
+    {% with action_button_text="Yes, continue" no_action_button_text="No, go back" %}{% include "wagtailadmin/bulk_actions/confirmation/form_with_fields.html" %}{% endwith %}
+{% else %}{% include "wagtailadmin/bulk_actions/confirmation/go_back.html" %}{% endif %}{% endblock form_section %}

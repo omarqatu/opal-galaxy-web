@@ -198,3 +198,16 @@ msgstr "جميع الصور"
 
 msgid "Photo categories"
 msgstr "فئات الصور"
+
+msgid "Gallery pages"
+msgstr "صفحات المعرض"
+
+msgid "Previous page"
+msgstr "الصفحة السابقة"
+
+msgid "Next page"
+msgstr "الصفحة التالية"
+
+#, python-format
+msgid "Page %(n)s of %(total)s"
+msgstr "الصفحة %(n)s من %(total)s"
