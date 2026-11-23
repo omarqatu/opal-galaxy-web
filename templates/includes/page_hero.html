@@ -4,7 +4,7 @@
     <h1>{{ title }}</h1>
     {% if lead %}<p class="lead">{{ lead }}</p>{% endif %}
     {% if primary_label %}<div class="page-hero__cta">
-      <a class="btn btn-primary" href="#contact">{{ primary_label }}</a>
+      <a class="btn btn-accent" href="#contact">{{ primary_label }}</a>
       {% if wa_text %}<a class="btn btn-wa" href="https://wa.me/{{ settings.core.CompanySettings.whatsapp }}?text={{ wa_text|urlencode }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% translate "WhatsApp" %}</span></a>{% endif %}
     </div>{% endif %}
     {% if meta %}<p class="page-hero__meta"><span class="ltr">{{ meta }}</span></p>{% endif %}

@@ -906,3 +906,63 @@ class GalleryOrderMigrationTests(TestCase):
         self.apply()
         self.assertEqual(list(GalleryItem.objects.filter(page=home).order_by("sort_order", "pk")
                               .values_list("pk", flat=True)), order)
+
+
+class DesignSystemTests(TestCase):
+    """The stylesheets stay on the shared system: tokens, one type scale, six breakpoints."""
+
+    def css(self, name):
+        from django.conf import settings
+        return (settings.BASE_DIR / "static/css" / name).read_text()
+
+    def test_base_and_component_styles_use_tokens_only(self):
+        import re
+        for name in ("site.css", "additions.css", "components.css"):
+            css = self.css(name)
+            with self.subTest(file=name):
+                self.assertEqual(re.findall(r"#[0-9a-fA-F]{3,8}\b", css), [])          # colours come from tokens
+                self.assertEqual(re.findall(r"font-size:\s*[\d.]+px", css), [])           # sizes come from the scale
+        self.assertNotIn("linear-gradient(90deg,var(--sky),var(--cyan))",
+                         self.css("components.css").split("System pass")[1])
+
+    def test_only_six_breakpoints_are_used(self):
+        import re
+        found = set()
+        for name in ("site.css", "additions.css", "components.css"):
+            found |= set(re.findall(r"(?:max|min)-width:\s*(\d+)px", self.css(name)))
+        self.assertLessEqual(found - {"399", "400", "641"}, {"480", "640", "860", "1024", "1180", "1380"})
+
+    def test_type_scale_and_new_colour_tokens(self):
+        import re
+        tokens = self.css("tokens.css")
+        for name in ("fs-display", "fs-h1", "fs-h2", "fs-h3", "fs-h4", "fs-h5", "fs-h6", "fs-lead", "fs-body",
+                     "fs-ui", "fs-small", "fs-micro", "section-y", "card-pad", "grid-gap", "tap", "focus"):
+            self.assertIn(f"--{name}:", tokens)
+        tok = dict(re.findall(r"--([a-z0-9-]+):(#[0-9A-Fa-f]{6})", tokens))
+
+        def lum(h):
+            ch = [int(h[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+            r, g, b = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in ch]
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+        def ratio(a, b):
+            hi, lo = sorted((lum(tok[a]), lum(tok[b])), reverse=True)
+            return (hi + 0.05) / (lo + 0.05)
+
+        self.assertGreaterEqual(ratio("field-border", "white"), 3)       # form field outline (non-text, 3:1)
+        self.assertGreaterEqual(ratio("navy", "sand-soft"), 4.5)         # notice text
+        self.assertGreaterEqual(ratio("success", "success-bg"), 4.5)
+        self.assertGreaterEqual(ratio("danger", "danger-bg"), 4.5)
+        self.assertGreaterEqual(ratio("sky", "navy-800"), 4.5)           # text on raised navy surfaces
+        self.assertGreaterEqual(ratio("cyan-ink", "white"), 4.5)         # focus ring and links on light
+
+    def test_anchor_offset_follows_the_header_height(self):
+        self.assertIn("scroll-padding-top:calc(var(--header-h)", self.css("site.css"))
+
+    def test_internal_page_header_uses_the_accent_button_on_navy(self):
+        call_command("seed_site", verbosity=0)
+        html = self.client.get("/ar/products/vrf/").content.decode()
+        hero = html.split('class="page-hero"')[1].split("</section>")[0]
+        self.assertIn('class="btn btn-accent" href="#contact"', hero)
+        self.assertNotIn("btn-primary", hero)
+        self.assertIn('dir="ltr"', html.split('name="phone"')[1].split(">")[0])   # digits stay left-to-right
