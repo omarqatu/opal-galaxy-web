@@ -52,7 +52,13 @@
           {% if duct_url %}<li><a href="{{ duct_url }}">{{ t|tr:"nav_duct" }}</a></li>{% endif %}
         </ul></details></li>
       <li><a href="{{ home_url }}#contractors">{{ t|tr:"nav_contractors" }}</a></li>
-      {% if about_url %}<li><a href="{{ about_url }}">{{ t|tr:"nav_about" }}</a></li>{% endif %}
+      {% if about_url and gallery_url %}<li class="has-sub"><details class="nav-drop"><summary>{{ t|tr:"nav_about" }}{% include "includes/icons/chevron.svg" %}</summary>
+        <ul class="submenu">
+          <li><a href="{{ about_url }}">{{ t|tr:"nav_about" }}</a></li>
+          <li><a href="{{ gallery_url }}">{% translate "Photo gallery" %}</a></li>
+        </ul></details></li>
+      {% elif about_url %}<li><a href="{{ about_url }}">{{ t|tr:"nav_about" }}</a></li>
+      {% elif gallery_url %}<li><a href="{{ gallery_url }}">{% translate "Photo gallery" %}</a></li>{% endif %}
       <li><a href="{% if contact_url %}{{ contact_url }}{% else %}#contact{% endif %}">{{ t|tr:"nav_contact" }}</a></li>
       <li class="menu__foot">
         <a class="btn btn-accent" href="#contact">{{ t|tr:"nav_quote" }}</a>
@@ -119,6 +125,7 @@
           <summary><h2>{{ t|tr:"footer_company" }}</h2>{% include "includes/icons/chevron.svg" %}</summary>
           <ul>
             {% if about_url %}<li><a href="{{ about_url }}">{{ t|tr:"nav_about" }}</a></li>{% endif %}
+            {% if gallery_url %}<li><a href="{{ gallery_url }}">{% translate "Photo gallery" %}</a></li>{% endif %}
             <li><a href="{% if faq_url %}{{ faq_url }}{% else %}{{ home_url }}#faq{% endif %}">{{ t|tr:"footer_faq" }}</a></li>
             {% if contact_url %}<li><a href="{{ contact_url }}">{{ t|tr:"nav_contact" }}</a></li>{% endif %}
           </ul>

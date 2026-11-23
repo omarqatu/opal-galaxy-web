@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.conf.urls.i18n import i18n_patterns
 from django.urls import include, path, re_path
-from django.views.static import serve
 from wagtail import urls as wagtail_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
@@ -15,8 +14,8 @@ urlpatterns = [
     path("robots.txt", views.robots_txt),
     path("sitemap.xml", views.sitemap_xml),
     path("health", views.health),
-    # Media is small (a few dozen product photos), so Django serves it directly.
-    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+    # Media is small (a few dozen photos), so Django serves it directly; see views.media for the rules.
+    re_path(r"^media/(?P<path>.*)$", views.media),
 ]
 urlpatterns += i18n_patterns(
     path("styleguide/", views.styleguide, name="styleguide"),  # staging only (404 when indexed)

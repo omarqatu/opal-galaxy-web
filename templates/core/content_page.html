@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load i18n opal %}
+{% extends "base.html" %}{% load i18n opal wagtailimages_tags %}
 {% block title %}{{ page|tr:"title" }} — Opal Galaxy{% if lang == 'ar' %}، دبي{% else %}, Dubai{% endif %}{% endblock %}
 {% block description %}{{ page|tr:"lead" }}{% endblock %}
 {% block content %}
@@ -16,6 +16,21 @@
 {% if page.kind == "faq" and faqs %}<section class="section section--white"><div class="container"><div class="prose">
   <div class="accordion">{% for f in faqs %}<details{% if forloop.first %} open{% endif %}><summary>{{ f|tr:"question" }}</summary><div class="accordion__body"><p>{{ f|tr:"answer" }}</p></div></details>{% endfor %}</div>
 </div></div></section>{% endif %}
+
+{% if page.kind == "gallery" %}<section class="section section--white" id="photos"><div class="container">
+  {% if gallery_categories %}<nav class="gallery-filter" aria-label="{% translate 'Photo categories' %}"><ul>
+    <li><a href="{{ request.path }}#photos"{% if not active_category %} aria-current="true"{% endif %}>{% translate "All photos" %}</a></li>
+    {% for c in gallery_categories %}<li><a href="?category={{ c.slug }}#photos"{% if active_category.pk == c.pk %} aria-current="true"{% endif %}>{{ c|tr:"name" }}</a></li>{% endfor %}
+  </ul></nav>{% endif %}
+  {% if photos %}<ul class="gallery-wall" id="gallery">{% for g in photos %}{% image g.image max-1600x1600 format-webp as full %}
+    <li{% if g.is_lead %} class="is-lead"{% endif %}><figure class="shot">
+      <a class="frame" href="{{ full.url }}" data-lightbox data-caption="{{ g|tr:'caption' }}{% if g.subcaption_en %} · {{ g|tr:'subcaption' }}{% endif %}">
+        {% if g.is_lead %}{% photo g.image "480 720 960 1200" as im %}{% else %}{% photo g.image "320 480 720" as im %}{% endif %}<img src="{{ im.src }}" srcset="{{ im.srcset }}" sizes="{% if g.is_lead %}(max-width:640px) 92vw, (max-width:1180px) 46vw, 36rem{% else %}(max-width:640px) 46vw, (max-width:1180px) 31vw, 24rem{% endif %}" alt="{{ g|tr:'alt' }}" width="{{ im.width }}" height="{{ im.height }}"{% if forloop.counter > 2 %} loading="lazy"{% endif %} decoding="async"></a>
+      {% if g.caption_en or g.subcaption_en %}<figcaption>{% if g.caption_en %}<b>{{ g|tr:"caption" }}</b>{% endif %}{% if g.subcaption_en %}<span>{{ g|tr:"subcaption" }}</span>{% endif %}</figcaption>{% endif %}
+    </figure></li>{% endfor %}
+  </ul>
+  {% include "includes/lightbox.html" %}{% endif %}
+</div></section>{% endif %}
 
 {% if page.kind == "contact" %}<section class="section section--white"><div class="container split split--top">
   <dl class="kv">

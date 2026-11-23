@@ -100,20 +100,14 @@
 
 {# ---- project gallery: approved photos only (up to eight); the first two lead, the rest follow ---- #}
 {% with photos=page.home_gallery %}{% if photos %}<section id="projects" class="section section--white"><div class="container">
-  <div class="section-head"><div><h2>{{ page|tr:"projects_title"|accent }}</h2><p class="lead">{{ page|tr:"projects_lead" }}</p></div></div>
+  <div class="section-head"><div><h2>{{ page|tr:"projects_title"|accent }}</h2><p class="lead">{{ page|tr:"projects_lead" }}</p></div>{% if gallery_url %}<a class="link-arrow" href="{{ gallery_url }}">{% translate "View full gallery" %}{% icon "arrow" %}</a>{% endif %}</div>
   <ul class="gallery-ed" id="gallery">{% for g in photos %}{% image g.image width-1000 format-webp as full %}
     <li{% if forloop.counter <= 2 %} class="is-lead"{% endif %}><a class="frame" href="{{ full.url }}" data-lightbox data-caption="{{ g|tr:'caption' }}{% if g.subcaption_en %} · {{ g|tr:'subcaption' }}{% endif %}">
       {% if forloop.counter <= 2 %}{% image g.image width-480 format-webp as im %}{% image g.image width-720 format-webp as im2 %}<img src="{{ im.url }}" srcset="{{ im.url }} {{ im.width }}w, {{ im2.url }} {{ im2.width }}w" sizes="(max-width:700px) 92vw, 36rem" alt="{{ g|tr:'alt' }}" width="{{ im.width }}" height="{{ im.height }}" loading="lazy" decoding="async">{% else %}{% image g.image fill-240x320 format-webp as im %}{% image g.image fill-480x640 format-webp as im2 %}<img src="{{ im.url }}" srcset="{{ im.url }} {{ im.width }}w, {{ im2.url }} {{ im2.width }}w" sizes="(max-width:700px) 30vw, 12rem" alt="{{ g|tr:'alt' }}" width="{{ im.width }}" height="{{ im.height }}" loading="lazy" decoding="async">{% endif %}
       <figcaption><b>{{ g|tr:"caption" }}</b>{{ g|tr:"subcaption" }}</figcaption></a></li>{% endfor %}
   </ul>
 </div></section>
-<dialog class="lightbox" id="lightbox" aria-label="{% translate 'Photo viewer' %}">
-  <figure><img alt=""><figcaption></figcaption></figure>
-  <p class="lightbox__count" aria-live="polite"></p>
-  <button type="button" class="lightbox__close" data-close aria-label="{% translate 'Close' %}">×</button>
-  <button type="button" class="lightbox__nav lightbox__prev" data-step="-1" aria-label="{% translate 'Previous photo' %}">{% include "includes/icons/arrow.svg" %}</button>
-  <button type="button" class="lightbox__nav lightbox__next" data-step="1" aria-label="{% translate 'Next photo' %}">{% include "includes/icons/arrow.svg" %}</button>
-</dialog>{% endif %}{% endwith %}
+{% include "includes/lightbox.html" %}{% endif %}{% endwith %}
 
 {# ---- about ---- #}
 <section id="about" class="section section--white section--ruled"><div class="container split split--wide-start split--top">

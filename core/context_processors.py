@@ -31,6 +31,7 @@ def site_context(request):
         "about_url": _page_url("about", lang),
         "contact_url": _page_url("contact", lang),
         "duct_url": _page_url("duct-cleaning", lang),
+        "gallery_url": _gallery_url(lang),
         "quote_sent": request.GET.get("sent") == "1",
         "quote_error": request.GET.get("sent") == "0",
     }
@@ -46,3 +47,10 @@ def _page_url(slug, lang):
     if Page.objects.filter(slug=slug, depth=3, live=True).exists():
         return lang_url(f"/{slug}/", lang)
     return ""
+
+
+def _gallery_url(lang):
+    """URL of the published gallery page (a content page of kind "gallery"), or "" until Omar publishes one."""
+    from .models import ContentPage
+    slug = ContentPage.objects.live().filter(kind="gallery", depth=3).values_list("slug", flat=True).first()
+    return lang_url(f"/{slug}/", lang) if slug else ""

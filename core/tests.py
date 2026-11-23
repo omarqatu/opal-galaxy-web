@@ -1488,3 +1488,265 @@ class GalleryApprovalTests(TestCase):
         self.assertFalse(ContentPage.objects.filter(kind="gallery").exists())
         self.assertEqual(self.client.get("/gallery/").status_code, 404)
 
+
+class FieldGalleryPageTests(TestCase):
+    """PR B of the field gallery: the public page, its filter, the viewer markup, links and media rules."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def home(self):
+        from core.models import HomePage
+        return HomePage.objects.get()
+
+    def make_page(self, publish=True):
+        """What Omar does in the admin: add a content page of kind "gallery" under the home page."""
+        from core.models import ContentPage
+        page = ContentPage(title="Gallery", slug="gallery", kind="gallery", title_en="Field gallery",
+                           title_ar="معرض الصور الميدانية", live=False)
+        self.home().add_child(instance=page)
+        if publish:
+            page.save_revision().publish()
+        return page
+
+    def categories(self):
+        from core.models import GalleryCategory
+        return [GalleryCategory.objects.create(name_en=n, name_ar=a, slug=sl, sort_order=i) for i, (n, a, sl) in enumerate([
+            ("AC Duct Cleaning", "تنظيف مجاري التكييف", "duct-cleaning"),
+            ("Field Operations", "العمليات الميدانية", "field-operations"),
+            ("Maintenance", "الصيانة", "maintenance")])]
+
+    def wall(self, url="/gallery/"):
+        html = self.client.get(url).content.decode()
+        return html.split('id="gallery"')[1].split("</ul>")[0] if 'id="gallery"' in html else ""
+
+    def test_nothing_is_public_until_the_page_is_created_and_published(self):
+        from core.models import ContentPage
+        approve_gallery()
+        self.assertFalse(ContentPage.objects.filter(kind="gallery").exists())     # no migration creates it
+        self.assertEqual(self.client.get("/gallery/").status_code, 404)
+        self.make_page(publish=False)                                              # Omar's draft
+        for path in ("/gallery/", "/ar/gallery/"):
+            self.assertEqual(self.client.get(path).status_code, 404)
+        for path in ("/", "/ar/", "/about/"):
+            html = self.client.get(path).content.decode()
+            self.assertNotIn("/gallery/", html)
+            self.assertNotIn("View full gallery", html)
+        self.assertNotIn("/gallery/", self.client.get("/sitemap.xml").content.decode())
+
+    def test_published_page_adds_the_links_in_both_languages(self):
+        approve_gallery()
+        self.make_page()
+        en, ar = self.client.get("/").content.decode(), self.client.get("/ar/").content.decode()
+        self.assertIn('<a class="link-arrow" href="/gallery/">View full gallery', en)
+        self.assertIn('<a class="link-arrow" href="/ar/gallery/">عرض المعرض كاملاً', ar)
+        # Header: the About item becomes a menu holding About and the gallery; footer: Company column.
+        header = en.split("<header")[1].split("</header>")[0]
+        group = header.split('href="/about/"')[0].rsplit("<details", 1)[1] + header.split('href="/about/"')[1].split("</details>")[0]
+        self.assertIn('class="nav-drop"', group)
+        self.assertIn('<a href="/gallery/">Photo gallery</a>', group)
+        self.assertEqual(header.count('href="/about/"'), 1)
+        footer = en.split('<footer')[1]
+        self.assertIn('<a href="/gallery/">Photo gallery</a>', footer)
+        self.assertIn('<a href="/ar/gallery/">معرض الصور</a>', ar.split("<header")[1].split("</header>")[0])
+        self.assertIn("/gallery/", self.client.get("/sitemap.xml").content.decode())
+        self.assertEqual(self.client.get("/gallery/").status_code, 200)
+        page = self.client.get("/ar/gallery/")
+        self.assertEqual(page.status_code, 200)
+        self.assertIn('dir="rtl"', page.content.decode())
+        self.assertIn("معرض الصور الميدانية", page.content.decode())
+
+    def test_without_a_gallery_page_the_header_keeps_the_plain_about_link(self):
+        header = self.client.get("/").content.decode().split("<header")[1].split("</header>")[0]
+        self.assertIn('<li><a href="/about/">', header)
+        self.assertEqual(header.count("nav-drop"), 3)
+
+    def test_only_approved_photos_are_shown(self):
+        from core.models import GalleryItem
+        self.make_page()
+        self.assertEqual(self.wall(), "")                           # nothing approved: no grid, no viewer
+        html = self.client.get("/gallery/").content.decode()
+        self.assertNotIn('id="lightbox"', html)
+        items = list(self.home().gallery.all())
+        for g in items[:5]:
+            g.approved_for_publication = True
+            g.save()
+        wall = self.wall()
+        self.assertEqual(wall.count("data-lightbox"), 5)
+        for g in items[:5]:
+            self.assertIn(g.alt_en, wall)
+        for g in items[5:]:
+            self.assertNotIn(g.alt_en, wall)
+            self.assertNotIn(g.image.file.name.split("/")[-1].rsplit(".", 1)[0] + ".", wall)
+        GalleryItem.objects.filter(pk=items[0].pk).update(approved_for_publication=False)
+        self.assertNotIn(items[0].alt_en, self.wall())
+        arabic = self.wall("/ar/gallery/")
+        self.assertEqual(arabic.count("data-lightbox"), 4)
+        self.assertIn(items[1].alt_ar, arabic)
+        self.assertIn(items[1].caption_ar, arabic)
+
+    def test_category_filter_lists_only_categories_with_approved_photos(self):
+        from core.models import GalleryItem
+        self.make_page()
+        duct, field, maintenance = self.categories()
+        items = list(self.home().gallery.all())
+        GalleryItem.objects.filter(pk__in=[items[0].pk, items[1].pk]).update(category=field, approved_for_publication=True)
+        GalleryItem.objects.filter(pk=items[2].pk).update(category=maintenance, approved_for_publication=True)
+        GalleryItem.objects.filter(pk=items[3].pk).update(category=duct)                    # not approved
+        GalleryItem.objects.filter(pk=items[4].pk).update(approved_for_publication=True)   # approved, no category
+        html = self.client.get("/gallery/").content.decode()
+        nav = html.split('class="gallery-filter"')[1].split("</nav>")[0]
+        self.assertIn('aria-current="true">All photos', nav)
+        self.assertIn('href="?category=field-operations#photos"', nav)
+        self.assertIn('href="?category=maintenance#photos"', nav)
+        self.assertNotIn("duct-cleaning", nav)                     # empty for visitors: hidden
+        self.assertLess(nav.index("Field Operations"), nav.index("Maintenance"))
+        self.assertEqual(self.wall().count("data-lightbox"), 4)
+        only = self.wall("/gallery/?category=field-operations")
+        self.assertEqual(only.count("data-lightbox"), 2)
+        self.assertIn(items[0].alt_en, only)
+        self.assertNotIn(items[2].alt_en, only)
+        active = self.client.get("/gallery/?category=field-operations").content.decode()
+        self.assertIn('aria-current="true">Field Operations', active)
+        # A hidden or unknown category shows every approved photo instead of an error or an unapproved one.
+        for slug in ("duct-cleaning", "nope"):
+            fallback = self.client.get(f"/gallery/?category={slug}")
+            self.assertEqual(fallback.status_code, 200)
+            self.assertEqual(self.wall(f"/gallery/?category={slug}").count("data-lightbox"), 4)
+            self.assertNotIn(items[3].alt_en, fallback.content.decode())
+        self.assertIn("العمليات الميدانية", self.client.get("/ar/gallery/").content.decode())
+
+    def test_no_filter_is_shown_without_categories(self):
+        approve_gallery()
+        self.make_page()
+        self.assertNotIn("gallery-filter", self.client.get("/gallery/").content.decode())
+
+    def test_at_most_two_featured_photos_lead_and_the_grid_stays_balanced(self):
+        from core.models import GalleryItem
+        approve_gallery()
+        self.make_page()
+        items = list(self.home().gallery.all())
+        order = lambda: [a.split('"')[0] for a in self.wall().split('alt="')[1:]]
+        self.assertEqual(self.wall().count('class="is-lead"'), 0)                 # none featured: uniform grid
+        self.assertEqual(order(), [g.alt_en for g in items])                       # the editor's order
+        GalleryItem.objects.filter(pk=items[4].pk).update(featured=True)           # one featured: paired with the next photo
+        self.assertEqual(self.wall().count('class="is-lead"'), 2)
+        self.assertEqual(order()[:3], [items[4].alt_en, items[0].alt_en, items[1].alt_en])
+        GalleryItem.objects.filter(pk__in=[items[2].pk, items[6].pk]).update(featured=True)   # three featured: two lead
+        self.assertEqual(self.wall().count('class="is-lead"'), 2)
+        self.assertEqual(order()[:4], [items[2].alt_en, items[4].alt_en, items[0].alt_en, items[1].alt_en])
+        self.assertEqual(len(order()), 8)
+        GalleryItem.objects.exclude(pk=items[4].pk).update(approved_for_publication=False)    # a single photo
+        self.assertEqual(self.wall().count("data-lightbox"), 1)
+
+    def test_images_are_responsive_webp_renditions_and_never_enlarged(self):
+        import re
+        from wagtail.images.models import Rendition
+        approve_gallery()
+        self.make_page()
+        wall = self.wall()
+        self.assertEqual(wall.count("srcset="), 8)
+        self.assertEqual(wall.count("sizes="), 8)
+        self.assertEqual(wall.count('loading="lazy"'), 6)          # the first two load at once
+        self.assertEqual(len(re.findall(r'width="\d+" height="\d+"', wall)), 8)
+        urls = set(re.findall(r"/media/[^\s\",]+", wall))
+        self.assertTrue(urls)
+        for url in urls:
+            self.assertTrue(url.startswith("/media/images/") and url.endswith(".webp"), url)   # never the original file
+        widest = max(g.image.width for g in self.home().gallery.all())
+        for width in re.findall(r" (\d+)w", wall):
+            self.assertLessEqual(int(width), widest)
+        for rendition in Rendition.objects.filter(image__in=[g.image for g in self.home().gallery.all()]):
+            self.assertLessEqual(rendition.width, rendition.image.width)
+        self.assertIn('id="lightbox"', self.client.get("/gallery/").content.decode())
+        self.assertIn('aria-label="Close"', self.client.get("/gallery/").content.decode())
+
+    def test_only_gallery_records_are_shown_never_the_illustration(self):
+        approve_gallery()
+        self.make_page()
+        home = self.home()
+        html = self.client.get("/gallery/").content.decode()
+        for image in (home.hero_image, home.hero_image_mobile):
+            if image:
+                self.assertNotIn(image.file.name.split("/")[-1].rsplit(".", 1)[0], html)
+
+    def test_pages_are_revalidated_so_a_withdrawn_photo_does_not_linger(self):
+        approve_gallery()
+        self.make_page()
+        self.assertEqual(self.client.get("/gallery/")["Cache-Control"], "no-cache")
+        self.assertEqual(self.client.get("/")["Cache-Control"], "no-cache")
+
+    def test_admin_preview_of_the_draft_page_shows_the_gallery(self):
+        approve_gallery()
+        page = self.make_page(publish=False)
+        response = page.make_preview_request()
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('id="gallery"', response.content.decode())
+
+
+class MediaFilesTests(TestCase):
+    """Uploaded files: originals are not public, renditions carry no position data and a bounded cache lifetime."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def photo_with_gps(self):
+        import io
+        from django.core.files.base import ContentFile
+        from PIL import Image as PILImage
+        from wagtail.images.models import Image
+        exif = PILImage.Exif()
+        exif[0x010F] = "TestCam"
+        exif[0x8825] = {1: "N", 2: (25.0, 15.0, 0.0), 3: "E", 4: (55.0, 18.0, 0.0)}
+        data = io.BytesIO()
+        PILImage.new("RGB", (1200, 1600), (90, 120, 150)).save(data, "JPEG", exif=exif)
+        image = Image(title="GPS probe", file=ContentFile(data.getvalue(), "gps-probe.jpg"))
+        image.save()
+        self.addCleanup(lambda: [r.file.delete(False) for r in image.renditions.all()] and None)
+        self.addCleanup(lambda: image.file.delete(False))
+        return image
+
+    def test_renditions_carry_no_exif_or_gps_but_the_original_does(self):
+        from PIL import Image as PILImage
+        from core.templatetags.opal import photo
+        image = self.photo_with_gps()
+        self.assertTrue(PILImage.open(image.file.path).getexif().get_ifd(0x8825))     # the upload is kept as it is
+        sizes = photo(image, "320 480 720 960 2400")
+        files = [image.get_rendition("max-1600x1600|format-webp")] + list(image.renditions.all())
+        self.assertGreaterEqual(len(files), 5)
+        for rendition in files:
+            opened = PILImage.open(rendition.file.path)
+            self.assertEqual(opened.format, "WEBP")
+            self.assertEqual(len(opened.getexif()), 0)
+            self.assertFalse(opened.getexif().get_ifd(0x8825))
+        self.assertTrue(sizes["srcset"].endswith(" 1200w"))        # 2400 is not produced: no upscaling
+        self.assertEqual(sizes["srcset"].count(".webp"), 5)       # 320, 480, 720, 960 and the original 1200, once each
+
+    def test_original_uploads_are_served_to_signed_in_admin_users_only(self):
+        from django.contrib.auth import get_user_model
+        image = self.photo_with_gps()
+        url = "/media/" + image.file.name
+        self.assertTrue(url.startswith("/media/original_images/"))
+        self.assertEqual(self.client.get(url).status_code, 404)
+        get_user_model().objects.create_user("visitor", password="pw")
+        self.client.login(username="visitor", password="pw")
+        self.assertEqual(self.client.get(url).status_code, 404)                       # signed in, no admin access
+        get_user_model().objects.create_superuser("omar", "o@example.com", "pw")
+        self.client.login(username="omar", password="pw")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Cache-Control"], "private, no-store")
+
+    def test_renditions_are_public_with_a_bounded_cache_lifetime(self):
+        image = self.photo_with_gps()
+        response = self.client.get(image.get_rendition("width-320|format-webp").url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Cache-Control"], "public, max-age=3600")
+
+    def test_no_public_page_links_to_an_original_upload(self):
+        approve_gallery()
+        for path in ("/", "/ar/", "/about/", "/brands/carrier/", "/products/vrf/", "/maintenance/"):
+            self.assertNotIn("original_images", self.client.get(path).content.decode(), path)
+

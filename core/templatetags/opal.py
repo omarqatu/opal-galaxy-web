@@ -166,3 +166,19 @@ def mark_ids(text):
 def spec_parts(line):
     """A spec line split at the catalogue's own " · " separators, for laying its parts out side by side."""
     return [part for part in (line or "").split(" · ") if part]
+
+
+@register.simple_tag
+def photo(image, widths="320 480 720"):
+    """Responsive WebP renditions of a photo: {% photo g.image "320 480 720" as im %}.
+
+    Wagtail never enlarges an image, so widths above the original collapse to the original size and
+    are listed once. WebP renditions carry no EXIF data (camera, date, GPS position).
+    """
+    specs = [f"width-{w}|format-webp" for w in str(widths).split()]
+    by_width = {}
+    for rendition in image.get_renditions(*specs).values():
+        by_width.setdefault(rendition.width, rendition)
+    sizes = [by_width[w] for w in sorted(by_width)]
+    return {"src": sizes[0].url, "width": sizes[0].width, "height": sizes[0].height,
+            "srcset": ", ".join(f"{r.url} {r.width}w" for r in sizes), "largest": sizes[-1]}

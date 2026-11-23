@@ -151,6 +151,19 @@
       if (e.key === 'ArrowRight') show(at + (rtl ? -1 : 1));
       if (e.key === 'ArrowLeft') show(at + (rtl ? 1 : -1));
     });
+    // Swipe on touch screens: towards the reading direction's end for the next photo.
+    var x0 = null, y0 = 0;
+    box.addEventListener('touchstart', function (e) {
+      x0 = e.touches.length === 1 ? e.touches[0].clientX : null; y0 = e.touches[0].clientY;
+    }, { passive: true });
+    box.addEventListener('touchend', function (e) {
+      if (x0 === null) return;
+      var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+      x0 = null;
+      if (links.length < 2 || Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      show(at + ((dx < 0) !== (document.documentElement.dir === 'rtl') ? 1 : -1));
+    }, { passive: true });
+    box.classList.toggle('is-single', links.length < 2);
     box.addEventListener('close', function () { img.removeAttribute('src'); if (opener) opener.focus(); });
   }
 
