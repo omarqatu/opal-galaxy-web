@@ -1750,3 +1750,239 @@ class MediaFilesTests(TestCase):
         for path in ("/", "/ar/", "/about/", "/brands/carrier/", "/products/vrf/", "/maintenance/"):
             self.assertNotIn("original_images", self.client.get(path).content.decode(), path)
 
+
+class FieldPhotoTransitionTests(TestCase):
+    """PR 1 of the scalable field gallery: the standalone model, its admin area and the guarded mirror."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    FIELDS = ("pk", "image_id", "sort_order", "alt_en", "alt_ar", "caption_en", "caption_ar", "subcaption_en",
+              "subcaption_ar", "category_id", "featured", "approved_for_publication")
+
+    def sync(self, **kw):
+        from core import gallery
+        from core.models import FieldPhoto, GalleryItem
+        return gallery.sync_field_photos(GalleryItem, FieldPhoto, **kw)
+
+    def problems(self):
+        from core import gallery
+        from core.models import FieldPhoto, GalleryItem
+        return gallery.verify(GalleryItem, FieldPhoto)
+
+    def admin(self):
+        from django.contrib.auth import get_user_model
+        get_user_model().objects.create_superuser("omar", "o@example.com", "pw")
+        self.client.login(username="omar", password="pw")
+
+    def test_every_gallery_row_is_mirrored_once_with_its_image_texts_and_order(self):
+        from core.models import FieldPhoto, GalleryItem
+        from wagtail.images.models import Image
+        self.assertEqual(GalleryItem.objects.count(), 8)
+        self.assertEqual(FieldPhoto.objects.count(), 8)
+        self.assertEqual(self.problems(), [])
+        for item in GalleryItem.objects.all():
+            photo = FieldPhoto.objects.get(legacy_item_id=item.pk)
+            self.assertEqual(photo.image_id, item.image_id)                     # the same image record: no file copied
+            self.assertEqual((photo.alt_en, photo.alt_ar), (item.alt_en, item.alt_ar))
+            self.assertEqual((photo.title_en, photo.title_ar), (item.caption_en, item.caption_ar))
+            self.assertEqual((photo.caption_en, photo.caption_ar), (item.subcaption_en, item.subcaption_ar))
+            self.assertEqual(photo.sort_order, item.sort_order)
+            self.assertEqual(photo.approved_for_publication, item.approved_for_publication)
+        self.assertEqual([p.legacy_item_id for p in FieldPhoto.objects.all()],
+                         list(GalleryItem.objects.order_by("sort_order").values_list("pk", flat=True)))
+        self.assertEqual(Image.objects.count(), 20)
+
+    def test_the_mirror_can_run_again_without_duplicates_or_changes(self):
+        from core.models import FieldPhoto, GalleryItem
+        from wagtail.images.models import Image
+        import os
+        before_items = list(GalleryItem.objects.order_by("pk").values_list(*self.FIELDS))
+        before_photos = list(FieldPhoto.objects.order_by("pk").values_list("pk", "legacy_item_id", "image_id", "updated"))
+        files = sorted(os.listdir(os.path.dirname(Image.objects.first().file.path)))
+        for _ in range(3):
+            report = self.sync()
+            self.assertEqual((report["created"], report["updated"], report["unchanged"], report["withdrawn"]), (0, 0, 8, 0))
+        import importlib
+        from django.apps import apps
+        importlib.import_module("core.migrations.0010_field_photos").mirror(apps, None)   # the migration step itself
+        self.assertEqual(list(FieldPhoto.objects.order_by("pk").values_list("pk", "legacy_item_id", "image_id", "updated")),
+                         before_photos)
+        self.assertEqual(list(GalleryItem.objects.order_by("pk").values_list(*self.FIELDS)), before_items)   # never touched
+        self.assertEqual(sorted(os.listdir(os.path.dirname(Image.objects.first().file.path))), files)       # no new files
+
+    def test_changes_made_in_the_old_editor_reach_the_mirror(self):
+        from core.models import FieldPhoto, GalleryCategory, GalleryItem, HomePage
+        category = GalleryCategory.objects.create(name_en="Maintenance", name_ar="الصيانة", slug="maintenance")
+        items = list(GalleryItem.objects.order_by("sort_order"))
+        GalleryItem.objects.filter(pk=items[0].pk).update(caption_ar="عنوان جديد", category=category, featured=True,
+                                                          approved_for_publication=True)
+        added = GalleryItem.objects.create(page=HomePage.objects.get(), image=items[0].image, sort_order=40, alt_en="Added later")
+        self.assertEqual(self.sync(dry_run=True)["created"], 1)
+        self.assertEqual(FieldPhoto.objects.count(), 8)                          # a dry run writes nothing
+        report = self.sync()
+        self.assertEqual((report["created"], report["updated"], report["unchanged"]), (1, 1, 7))
+        mirror = FieldPhoto.objects.get(legacy_item_id=items[0].pk)
+        self.assertEqual((mirror.title_ar, mirror.category, mirror.featured, mirror.approved_for_publication),
+                         ("عنوان جديد", category, True, True))
+        self.assertEqual((mirror.show_on_homepage, mirror.home_order), (True, 1))
+        late = FieldPhoto.objects.get(legacy_item_id=added.pk)
+        self.assertFalse(late.approved_for_publication)                          # unapproved stays unapproved
+        self.assertFalse(late.show_on_homepage)
+        self.assertEqual(self.problems(), [])
+
+    def test_a_row_removed_from_the_old_gallery_is_withdrawn_not_deleted(self):
+        from core.models import FieldPhoto, GalleryItem
+        approve_gallery()
+        self.sync()
+        gone = GalleryItem.objects.order_by("sort_order").first()
+        gone_pk = gone.pk
+        gone.delete()
+        report = self.sync()
+        self.assertEqual(report["withdrawn"], 1)
+        mirror = FieldPhoto.objects.get(legacy_item_id=gone_pk)                  # the record and its image are kept
+        self.assertFalse(mirror.approved_for_publication)
+        self.assertFalse(mirror.show_on_homepage)
+        self.assertEqual(FieldPhoto.objects.count(), 8)
+        self.assertEqual(self.sync()["withdrawn"], 0)
+
+    def test_home_selection_matches_what_the_home_page_shows_today(self):
+        from core.models import FieldPhoto, GalleryItem, HomePage
+        home = HomePage.objects.get()
+        first = home.gallery.first()
+        for n in range(3):
+            GalleryItem.objects.create(page=home, image=first.image, sort_order=30 + n, alt_en=f"Extra {n}")
+        approve_gallery()
+        self.sync()
+        on_home = FieldPhoto.objects.filter(show_on_homepage=True, approved_for_publication=True).order_by("home_order")
+        self.assertEqual([p.legacy_item_id for p in on_home], [g.pk for g in home.home_gallery()])
+        self.assertEqual(on_home.count(), 8)
+        self.assertEqual(FieldPhoto.objects.count(), 11)
+
+    def test_photos_created_in_the_new_area_are_left_alone_by_the_mirror(self):
+        from core.models import FieldPhoto, GalleryItem
+        own = FieldPhoto.objects.create(image=GalleryItem.objects.first().image, title_en="Uploaded in the new area")
+        self.assertFalse(own.approved_for_publication)                           # unapproved by default
+        self.assertFalse(own.show_on_homepage)
+        self.assertFalse(own.featured)
+        self.sync()
+        own.refresh_from_db()
+        self.assertEqual((own.title_en, own.legacy_item_id), ("Uploaded in the new area", None))
+        self.assertEqual(FieldPhoto.objects.count(), 9)
+
+    def test_order_is_manual_numbers_first_then_newest(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        from core.models import FieldPhoto, GalleryItem
+        image = GalleryItem.objects.first().image
+        FieldPhoto.objects.all().delete()
+        now = timezone.now()
+        old = FieldPhoto.objects.create(image=image, title_en="old", created=now - timedelta(days=9))
+        new = FieldPhoto.objects.create(image=image, title_en="new", created=now)
+        second = FieldPhoto.objects.create(image=image, title_en="second", sort_order=2, created=now - timedelta(days=30))
+        first = FieldPhoto.objects.create(image=image, title_en="first", sort_order=1, created=now - timedelta(days=40))
+        self.assertEqual(list(FieldPhoto.objects.all()), [first, second, new, old])
+
+    def test_the_public_site_still_reads_the_old_gallery(self):
+        """Until the switch the new table changes nothing a visitor sees."""
+        from core.models import FieldPhoto
+        approve_gallery()
+        before = self.client.get("/").content.decode()
+        FieldPhoto.objects.update(approved_for_publication=False, title_en="Changed in the new area")
+        after = self.client.get("/").content.decode()
+        self.assertEqual(before.split('id="gallery"')[1].split("</ul>")[0], after.split('id="gallery"')[1].split("</ul>")[0])
+        self.assertNotIn("Changed in the new area", after)
+
+    def test_an_image_in_use_cannot_be_deleted_from_under_a_photo(self):
+        from django.db.models import ProtectedError
+        from core.models import FieldPhoto, GalleryItem
+        image = GalleryItem.objects.first().image
+        GalleryItem.objects.filter(image=image).delete()
+        with self.assertRaises(ProtectedError):
+            image.delete()
+        self.assertTrue(FieldPhoto.objects.filter(image=image).exists())
+
+    def test_admin_area_lists_filters_searches_and_paginates(self):
+        from core.models import FieldPhoto, GalleryCategory, GalleryItem
+        self.admin()
+        menu = self.client.get("/admin/").content.decode()
+        self.assertIn("Field gallery", menu)
+        category = GalleryCategory.objects.create(name_en="Maintenance", slug="maintenance")
+        image = GalleryItem.objects.first().image
+        FieldPhoto.objects.bulk_create([FieldPhoto(image=image, title_en=f"Bulk {n}", category=category if n % 2 else None)
+                                        for n in range(60)])
+        url = "/admin/snippets/core/fieldphoto/"
+        page = self.client.get(url)
+        self.assertEqual(page.status_code, 200)
+        html = page.content.decode()
+        self.assertIn("<img", html)                                              # thumbnails
+        self.assertEqual(page.context["page_obj"].paginator.per_page, 50)
+        self.assertEqual(page.context["page_obj"].paginator.count, 68)
+        self.assertEqual(len(page.context["page_obj"].object_list), 50)          # never the whole table in one request
+        self.assertEqual(self.client.get(url + "?p=2").status_code, 200)
+        filtered = self.client.get(url, {"category": category.pk})
+        self.assertEqual(filtered.context["page_obj"].paginator.count, 30)
+        approved = self.client.get(url, {"approved_for_publication": "true"})
+        self.assertEqual(approved.context["page_obj"].paginator.count, 0)
+        found = self.client.get(url, {"q": "Bulk 59"})
+        self.assertEqual(found.context["page_obj"].paginator.count, 1)
+        self.assertEqual(self.client.get("/admin/snippets/core/gallerycategory/").status_code, 200)
+
+    def test_each_photo_is_edited_on_its_own(self):
+        from core.models import FieldPhoto
+        self.admin()
+        photo = FieldPhoto.objects.first()
+        edit = self.client.get(f"/admin/snippets/core/fieldphoto/edit/{photo.pk}/")
+        self.assertEqual(edit.status_code, 200)
+        html = edit.content.decode()
+        for name in ("alt_en", "alt_ar", "title_en", "title_ar", "caption_en", "caption_ar", "category", "featured",
+                     "show_on_homepage", "home_order", "sort_order", "approved_for_publication"):
+            self.assertIn(f'name="{name}"', html)
+
+    def test_only_users_with_the_approval_permission_can_approve(self):
+        from django.contrib.auth import get_user_model
+        from django.contrib.auth.models import Permission
+        from core.models import FieldPhoto
+        editor = get_user_model().objects.create_user("editor", password="pw")
+        editor.user_permissions.add(*Permission.objects.filter(
+            codename__in=["access_admin", "add_fieldphoto", "change_fieldphoto", "view_fieldphoto"]))
+        self.client.login(username="editor", password="pw")
+        photo = FieldPhoto.objects.first()
+        url = f"/admin/snippets/core/fieldphoto/edit/{photo.pk}/"
+        html = self.client.get(url).content.decode()
+        self.assertIn('name="title_en"', html)
+        self.assertNotIn('name="approved_for_publication"', html)
+        data = {"image": photo.image_id, "title_en": "Edited by an editor", "home_order": 0,
+                "approved_for_publication": "on"}                                # a forged tick is ignored
+        self.assertEqual(self.client.post(url, data).status_code, 302)
+        photo.refresh_from_db()
+        self.assertEqual(photo.title_en, "Edited by an editor")
+        self.assertFalse(photo.approved_for_publication)
+        editor.user_permissions.add(Permission.objects.get(codename="approve_fieldphoto"))
+        self.client.logout(); self.client.login(username="editor", password="pw")
+        self.assertIn('name="approved_for_publication"', self.client.get(url).content.decode())
+        self.assertEqual(self.client.post(url, data).status_code, 302)
+        photo.refresh_from_db()
+        self.assertTrue(photo.approved_for_publication)
+
+    def test_check_command_reports_counts_and_fails_on_a_difference(self):
+        from io import StringIO
+        from django.core.management.base import CommandError
+        from core.models import GalleryItem
+        out = StringIO()
+        call_command("sync_field_photos", "--check", stdout=out)
+        self.assertIn("gallery rows: 8, mirrored field photos: 8", out.getvalue())
+        GalleryItem.objects.filter(pk=GalleryItem.objects.first().pk).update(alt_en="Changed in the old editor")
+        with self.assertRaises(CommandError):
+            call_command("sync_field_photos", "--check", stdout=StringIO())
+        call_command("sync_field_photos", stdout=StringIO())
+        call_command("sync_field_photos", "--check", stdout=StringIO())
+
+    def test_old_editor_and_its_records_are_still_in_place(self):
+        from core.models import GalleryItem, HomePage
+        self.admin()
+        html = self.client.get(f"/admin/pages/{HomePage.objects.get().pk}/edit/").content.decode()
+        self.assertIn("gallery-0-approved_for_publication", html)
+        self.assertEqual(GalleryItem.objects.count(), 8)
+
