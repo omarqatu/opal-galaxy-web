@@ -169,3 +169,15 @@ Terminology decisions (Omar, 23 Nov 2026) — applied to all new copy, and to th
 | T9-4 | Shared form on the AC duct cleaning page | Omar: the page asks for the type of property and the ceiling access, but the form has no field for either; customers can only write them in Notes. | Shared form left unchanged; the WhatsApp message lists the four headings. |
 | T9-5 | Shared form heading and BOQ wording on the AC duct cleaning page (same texts as T9-1 and T9-2) | Omar: "project quote" and "BOQ" do not fit a cleaning inquiry. | Shared form left unchanged. |
 
+## About page (Task 17-E): statements shown as stored, not emphasised and not changed
+
+| # | Text affected | To confirm | Placeholder meanwhile |
+|---|---|---|---|
+| A-1 | "is a licensed air-conditioning trading company in Dubai" | Omar: licence number and whether to publish it (see 4). The company details panel leaves the licence line out until confirmed. | Lead shown as stored; no licence in the panel. |
+| A-2 | "built on years of supplying and installing HVAC" | Omar: founding year or years in business (see 18, 34). | Shown as stored. |
+| A-3 | "between the authorised distributors and the contractor: distributor pricing with the speed of a small supplier" | Omar: true for every brand listed; commercial claim (see 13, 18). | Shown as stored. |
+| A-4 | "the model on the quote is the model that arrives on site, on the agreed date, with a warranty card in your name" | Omar: the three promises (see 18). | Shown as stored, as ordinary text. |
+| A-5 | "Supply with installation on request" | Omar: own installation team or subcontracted (see 17). | Shown as stored. |
+| A-6 | Business hours | Omar: left out of the About panel while question 1 is open; still shown where they already were. | Not shown on the About page. |
+| A-7 | Page description (meta) is the whole lead, over 300 characters | Omar: for the postponed SEO phase. | Unchanged. |
+

@@ -221,3 +221,15 @@ msgstr "خدمات تكييف أخرى"
 msgid "Hello, I would like to ask about AC duct cleaning."
 msgstr "مرحباً، أودّ الاستفسار عن تنظيف مجاري التكييف."
 
+msgid "Hello, I have an inquiry for Opal Galaxy."
+msgstr "مرحباً، لديّ استفسار لشركة Opal Galaxy."
+
+msgid "Company details"
+msgstr "بيانات الشركة"
+
+msgid "Legal name"
+msgstr "الاسم القانوني"
+
+msgid "Explore Opal Galaxy"
+msgstr "استكشف Opal Galaxy"
+

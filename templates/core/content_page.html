@@ -4,6 +4,46 @@
 {% block content %}
 {% with s=settings.core.CompanySettings t=settings.core.SiteCopy %}
 {% include "includes/crumbs.html" with current_label=page|tr:"title" %}
+{% if page.slug == "about" %}{# Task 17-E: About. Other content pages keep the composition in the else branch. #}
+{% translate "Hello, I have an inquiry for Opal Galaxy." as wa_message %}
+<section class="page-hero page-hero--text"><div class="container">
+  <div class="page-hero__copy">
+    <h1>{{ page|tr:"title" }}</h1>
+    {% if page.lead_en %}<p class="lead">{{ page|tr:"lead" }}</p>{% endif %}
+    <div class="page-hero__cta">
+      {% if contact_url %}<a class="btn btn-accent" href="{{ contact_url }}">{{ t|tr:"nav_contact" }}</a>{% endif %}
+      <a class="btn btn-wa" href="https://wa.me/{{ s.whatsapp }}?text={{ wa_message|urlencode }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% translate "WhatsApp" %}</span></a>
+    </div>
+  </div>
+</div></section>
+
+<section class="section section--white"><div class="container about">
+  <div class="about__main">{% for sec in page.sections.all %}
+    <section class="about-sec">
+      {% if sec.heading_en %}<h2>{{ sec|tr:"heading" }}</h2>{% endif %}
+      <div class="about-sec__body">{% for kind, value in sec.blocks %}{% if kind == "ul" %}<ul>{% for item in value %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>{{ value|urlize }}</p>{% endif %}{% endfor %}</div>
+    </section>{% endfor %}
+  </div>
+  <aside class="about__aside" aria-labelledby="company-details">
+    <h2 id="company-details">{% translate "Company details" %}</h2>
+    <dl class="co-details">
+      {% if s.legal_name %}<div><dt>{% translate "Legal name" %}</dt><dd><span class="ltr">{{ s.legal_name }}</span></dd></div>{% endif %}
+      {% if s.address %}<div><dt>{% translate "Address" %}</dt><dd><span class="ltr">{{ s.address }}</span></dd></div>{% endif %}
+      {% if s.phone %}<div><dt>{% translate "Phone / WhatsApp" %}</dt><dd><a class="ltr" href="tel:{{ s.phone }}">{{ s.phone_display|default:s.phone }}</a></dd></div>{% endif %}
+      {% if s.email %}<div><dt>{% translate "Email" %}</dt><dd><a class="ltr" href="mailto:{{ s.email }}">{{ s.email }}</a></dd></div>{% endif %}
+    </dl>
+  </aside>
+</div></section>
+
+<section class="section section--ruled explore"><div class="container">
+  <h2>{% translate "Explore Opal Galaxy" %}</h2>
+  <ul class="explore__links">
+    <li><a class="explore__link" href="{{ home_url }}#brands"><span>{{ t|tr:"nav_brands" }}</span><span class="icon-dir" aria-hidden="true">{% include "includes/icons/arrow.svg" %}</span></a></li>
+    {% for sp in service_pages %}<li><a class="explore__link" href="{% lurl sp.slug|slugpath %}"><span>{{ sp|tr:"title" }}</span><span class="icon-dir" aria-hidden="true">{% include "includes/icons/arrow.svg" %}</span></a></li>{% endfor %}
+    {% if gallery_url %}<li><a class="explore__link" href="{{ gallery_url }}"><span>{% translate "Media" %}</span><span class="icon-dir" aria-hidden="true">{% include "includes/icons/arrow.svg" %}</span></a></li>{% endif %}
+  </ul>
+</div></section>
+{% else %}
 {% include "includes/page_hero.html" with title=page|tr:"title" lead=page|tr:"lead" %}
 
 {% if page.sections.all %}<section class="section section--white"><div class="container"><div class="prose">
@@ -12,6 +52,7 @@
     {% for kind, value in sec.blocks %}{% if kind == "ul" %}<ul>{% for item in value %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>{{ value|urlize }}</p>{% endif %}{% endfor %}
   </div>{% endfor %}
 </div></div></section>{% endif %}
+{% endif %}
 
 {% if page.kind == "faq" and faqs %}<section class="section section--white"><div class="container"><div class="prose">
   <div class="accordion">{% for f in faqs %}<details{% if forloop.first %} open{% endif %}><summary>{{ f|tr:"question" }}</summary><div class="accordion__body"><p>{{ f|tr:"answer" }}</p></div></details>{% endfor %}</div>

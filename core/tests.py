@@ -2187,3 +2187,131 @@ class DuctCleaningPageTests(TestCase):
         self.assertIn('<div class="card" data-reveal>', body)
         self.assertNotIn("prep__", body)
         self.assertNotIn("svc-list", body)
+
+
+class AboutPageTests(TestCase):
+    """Task 17-E: the About page; the other content pages keep their composition."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def page(self):
+        from core.models import ContentPage
+        return ContentPage.objects.get(slug="about")
+
+    def body(self, path):
+        return self.client.get(path).content.decode().split('id="app"')[1].split("</main>")[0].split('id="contact"')[0]
+
+    def test_title_lead_and_sections_are_shown_exactly_and_in_order(self):
+        import html
+        page = self.page()
+        sections = list(page.sections.all())
+        self.assertGreaterEqual(len(sections), 2)
+        for path, lang in (("/about/", "en"), ("/ar/about/", "ar")):
+            body = html.unescape(self.body(path))
+            self.assertIn(f"<h1>{getattr(page, f'title_{lang}')}</h1>", body)
+            self.assertIn(f'<p class="lead">{getattr(page, f"lead_{lang}")}</p>', body)
+            self.assertEqual(body.count('<section class="about-sec">'), len(sections))
+            positions = []
+            for sec in sections:
+                heading = getattr(sec, f"heading_{lang}")
+                self.assertIn(f"<h2>{heading}</h2>", body)
+                positions.append(body.index(f"<h2>{heading}</h2>"))
+                for line in getattr(sec, f"body_{lang}").splitlines():
+                    line = line.strip()
+                    if line:
+                        self.assertIn(line[1:].strip() if line.startswith("-") else line, body)   # every paragraph and list item
+            self.assertEqual(positions, sorted(positions))
+        self.assertEqual(self.client.get("/about/").content.decode().count("<h1"), 1)
+
+    def test_the_layout_follows_the_number_of_sections(self):
+        from core.models import ContentSection
+        page = self.page()
+        ContentSection.objects.create(page=page, sort_order=50, heading_en="Added later", body_en="One paragraph.\n\n- first\n- second")
+        body = self.body("/about/")
+        self.assertEqual(body.count('<section class="about-sec">'), page.sections.count())
+        self.assertIn("<li>first</li><li>second</li>", body)
+        ContentSection.objects.filter(page=page).delete()
+        self.assertEqual(self.client.get("/about/").status_code, 200)
+        self.assertNotIn("about-sec", self.body("/about/"))
+
+    def test_hero_has_contact_and_whatsapp_actions(self):
+        from urllib.parse import quote
+        from core.models import CompanySettings, ContentPage, SiteCopy
+        number = CompanySettings.load().whatsapp
+        hero = self.body("/about/").split('class="page-hero__cta"')[1].split("</div>")[0]
+        self.assertIn(f'<a class="btn btn-accent" href="/contact/">{SiteCopy.load().nav_contact_en}</a>', hero)
+        self.assertIn(f'href="https://wa.me/{number}?text={quote("Hello, I have an inquiry for Opal Galaxy.")}"', hero)
+        self.assertIn('target="_blank" rel="noopener"', hero)
+        arabic = self.body("/ar/about/").split('class="page-hero__cta"')[1].split("</div>")[0]
+        self.assertIn('href="/ar/contact/"', arabic)
+        self.assertIn(quote("مرحباً، لديّ استفسار لشركة Opal Galaxy."), arabic)
+        ContentPage.objects.get(slug="contact").unpublish()                             # no contact page: no dead link
+        hero = self.body("/about/").split('class="page-hero__cta"')[1].split("</div>")[0]
+        self.assertNotIn("/contact/", hero)
+        self.assertIn("wa.me", hero)
+
+    def test_company_details_come_from_the_settings_without_hours_or_licence(self):
+        from core.models import CompanySettings
+        s = CompanySettings.load()
+        panel = self.body("/about/").split('class="about__aside"')[1].split("</aside>")[0]
+        self.assertEqual(panel.count("<dt>"), 4)
+        for value in (s.legal_name, s.address, s.phone_display or s.phone, s.email):
+            self.assertIn(value, panel)
+        self.assertIn(f'href="tel:{s.phone}"', panel)
+        self.assertIn(f'href="mailto:{s.email}"', panel)
+        whole = self.body("/about/")
+        for held_back in (s.hours_full_en, s.hours_short_en, s.licence_en, "Business hours", "Licence"):
+            if held_back:
+                self.assertNotIn(held_back, whole)
+        arabic = self.body("/ar/about/")
+        self.assertIn("بيانات الشركة", arabic)
+        self.assertIn("الاسم القانوني", arabic)
+        for held_back in (s.hours_full_ar, s.licence_ar):
+            if held_back:
+                self.assertNotIn(held_back, arabic)
+        CompanySettings.objects.update(email="", address="")                           # an empty value drops its row
+        panel = self.body("/about/").split('class="about__aside"')[1].split("</aside>")[0]
+        self.assertEqual(panel.count("<dt>"), 2)
+        self.assertEqual(CompanySettings.load().legal_name, s.legal_name)               # nothing stored was changed by rendering
+
+    def test_explore_links_point_only_to_published_pages(self):
+        import re
+        from core.models import ContentPage, HomePage, ServicePage
+        section = self.body("/about/").split('class="section section--ruled explore"')[1].split("</section>")[0]
+        hrefs = re.findall(r'class="explore__link" href="([^"]+)"', section)
+        self.assertEqual(hrefs[0], "/#brands")
+        self.assertEqual(len(hrefs), len(set(hrefs)))
+        for href in hrefs[1:]:
+            self.assertEqual(self.client.get(href).status_code, 200, href)
+        self.assertIn("/maintenance/", hrefs)
+        self.assertNotIn("/gallery/", hrefs)                                            # no gallery page yet
+        self.assertNotIn("brand-wall", self.body("/about/"))                            # no grid of manufacturer names
+        gallery = ContentPage(title="Gallery", slug="gallery", kind="gallery", title_en="Gallery")
+        HomePage.objects.get().add_child(instance=gallery)
+        gallery.save_revision().publish()
+        ServicePage.objects.get(slug="maintenance").unpublish()
+        section = self.body("/about/").split('class="section section--ruled explore"')[1].split("</section>")[0]
+        hrefs = re.findall(r'class="explore__link" href="([^"]+)"', section)
+        self.assertIn("/gallery/", hrefs)
+        self.assertNotIn("/maintenance/", hrefs)
+        self.assertIn('href="/ar/#brands"', self.body("/ar/about/"))
+
+    def test_quote_form_follows_the_page_option(self):
+        from core.models import ContentPage
+        self.assertIn('id="contact"', self.client.get("/about/").content.decode())
+        ContentPage.objects.filter(slug="about").update(show_quote_form=False)
+        self.assertNotIn('id="contact"', self.client.get("/about/").content.decode())
+
+    def test_other_content_pages_keep_their_composition(self):
+        for path in ("/faq/", "/contact/", "/privacy/"):
+            html = self.client.get(path).content.decode()
+            body = html.split('id="app"')[1].split("</main>")[0]
+            for needle in ("about-sec", "about__aside", "explore__link", "page-hero--text"):
+                self.assertNotIn(needle, body, path)
+            self.assertIn('<section class="page-hero">', body)
+        self.assertIn('class="prose__section"', self.client.get("/privacy/").content.decode())
+        self.assertIn('class="accordion"', self.client.get("/faq/").content.decode())
+        self.assertIn('<dl class="kv">', self.client.get("/contact/").content.decode())
+
