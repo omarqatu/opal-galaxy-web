@@ -182,3 +182,13 @@ def photo(image, widths="320 480 720"):
     sizes = [by_width[w] for w in sorted(by_width)]
     return {"src": sizes[0].url, "width": sizes[0].width, "height": sizes[0].height,
             "srcset": ", ".join(f"{r.url} {r.width}w" for r in sizes), "largest": sizes[-1]}
+
+
+@register.simple_tag
+def inquiry_message(intro, items):
+    """Prefilled WhatsApp text for an inquiry: the intro, then each item's heading in the page language
+    as a line for the customer to complete. Descriptions are left out, empty headings are skipped,
+    and with no headings the intro alone is returned."""
+    headings = [h for h in (i18n.tr(item, "title").strip() for item in items) if h]
+    return "\n".join([intro, ""] + [f"{h}:" for h in headings]) if headings else intro
+

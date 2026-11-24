@@ -1,0 +1,10 @@
+{% load i18n opal %}{# Published service pages other than the current one; nothing is rendered when there is none. #}
+{% if service_pages|length > 1 %}{# published service pages other than this one #}<section class="section section--ruled other-services"><div class="container">
+  <h2>{% translate "Other HVAC services" %}</h2>
+  <ul class="service-rows">{% for sp in service_pages %}{% if sp.pk != page.pk %}
+    <li><a class="service-row" href="{% lurl sp.slug|slugpath %}">
+      <span class="service-row__icon">{% if sp.icon %}{% icon sp.icon %}{% endif %}</span>
+      <span class="service-row__body"><span class="service-row__title">{{ sp|tr:"title" }}</span>{% if sp.lead_en %}<span class="service-row__text">{{ sp|tr:"lead" }}</span>{% endif %}</span>
+      <span class="service-row__go icon-dir" aria-hidden="true">{% include "includes/icons/arrow.svg" %}</span></a></li>{% endif %}{% endfor %}
+  </ul>
+</div></section>{% endif %}

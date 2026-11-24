@@ -1015,3 +1015,22 @@ html[dir=ltr] p.tech__foot{max-width:none}
 .other-services .service-row__text{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 @media (max-width:860px){.svc-list{grid-template-columns:minmax(0,1fr)}.svc-item{gap:var(--s-4);padding-block:var(--s-5)}}
 
+/* ==========================================================================
+   Service page (duct cleaning): preparation sheet, a definition list of details to send
+   ========================================================================== */
+.prep{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.prep__title{margin:0;padding:var(--s-5) var(--s-6);font-size:var(--fs-h3);border-block-end:1px solid var(--line);border-inline-start:3px solid var(--cyan)}
+.prep__list{margin:0;padding-inline:var(--s-6)}
+.prep__row{display:grid;grid-template-columns:minmax(0,17rem) minmax(0,1fr);gap:var(--s-2) var(--s-6);padding-block:var(--s-5);border-block-end:1px solid var(--line)}
+.prep__row:last-child{border-block-end:0}
+.prep__row dt{display:flex;align-items:baseline;gap:var(--s-3);margin:0;font-weight:600;font-size:var(--fs-h4);line-height:1.35;color:var(--navy)}
+.prep__row dd{margin:0;color:var(--muted);max-inline-size:60ch}
+.prep__dot{flex:none;inline-size:.5rem;block-size:.5rem;border-radius:50%;background:var(--cyan);transform:translateY(-.125rem)}
+:lang(ar) .prep__row dt{line-height:1.5}
+@media (max-width:640px){
+  .prep__title{padding:var(--s-4)}
+  .prep__list{padding-inline:var(--s-4)}
+  .prep__row{grid-template-columns:minmax(0,1fr);padding-block:var(--s-4)}
+  .prep__row dd{padding-inline-start:calc(.5rem + var(--s-3))}
+}
+
