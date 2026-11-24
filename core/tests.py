@@ -2627,3 +2627,32 @@ class PrivacyPageTests(TestCase):
         self.assertIn('<div class="prose">', html)
         self.assertNotIn("prose--doc", html)
 
+
+class BreadcrumbTests(TestCase):
+    """The breadcrumb's links, separators and current page sit on one centre line."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def test_every_item_is_centred_on_the_same_line(self):
+        from django.conf import settings
+        css = (settings.BASE_DIR / "static/css/components.css").read_text()
+        self.assertIn(".crumbs{align-items:center}", css)
+        self.assertRegex(css, r"\.crumbs span\{display:inline-flex;align-items:center;min-block-size:2rem\}")
+        self.assertIn(".crumbs a{display:inline-flex;align-items:center;min-block-size:2rem}", css)   # the link keeps its touch height
+        # Arabic: the separator rule must not put a "/" before the first item.
+        self.assertLess(css.index('[dir=rtl] .crumbs span::before{content:"/"}'),
+                        css.index("[dir=rtl] .crumbs span:first-child::before{content:none}"))
+
+    def test_markup_is_unchanged_on_every_page_type(self):
+        for path, trail in (("/privacy/", ["Home", "Privacy Policy"]), ("/about/", ["Home", "About Opal Galaxy"]),
+                            ("/maintenance/", ["Home", "Maintenance and spare parts"]),
+                            ("/brands/carrier/", ["Home", "Brands", "Carrier"]), ("/products/vrf/", ["Home", "Products", "VRF systems"])):
+            import re
+            html = self.client.get(path).content.decode()
+            nav = html.split('<nav class="crumbs wrap"')[1].split("</nav>")[0]
+            self.assertEqual([re.sub(r"<[^>]+>", "", x) for x in re.findall(r"<span>(.*?)</span>", nav)], trail, path)
+            self.assertEqual(nav.count("<a "), len(trail) - 1)            # the current page is text, not a link
+        self.assertIn('aria-label="مسار التنقل"', self.client.get("/ar/about/").content.decode())
+
