@@ -181,3 +181,12 @@ Terminology decisions (Omar, 23 Nov 2026) — applied to all new copy, and to th
 | A-6 | Business hours | Omar: left out of the About panel while question 1 is open; still shown where they already were. | Not shown on the About page. |
 | A-7 | Page description (meta) is the whole lead, over 300 characters | Omar: for the postponed SEO phase. | Unchanged. |
 
+## Contact page (Task 17-F)
+
+| # | Text affected | To confirm | Placeholder meanwhile |
+|---|---|---|---|
+| C-1 | Business hours "Saturday – Thursday, 8:00 – 18:00 · Sunday closed" | Omar: contradictory (see 1). Not shown on the Contact page until verified; the stored value is untouched and still appears on the home page and in the footer. | Hidden on Contact and About. |
+| C-2 | Licence "Dubai Department of Economy and Tourism" | Omar: authority name only, no licence number (see 4). Not shown on the Contact page until verified; stored value untouched. | Hidden on Contact and About. |
+| C-3 | Address "St152 – Port Saeed, Deira, Dubai – UAE" | Omar: no building or office number, no map link, shown in Latin script on the Arabic page (see 3, 32). | Shown as stored. |
+| T9-6 | Shared form on the Contact page | Omar: the form section repeats the phone and the email directly under the contact cards, its heading says "project quote", its text mentions a BOQ, and every field is about an equipment order although the page is for general contact. | Shared form left unchanged. |
+
