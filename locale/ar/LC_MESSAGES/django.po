@@ -190,8 +190,8 @@ msgstr "مسودة"
 msgid "View full gallery"
 msgstr "عرض المعرض كاملاً"
 
-msgid "Photo gallery"
-msgstr "معرض الصور"
+msgid "Media"
+msgstr "الوسائط"
 
 msgid "All photos"
 msgstr "جميع الصور"
@@ -211,3 +211,10 @@ msgstr "الصفحة التالية"
 #, python-format
 msgid "Page %(n)s of %(total)s"
 msgstr "الصفحة %(n)s من %(total)s"
+
+msgid "Hello, I would like to ask about maintenance and spare parts."
+msgstr "مرحباً، أودّ الاستفسار عن الصيانة وقطع الغيار."
+
+msgid "Other HVAC services"
+msgstr "خدمات تكييف أخرى"
+

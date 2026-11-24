@@ -383,9 +383,13 @@ class HomeRedesignTests(TestCase):
     def test_existing_destinations_are_still_in_the_menu(self):
         html = self.client.get("/products/wall/").content.decode()
         menu = html.split('id="menu"')[1].split("</nav>")[0]
-        for href in ('"/"', '/#products"', '/#brands"', '/#contractors"', '/#install"', '"/maintenance/"',
-                     '"/duct-cleaning/"', '"/about/"', '"/contact/"'):
+        for href in ('/#products"', '/#brands"', '/#contractors"', '/#install"', '"/maintenance/"',
+                     '"/duct-cleaning/"', '"/contact/"'):
             self.assertIn(href, menu)
+        # Home is reached through the logo and About through the footer (Task 17-C).
+        self.assertIn('<a class="logo" href="/"', html)
+        self.assertNotIn('"/about/"', menu)
+        self.assertIn('href="/about/"', html.split("<footer")[1])
 
     def test_one_h1_and_no_external_requests(self):
         import re
@@ -804,11 +808,12 @@ class RefinementTests(TestCase):
         header = self.header("/products/wall/")
         self.assertEqual(header.count('<details class="nav-drop">'), 3)
         self.assertEqual(header.count("<summary>"), 3)
-        self.assertIn('>Home</a>', header)
+        self.assertNotIn('>Home</a>', header)                     # the logo is the link to the home page
+        self.assertIn('<a class="logo" href="/"', header)
         self.assertIn('class="btn btn-accent btn-sm nav-quote" href="#contact"', header)
         self.assertIn('aria-controls="menu"', header)
         for href in ('"/#products"', '"/#brands"', '"/#install"', '"/#contractors"', '"/maintenance/"',
-                     '"/duct-cleaning/"', '"/about/"', '"/contact/"', 'href="tel:', "https://wa.me/", 'hreflang="ar"'):
+                     '"/duct-cleaning/"', '"/contact/"', 'href="tel:', "https://wa.me/", 'hreflang="ar"'):
             self.assertIn(href, header)
 
     def test_every_internal_link_on_the_home_page_resolves(self):
@@ -1317,15 +1322,20 @@ class FieldGalleryPageTests(TestCase):
         en, ar = self.client.get("/").content.decode(), self.client.get("/ar/").content.decode()
         self.assertIn('<a class="link-arrow" href="/gallery/">View full gallery', en)
         self.assertIn('<a class="link-arrow" href="/ar/gallery/">عرض المعرض كاملاً', ar)
-        # Header: the About item becomes a menu holding About and the gallery; footer: Company column.
+        # Header: a direct Media link just before Contact, no About item; footer: About and Media in the Company column.
         header = en.split("<header")[1].split("</header>")[0]
-        group = header.split('href="/about/"')[0].rsplit("<details", 1)[1] + header.split('href="/about/"')[1].split("</details>")[0]
-        self.assertIn('class="nav-drop"', group)
-        self.assertIn('<a href="/gallery/">Photo gallery</a>', group)
-        self.assertEqual(header.count('href="/about/"'), 1)
+        self.assertIn('<li><a href="/gallery/">Media</a></li>', header)
+        self.assertEqual(header.count('href="/gallery/"'), 1)
+        self.assertNotIn('href="/about/"', header)
+        self.assertLess(header.index('href="/#contractors"'), header.index('href="/gallery/"'))
+        self.assertLess(header.index('href="/gallery/"'), header.index('href="/contact/"'))
+        self.assertEqual(header.count("nav-drop"), 3)
         footer = en.split('<footer')[1]
-        self.assertIn('<a href="/gallery/">Photo gallery</a>', footer)
-        self.assertIn('<a href="/ar/gallery/">معرض الصور</a>', ar.split("<header")[1].split("</header>")[0])
+        self.assertIn('<a href="/gallery/">Media</a>', footer)
+        self.assertIn('href="/about/"', footer)
+        self.assertIn('<li><a href="/ar/gallery/">الوسائط</a></li>', ar.split("<header")[1].split("</header>")[0])
+        self.assertIn('<a href="/gallery/" aria-current="page">Media</a>',
+                      self.client.get("/gallery/").content.decode().split("<header")[1].split("</header>")[0])
         self.assertIn("/gallery/", self.client.get("/sitemap.xml").content.decode())
         self.assertEqual(self.client.get("/gallery/").status_code, 200)
         page = self.client.get("/ar/gallery/")
@@ -1333,10 +1343,30 @@ class FieldGalleryPageTests(TestCase):
         self.assertIn('dir="rtl"', page.content.decode())
         self.assertIn("معرض الصور الميدانية", page.content.decode())
 
-    def test_without_a_gallery_page_the_header_keeps_the_plain_about_link(self):
-        header = self.client.get("/").content.decode().split("<header")[1].split("</header>")[0]
-        self.assertIn('<li><a href="/about/">', header)
+    def test_header_order_is_products_brands_services_contractors_media_contact(self):
+        import re
+        self.make_page()
+        for path, labels in (("/", ["Products", "Brands", "Services", "Contractors", "Media", "Contact"]),
+                             ("/ar/", None)):
+            header = self.client.get(path).content.decode().split("<header")[1].split("</header>")[0]
+            menu = header.split('id="menu"')[1].split('class="menu__foot"')[0]
+            top = re.findall(r'^      <li[^>]*>(?:<details class="nav-drop"><summary>|<a [^>]*>)([^<{]+)', menu, re.M)
+            self.assertEqual(len(top), 6, top)
+            if labels:
+                self.assertEqual([t.strip() for t in top], labels)
+            else:
+                self.assertEqual(top[4].strip(), "الوسائط")
+            # the actions next to the menu are all still there
+            for needle in ('class="lang"', 'tool-btn--call', 'tool-btn--wa', 'nav-quote', 'id="burger"', 'class="logo"'):
+                self.assertIn(needle, header)
+
+    def test_without_a_gallery_page_the_header_has_no_media_or_about_item(self):
+        html = self.client.get("/").content.decode()
+        header = html.split("<header")[1].split("</header>")[0]
+        self.assertNotIn("Media", header)
+        self.assertNotIn('href="/about/"', header)
         self.assertEqual(header.count("nav-drop"), 3)
+        self.assertIn('href="/about/"', html.split("<footer")[1])       # About stays reachable from the footer
 
     def test_only_approved_photos_are_shown(self):
         from core.models import FieldPhoto
@@ -1953,4 +1983,98 @@ class FieldPhotoTests(TestCase):
         self.login("view_fieldphoto")
         self.assertIn(self.client.get("/admin/field-gallery/upload/").status_code, (302, 403))
         self.assertFalse(Collection.objects.filter(name=FIELD_GALLERY_COLLECTION).exists())
+
+
+class MaintenancePageTests(TestCase):
+    """Task 17-C: the Maintenance and spare parts page; the duct cleaning page keeps its composition."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def body(self, path):
+        html = self.client.get(path).content.decode()
+        return html.split('id="app"')[1].split('id="contact"')[0]
+
+    def test_services_are_a_numbered_list_with_the_stored_texts(self):
+        from core.models import ServicePage
+        page = ServicePage.objects.get(slug="maintenance")
+        items = list(page.items.all())
+        body = self.body("/maintenance/")
+        self.assertEqual(body.count('<li class="svc-item"'), len(items))
+        self.assertIn('<ul class="svc-list">', body)
+        self.assertNotIn('class="card"', body)
+        positions = []
+        for n, item in enumerate(items, 1):
+            self.assertIn(f'<span class="svc-item__n" aria-hidden="true">{n:02d}</span>', body)
+            self.assertIn(f"<h3>{item.title_en}</h3><p>{item.text_en}</p>", body)      # exactly as stored
+            positions.append(body.index(item.title_en))
+        self.assertEqual(positions, sorted(positions))
+        arabic = self.body("/ar/maintenance/")
+        for item in items:
+            self.assertIn(f"<h3>{item.title_ar}</h3><p>{item.text_ar}</p>", arabic)
+        self.assertEqual(self.client.get("/maintenance/").content.decode().count("<h1"), 1)
+
+    def test_the_list_follows_the_number_of_items(self):
+        from core.models import ServiceItem, ServicePage
+        page = ServicePage.objects.get(slug="maintenance")
+        for n in range(7):
+            ServiceItem.objects.create(page=page, sort_order=20 + n, title_en=f"Extra {n}", text_en="Text")
+        body = self.body("/maintenance/")
+        self.assertEqual(body.count('<li class="svc-item"'), 11)
+        self.assertIn(">11</span>", body)
+        ServiceItem.objects.filter(page=page).delete()
+        self.assertNotIn("svc-list", self.body("/maintenance/"))                         # no items: no empty section
+
+    def test_hero_keeps_the_primary_action_and_adds_whatsapp(self):
+        from urllib.parse import quote
+        from core.models import CompanySettings, ServicePage
+        page, number = ServicePage.objects.get(slug="maintenance"), CompanySettings.load().whatsapp
+        hero = self.body("/maintenance/").split('class="page-hero__cta"')[1].split("</div>")[0]
+        self.assertIn(f'<a class="btn btn-accent" href="#contact">{page.cta_en}</a>', hero)
+        message = "Hello, I would like to ask about maintenance and spare parts."
+        self.assertIn(f'href="https://wa.me/{number}?text={quote(message)}"', hero)
+        self.assertIn('target="_blank" rel="noopener"', hero)
+        arabic = self.body("/ar/maintenance/").split('class="page-hero__cta"')[1].split("</div>")[0]
+        self.assertIn(page.cta_ar, arabic)
+        self.assertIn(f"https://wa.me/{number}?text={quote('مرحباً، أودّ الاستفسار عن الصيانة وقطع الغيار.')}", arabic)
+        self.assertIn("واتساب", arabic)
+
+    def test_other_services_lists_published_service_pages_except_this_one(self):
+        from core.models import ServicePage
+        duct = ServicePage.objects.get(slug="duct-cleaning")
+        if not duct.live:
+            duct.save_revision().publish()
+        section = self.body("/maintenance/").split('other-services">')[1].split("</section>")[0]
+        self.assertIn("<h2>Other HVAC services</h2>", section)
+        self.assertEqual(section.count('class="service-row"'), 1)
+        self.assertIn('href="/duct-cleaning/"', section)
+        self.assertNotIn('href="/maintenance/"', section)
+        self.assertIn(duct.title_en, section)
+        self.assertEqual(self.client.get("/duct-cleaning/").status_code, 200)
+        arabic = self.body("/ar/maintenance/").split('other-services">')[1].split("</section>")[0]
+        self.assertIn("خدمات تكييف أخرى", arabic)
+        self.assertIn('href="/ar/duct-cleaning/"', arabic)
+        duct.unpublish()                                                                 # nothing else published: no section, no dead link
+        body = self.body("/maintenance/")
+        self.assertNotIn("other-services", body)
+        self.assertNotIn("/duct-cleaning/", body)
+
+    def test_no_brand_grid_and_the_quote_form_is_unchanged(self):
+        html = self.client.get("/maintenance/").content.decode()
+        self.assertNotIn("brand-wall", html.split('id="app"')[1].split('id="contact"')[0])
+        form = html.split('id="contact"')[1]
+        self.assertRegex(form, r'<option value="maintenance"[^>]*selected')
+        self.assertIn('name="phone"', form)
+
+    def test_duct_cleaning_page_keeps_its_composition(self):
+        from core.models import ServicePage
+        duct = ServicePage.objects.get(slug="duct-cleaning")
+        if not duct.live:
+            duct.save_revision().publish()
+        body = self.body("/duct-cleaning/")
+        self.assertEqual(body.count('<div class="card" data-reveal>'), duct.items.count())
+        self.assertIn('<div class="grid grid--2">', body)
+        for needle in ("svc-list", "svc-item", "other-services", "wa.me"):
+            self.assertNotIn(needle, body)
 

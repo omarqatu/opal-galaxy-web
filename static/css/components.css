@@ -1000,3 +1000,18 @@ html[dir=ltr] p.tech__foot{max-width:none}
 }
 .gallery-pages{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:var(--s-4);margin-block-start:var(--s-7)}
 .gallery-pages__at{font-size:var(--fs-small);color:var(--muted)}
+
+/* ==========================================================================
+   Service page (maintenance): numbered editorial list and other services
+   ========================================================================== */
+.svc-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--s-8);border-block-end:1px solid var(--line)}
+.svc-item{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s-5);padding-block:var(--s-6);border-block-start:1px solid var(--line)}
+.svc-item__n{min-inline-size:2ch;font-size:var(--fs-h4);font-weight:600;line-height:1.3;color:var(--cyan-ink);font-variant-numeric:tabular-nums;direction:ltr;transition:color var(--t-fast) var(--ease)}
+.svc-item:hover .svc-item__n{color:var(--navy)}
+.svc-item h3{margin:0 0 var(--s-2)}
+.svc-item p{margin:0;color:var(--muted);max-inline-size:52ch}
+:lang(ar) .svc-item h3{line-height:1.5}
+.other-services h2{font-size:var(--fs-h3);margin-block-end:var(--s-5)}
+.other-services .service-row__text{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media (max-width:860px){.svc-list{grid-template-columns:minmax(0,1fr)}.svc-item{gap:var(--s-4);padding-block:var(--s-5)}}
+
