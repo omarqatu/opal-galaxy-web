@@ -1109,3 +1109,30 @@ html[dir=ltr] p.tech__foot{max-width:none}
 :lang(ar) .faq-item h2{line-height:1.5}
 .faq-next__actions{display:flex;flex-wrap:wrap;gap:var(--s-3)}
 
+/* ==========================================================================
+   Privacy policy: a plain reading document with its own print style
+   ========================================================================== */
+.prose--doc{max-inline-size:46rem}
+.prose--doc .prose__section{padding-block-start:var(--s-6);border-block-start:1px solid var(--line)}
+.prose--doc .prose__section:first-child{padding-block-start:0;border-block-start:0}
+.prose--doc .prose__section+.prose__section{margin-block-start:var(--s-6)}
+.prose--doc h2{margin-block-end:var(--s-3);line-height:1.3}
+.prose--doc p,.prose--doc li{font-size:var(--fs-body);line-height:1.7;color:var(--navy)}
+.prose--doc p:last-child,.prose--doc ul:last-child{margin-block-end:0}
+.prose--doc ul{list-style:none;margin:0 0 1em;padding:0}
+.prose--doc li{position:relative;margin-block:var(--s-2);padding-inline-start:var(--s-5)}
+.prose--doc li::before{content:"";position:absolute;inset-inline-start:.25rem;inset-block-start:.7em;inline-size:.375rem;block-size:.375rem;border-radius:50%;background:var(--cyan-ink)}
+.prose--doc a{color:var(--cyan-ink);text-decoration:underline;text-underline-offset:.2em;overflow-wrap:anywhere}
+:lang(ar) .prose--doc h2{line-height:1.5}
+@media print{
+  body:has(.prose--doc) .site-header,body:has(.prose--doc) .mbar,body:has(.prose--doc) .crumbs,body:has(.prose--doc) #contact,body:has(.prose--doc) .site-footer,body:has(.prose--doc) .skip{display:none}
+  body:has(.prose--doc) .page-hero{background:var(--white);padding-block:0 var(--s-5);border-block-end:1px solid var(--navy)}
+  body:has(.prose--doc) .page-hero h1,body:has(.prose--doc) .page-hero .lead{color:var(--navy)}
+  body:has(.prose--doc) .section{padding-block:var(--s-5) 0;background:var(--white)}
+  body:has(.prose--doc){background:var(--white);padding-block-end:0}
+  body:has(.prose--doc) main{padding-block-end:0}
+  .prose--doc{max-inline-size:none}
+  .prose--doc .prose__section{break-inside:avoid}
+  .prose--doc a{color:var(--navy)}
+}
+
