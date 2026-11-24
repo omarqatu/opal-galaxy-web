@@ -2656,3 +2656,49 @@ class BreadcrumbTests(TestCase):
             self.assertEqual(nav.count("<a "), len(trail) - 1)            # the current page is text, not a link
         self.assertIn('aria-label="مسار التنقل"', self.client.get("/ar/about/").content.decode())
 
+
+class HeadingOrderTests(TestCase):
+    """QA-03: no heading level is skipped on the internal pages (h2 is followed by h3, not h4)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def levels(self, path):
+        import re
+        html = self.client.get(path).content.decode()
+        body = html.split('id="app"')[1].split("</main>")[0]
+        return [int(n) for n in re.findall(r"<h([1-6])[\s>]", body)]
+
+    def test_technical_panels_use_h3_under_the_section_h2(self):
+        from catalog.models import Brand, ProductCategory
+        paths = [b.get_url() for b in Brand.objects.all()] + [c.get_url() for c in ProductCategory.objects.live()]
+        self.assertGreaterEqual(len(paths), 20)
+        with_panels = 0
+        for base in paths:
+            for path in (base, "/ar" + base):
+                html = self.client.get(path).content.decode()
+                self.assertNotIn("<h4", html.split('id="app"')[1].split('id="contact"')[0], path)
+                if 'class="tech__heading"' in html:
+                    with_panels += 1
+                    self.assertIn('<h3 class="tech__heading">', html)
+                levels = self.levels(path)
+                self.assertEqual(levels[0], 1, path)
+                for previous, current in zip(levels, levels[1:]):
+                    self.assertLessEqual(current - previous, 1, f"{path}: h{previous} followed by h{current}")
+        self.assertGreater(with_panels, 0)
+
+    def test_other_internal_pages_skip_no_level_either(self):
+        for path in ("/maintenance/", "/duct-cleaning/", "/about/", "/contact/", "/faq/", "/privacy/",
+                     "/ar/maintenance/", "/ar/about/", "/ar/faq/"):
+            levels = self.levels(path)
+            self.assertEqual(levels.count(1), 1, path)
+            for previous, current in zip(levels, levels[1:]):
+                self.assertLessEqual(current - previous, 1, f"{path}: h{previous} followed by h{current}")
+
+    def test_panel_heading_style_does_not_depend_on_the_tag(self):
+        from django.conf import settings
+        css = (settings.BASE_DIR / "static/css/components.css").read_text()
+        self.assertIn(".tech__heading{", css)
+        self.assertNotRegex(css, r"\.tech[^{]*\bh[34]\b")          # styled by class, so the tag can change without a visual change
+
