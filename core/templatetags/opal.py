@@ -192,3 +192,10 @@ def inquiry_message(intro, items):
     headings = [h for h in (i18n.tr(item, "title").strip() for item in items) if h]
     return "\n".join([intro, ""] + [f"{h}:" for h in headings]) if headings else intro
 
+
+@register.filter
+def paragraphs(text):
+    """Split stored plain text into its paragraphs (separated by one or more blank lines).
+    Returns plain strings, so the template escapes them as usual; empty chunks are dropped."""
+    return [chunk.strip() for chunk in re.split(r"\n\s*\n", (text or "").replace("\r\n", "\n")) if chunk.strip()]
+
