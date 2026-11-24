@@ -542,7 +542,7 @@ class InternalPagesTests(TestCase):
         from core.models import FaqItem
         FaqItem.objects.update(featured=False)
         html = self.client.get("/ar/faq/").content.decode()
-        self.assertEqual(html.split('class="accordion"')[1].split("</section>")[0].count("<details"), 6)
+        self.assertEqual(html.split('class="faq-list"')[1].split("</section>")[0].count('<article class="faq-item">'), 6)
         self.assertIn("ما معنى تصنيف T3", html)
 
     def test_contact_page_shows_company_details_and_the_form(self):
@@ -2312,7 +2312,7 @@ class AboutPageTests(TestCase):
                 self.assertNotIn(needle, body, path)
             self.assertIn('<section class="page-hero">', body)
         self.assertIn('class="prose__section"', self.client.get("/privacy/").content.decode())
-        self.assertIn('class="accordion"', self.client.get("/faq/").content.decode())
+        self.assertIn('class="faq-list"', self.client.get("/faq/").content.decode())
         self.assertIn('class="contact-cards"', self.client.get("/contact/").content.decode())
 
 
@@ -2427,4 +2427,110 @@ class ContactPageTests(TestCase):
             for needle in ("contact-card", 'class="office"'):
                 self.assertNotIn(needle, body, path)
         self.assertIn('class="about__aside"', self.client.get("/about/").content.decode())
+
+
+class FaqPageTests(TestCase):
+    """Task 17-G: the FAQ page shows every answer; the home page keeps its accordion."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def body(self, path="/faq/"):
+        return self.client.get(path).content.decode().split('id="app"')[1].split('id="contact"')[0]
+
+    def items(self):
+        from core.models import FaqItem
+        return list(FaqItem.objects.all())
+
+    def test_every_question_is_a_heading_with_its_answer_visible_in_order(self):
+        import html
+        from core.models import FaqItem
+        FaqItem.objects.filter(pk=self.items()[1].pk).update(featured=False)       # not on the home page, still here
+        items = self.items()
+        self.assertEqual(len(items), 6)
+        for path, lang in (("/faq/", "en"), ("/ar/faq/", "ar")):
+            body = html.unescape(self.body(path))
+            self.assertEqual(body.count('<article class="faq-item">'), 6)
+            positions = []
+            for item in items:
+                question, answer = getattr(item, f"question_{lang}"), getattr(item, f"answer_{lang}")
+                self.assertIn(f"<h2>{question}</h2>", body)
+                self.assertIn(f"<p>{answer}</p>", body)
+                positions.append(body.index(f"<h2>{question}</h2>"))
+            self.assertEqual(positions, sorted(positions))
+            for needle in ("<details", "<summary", "accordion", "application/ld+json"):   # nothing hidden, no schema added
+                self.assertNotIn(needle, body)
+        self.assertEqual(self.client.get("/faq/").content.decode().count("<h1"), 1)
+
+    def test_answers_keep_their_paragraphs_and_line_breaks_and_are_escaped(self):
+        from core.models import FaqItem
+        first, second, third = self.items()[:3]
+        FaqItem.objects.filter(pk=first.pk).update(answer_en="First paragraph.\n\n\n\nSecond paragraph,\nsecond line.\r\n\r\nThird.")
+        FaqItem.objects.filter(pk=second.pk).update(answer_en="<script>alert(1)</script> & <b>bold</b>")
+        FaqItem.objects.filter(pk=third.pk).update(answer_en="   ", answer_ar="")
+        body = self.body()
+        self.assertIn("<p>First paragraph.</p><p>Second paragraph,<br>second line.</p><p>Third.</p>", body)
+        self.assertNotIn("<p></p>", body)
+        self.assertNotIn("<script>alert(1)</script>", body)
+        self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt; &amp; &lt;b&gt;bold&lt;/b&gt;", body)
+        blank = body.split(f"<h2>{third.question_en}</h2>")[1].split("</article>")[0]
+        self.assertNotIn("<p>", blank)                                             # a blank answer leaves the heading alone
+        self.assertEqual(FaqItem.objects.get(pk=first.pk).answer_en,
+                         "First paragraph.\n\n\n\nSecond paragraph,\nsecond line.\r\n\r\nThird.")   # stored text untouched by rendering
+
+    def test_any_number_of_questions_including_none(self):
+        from core.models import FaqItem, HomePage
+        home = HomePage.objects.get()
+        for n in range(20):
+            FaqItem.objects.create(page=home, sort_order=50 + n, question_en=f"Extra question {n}?", answer_en="Answer.")
+        self.assertEqual(self.body().count('<article class="faq-item">'), 26)
+        FaqItem.objects.all().delete()
+        response = self.client.get("/faq/")
+        self.assertEqual(response.status_code, 200)
+        body = self.body()
+        self.assertNotIn("faq-list", body)
+        self.assertIn("faq-next", body)
+
+    def test_contact_actions_follow_the_list_once(self):
+        from urllib.parse import quote
+        from core.models import CompanySettings, ContentPage, SiteCopy
+        number = CompanySettings.load().whatsapp
+        body = self.body()
+        self.assertEqual(body.count("faq-next__actions"), 1)
+        self.assertLess(body.index("faq-list"), body.index("faq-next__actions"))
+        actions = body.split('class="faq-next__actions"')[1].split("</div>")[0]
+        self.assertIn(f'<a class="btn btn-primary" href="/contact/">{SiteCopy.load().nav_contact_en}</a>', actions)
+        self.assertIn(f'href="https://wa.me/{number}?text={quote("Hello, I have an inquiry for Opal Galaxy.")}"', actions)
+        self.assertEqual(body.count("wa.me"), 1)                                    # not repeated after every question
+        arabic = self.body("/ar/faq/").split('class="faq-next__actions"')[1].split("</div>")[0]
+        self.assertIn('href="/ar/contact/"', arabic)
+        self.assertIn("واتساب", arabic)
+        self.assertEqual(self.client.get("/contact/").status_code, 200)
+        ContentPage.objects.get(slug="contact").unpublish()
+        actions = self.body().split('class="faq-next__actions"')[1].split("</div>")[0]
+        self.assertNotIn("/contact/", actions)
+        self.assertIn("wa.me", actions)
+
+    def test_home_page_accordion_and_its_selection_are_unchanged(self):
+        from core.models import FaqItem
+        FaqItem.objects.filter(pk=self.items()[0].pk).update(featured=False)
+        home = self.client.get("/").content.decode().split('id="faq"')[1].split("</section>")[0]
+        self.assertIn('<div class="accordion">', home)
+        self.assertEqual(home.count("<details>"), 5)
+        self.assertNotIn(self.items()[0].question_en, home)
+        self.assertIn(self.items()[0].question_en, self.body())
+        self.assertNotIn("faq-item", home)
+
+    def test_other_pages_and_the_form_are_unchanged(self):
+        for path, marker in (("/about/", 'class="about__aside"'), ("/contact/", 'class="contact-cards"'),
+                             ("/privacy/", 'class="prose__section"'), ("/maintenance/", 'class="svc-list"'),
+                             ("/duct-cleaning/", 'class="prep__list"')):
+            html = self.client.get(path).content.decode()
+            self.assertIn(marker, html, path)
+            for needle in ("faq-item", "faq-next"):
+                self.assertNotIn(needle, html, path)
+        form = self.client.get("/faq/").content.decode().split('id="contact"')[1]
+        for field in ('name="name"', 'name="phone"', 'name="unit"', 'name="notes"'):
+            self.assertIn(field, form)
 

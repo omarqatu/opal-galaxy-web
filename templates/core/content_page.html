@@ -54,9 +54,21 @@
 </div></div></section>{% endif %}
 {% endif %}
 
-{% if page.kind == "faq" and faqs %}<section class="section section--white"><div class="container"><div class="prose">
-  <div class="accordion">{% for f in faqs %}<details{% if forloop.first %} open{% endif %}><summary>{{ f|tr:"question" }}</summary><div class="accordion__body"><p>{{ f|tr:"answer" }}</p></div></details>{% endfor %}</div>
-</div></div></section>{% endif %}
+{% if page.kind == "faq" %}{# Task 17-G: every question is a heading with its answer visible; the home page keeps its accordion. #}
+{% if faqs %}<section class="section section--white"><div class="container">
+  <div class="faq-list">{% for f in faqs %}
+    <article class="faq-item">
+      <h2>{{ f|tr:"question" }}</h2>
+      {% for para in f|tr:"answer"|paragraphs %}<p>{{ para|linebreaksbr }}</p>{% endfor %}
+    </article>{% endfor %}
+  </div>
+</div></section>{% endif %}
+<section class="section section--ruled faq-next" aria-label="{% translate 'Contact methods' %}"><div class="container">
+  <div class="faq-next__actions">
+    {% if contact_url %}<a class="btn btn-primary" href="{{ contact_url }}">{{ t|tr:"nav_contact" }}</a>{% endif %}
+    {% translate "Hello, I have an inquiry for Opal Galaxy." as wa_message %}<a class="btn btn-wa" href="https://wa.me/{{ s.whatsapp }}?text={{ wa_message|urlencode }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{% translate "WhatsApp" %}</span></a>
+  </div>
+</div></section>{% endif %}
 
 {% if page.kind == "gallery" %}<section class="section section--white" id="photos"><div class="container">
   {% if gallery_categories %}<nav class="gallery-filter" aria-label="{% translate 'Photo categories' %}"><ul>

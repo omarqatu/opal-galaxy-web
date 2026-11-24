@@ -190,3 +190,15 @@ Terminology decisions (Omar, 23 Nov 2026) — applied to all new copy, and to th
 | C-3 | Address "St152 – Port Saeed, Deira, Dubai – UAE" | Omar: no building or office number, no map link, shown in Latin script on the Arabic page (see 3, 32). | Shown as stored. |
 | T9-6 | Shared form on the Contact page | Omar: the form section repeats the phone and the email directly under the contact cards, its heading says "project quote", its text mentions a BOQ, and every field is about an equipment order although the page is for general contact. | Shared form left unchanged. |
 
+## FAQ page (Task 17-G): statements in the answers, shown as stored and not highlighted
+
+| # | Text affected | To confirm | Placeholder meanwhile |
+|---|---|---|---|
+| F-1 | "within 48 hours in Dubai, Sharjah and Ajman, and to other emirates depending on order size" | Omar: delivery commitment (see 10). | Shown as stored. |
+| F-2 | "We reply within one working day." | Omar: response time (see 11). | Shown as stored. |
+| F-3 | "A detailed quote with model numbers, a tax invoice, submittals and manufacturer catalogues, and warranty cards in the client's or project's name." | Omar: documents actually provided (see 15). | Shown as stored. |
+| F-4 | "For the UAE climate we supply T3-rated units or equivalent" | Omar: true for every unit supplied? | Shown as stored. |
+| F-5 | "R32 is the newest generation: higher efficiency and lower environmental impact." | Omar: general technical statement; keep as worded? | Shown as stored. |
+| F-6 | "Use the form below, or send your BOQ or HVAC drawings on WhatsApp." | Omar: tied to the form wording handled in Task 9. | Shown as stored. |
+| F-7 | No FAQPage structured data on the page | Omar: deferred with the SEO phase. | None added. |
+
