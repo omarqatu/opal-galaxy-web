@@ -78,19 +78,29 @@
   {% include "includes/lightbox.html" %}{% endif %}
 </div></section>{% endif %}
 
-{% if page.kind == "contact" %}<section class="section section--white"><div class="container split split--top">
-  <dl class="kv">
-    <dt>{% translate "Phone / WhatsApp" %}</dt><dd><a class="ltr" href="tel:{{ s.phone }}">{{ s.phone_display|default:s.phone }}</a></dd>
-    {% if s.email %}<dt>{% translate "Email" %}</dt><dd><a class="ltr" href="mailto:{{ s.email }}">{{ s.email }}</a></dd>{% endif %}
-    <dt>{% translate "Address" %}</dt><dd><span class="ltr">{{ s.address }}</span></dd>
-    <dt>{% translate "Business hours" %}</dt><dd>{{ s|tr:"hours_full" }}</dd>
-    {% if s.licence_en %}<dt>{% translate "Licence" %}</dt><dd>{{ s|tr:"licence" }}</dd>{% endif %}
-  </dl>
-  <div class="contact-actions">
-    <a class="btn btn-wa" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener">{% include "includes/wa.svg" %}<span>{{ t|tr:"footer_whatsapp" }}</span></a>
-    <a class="btn btn-outline" href="tel:{{ s.phone }}">{% include "includes/phone.svg" %}<span class="ltr">{{ s.phone_display|default:s.phone }}</span></a>
-    {% if s.email %}<a class="btn btn-outline" href="mailto:{{ s.email }}"><span class="ltr">{{ s.email }}</span></a>{% endif %}
-  </div>
+{% if page.kind == "contact" %}{# Task 17-F: one card per way to reach the company, then the office details. Values come from Company details. #}
+<section class="section section--white" aria-labelledby="contact-methods"><div class="container">
+  <h2 class="visually-hidden" id="contact-methods">{% translate "Contact methods" %}</h2>
+  <ul class="contact-cards">
+    {% if s.whatsapp %}<li><a class="contact-card contact-card--wa" href="https://wa.me/{{ s.whatsapp }}" target="_blank" rel="noopener">
+      <span class="contact-card__icon" aria-hidden="true">{% include "includes/wa.svg" %}</span>
+      <span class="contact-card__body"><span class="contact-card__label">{% translate "WhatsApp" %}</span><span class="contact-card__value ltr">{% if s.phone|cut:"+" == s.whatsapp and s.phone_display %}{{ s.phone_display }}{% else %}+{{ s.whatsapp }}{% endif %}</span></span>
+      <span class="contact-card__go icon-dir" aria-hidden="true">{% include "includes/icons/arrow.svg" %}</span></a></li>{% endif %}
+    {% if s.phone %}<li><a class="contact-card" href="tel:{{ s.phone }}">
+      <span class="contact-card__icon" aria-hidden="true">{% include "includes/phone.svg" %}</span>
+      <span class="contact-card__body"><span class="contact-card__label">{% translate "Telephone" %}</span><span class="contact-card__value ltr">{{ s.phone_display|default:s.phone }}</span></span>
+      <span class="contact-card__go icon-dir" aria-hidden="true">{% include "includes/icons/arrow.svg" %}</span></a></li>{% endif %}
+    {% if s.email %}<li><a class="contact-card" href="mailto:{{ s.email }}">
+      <span class="contact-card__icon" aria-hidden="true">{% include "includes/icons/mail.svg" %}</span>
+      <span class="contact-card__body"><span class="contact-card__label">{% translate "Email" %}</span><span class="contact-card__value ltr">{{ s.email }}</span></span>
+      <span class="contact-card__go icon-dir" aria-hidden="true">{% include "includes/icons/arrow.svg" %}</span></a></li>{% endif %}
+  </ul>
+  {% if s.address %}<div class="office">
+    <h2 class="office__title">{% translate "Office information" %}</h2>
+    <dl class="office__list">
+      <div><dt>{% translate "Address" %}</dt><dd><span class="ltr">{{ s.address }}</span></dd></div>
+    </dl>
+  </div>{% endif %}
 </div></section>{% endif %}
 {% endwith %}
 {% endblock %}

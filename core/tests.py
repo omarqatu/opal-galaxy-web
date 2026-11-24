@@ -2313,5 +2313,118 @@ class AboutPageTests(TestCase):
             self.assertIn('<section class="page-hero">', body)
         self.assertIn('class="prose__section"', self.client.get("/privacy/").content.decode())
         self.assertIn('class="accordion"', self.client.get("/faq/").content.decode())
-        self.assertIn('<dl class="kv">', self.client.get("/contact/").content.decode())
+        self.assertIn('class="contact-cards"', self.client.get("/contact/").content.decode())
+
+
+class ContactPageTests(TestCase):
+    """Task 17-F: the Contact page; About, FAQ, Privacy and the shared form are unchanged."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def section(self, path="/contact/"):
+        html = self.client.get(path).content.decode()
+        return html.split('aria-labelledby="contact-methods"')[1].split("</section>")[0]
+
+    def settings(self):
+        from core.models import CompanySettings
+        return CompanySettings.load()
+
+    def test_three_cards_in_order_with_the_values_from_company_details(self):
+        import re
+        s = self.settings()
+        section = self.section()
+        hrefs = re.findall(r'<a class="contact-card[^"]*" href="([^"]+)"', section)
+        self.assertEqual(hrefs, [f"https://wa.me/{s.whatsapp}", f"tel:{s.phone}", f"mailto:{s.email}"])
+        labels = re.findall(r'class="contact-card__label">([^<]+)<', section)
+        self.assertEqual(labels, ["WhatsApp", "Telephone", "Email"])
+        values = re.findall(r'class="contact-card__value ltr">([^<]+)<', section)
+        self.assertEqual(values, [s.phone_display, s.phone_display, s.email])
+        self.assertIn('target="_blank" rel="noopener"', section.split("contact-card--wa")[1].split(">")[0])
+        self.assertEqual(section.count("<a "), 3)                                   # one link per card, nothing else
+        self.assertEqual(section.count("<svg"), 6)                                  # an icon and an arrow each, decorative
+        self.assertEqual(section.count('class="contact-card__icon" aria-hidden="true"'), 3)
+        self.assertEqual(section.count('class="contact-card__go icon-dir" aria-hidden="true"'), 3)
+        self.assertIn('<h2 class="visually-hidden" id="contact-methods">Contact methods</h2>', section)
+        arabic = self.section("/ar/contact/")
+        self.assertEqual(re.findall(r'class="contact-card__label">([^<]+)<', arabic), ["واتساب", "الهاتف", "البريد الإلكتروني"])
+        self.assertEqual(re.findall(r'class="contact-card__value ltr">([^<]+)<', arabic), values)   # numbers and addresses stay left-to-right
+
+    def test_each_value_appears_once_in_the_section(self):
+        s = self.settings()
+        section = self.section()
+        self.assertEqual(section.count(s.email), 2)                                 # the link address and the visible text
+        self.assertEqual(section.count(f"tel:{s.phone}"), 1)
+        self.assertEqual(section.count(f"wa.me/{s.whatsapp}"), 1)
+        for old in ('class="kv"', "contact-actions", "btn-outline"):
+            self.assertNotIn(old, section)
+
+    def test_office_information_shows_the_address_only(self):
+        s = self.settings()
+        section = self.section()
+        office = section.split('class="office"')[1]
+        self.assertIn("<h2 class=\"office__title\">Office information</h2>", office)
+        self.assertEqual(office.count("<dt>"), 1)
+        self.assertIn(f'<dt>Address</dt><dd><span class="ltr">{s.address}</span></dd>', office)
+        self.assertTrue(s.hours_full_en and s.licence_en)                           # still stored, just not shown here
+        for held_back in (s.hours_full_en, s.hours_short_en, s.licence_en, "Business hours", "Licence"):
+            self.assertNotIn(held_back, section)
+        arabic = self.section("/ar/contact/")
+        self.assertIn("بيانات المكتب", arabic)
+        for held_back in (s.hours_full_ar, s.licence_ar, "ساعات العمل"):
+            self.assertNotIn(held_back, arabic)
+
+    def test_empty_values_drop_their_card_or_row(self):
+        from core.models import CompanySettings
+        before = self.settings()
+        CompanySettings.objects.update(email="", address="")
+        section = self.section()
+        self.assertEqual(section.count('<a class="contact-card'), 2)
+        self.assertNotIn("mailto:", section)
+        self.assertNotIn('class="office"', section)
+        self.assertEqual(self.client.get("/contact/").status_code, 200)
+        CompanySettings.objects.update(whatsapp="971500000000")                      # a different WhatsApp number is shown as it is
+        self.assertIn('class="contact-card__value ltr">+971500000000<', self.section())
+        after = self.settings()
+        self.assertEqual((after.hours_full_en, after.licence_en, after.phone), (before.hours_full_en, before.licence_en, before.phone))
+
+    def test_hero_has_no_buttons_and_keeps_the_stored_title_and_lead(self):
+        from core.models import ContentPage
+        page = ContentPage.objects.get(slug="contact")
+        html = self.client.get("/contact/").content.decode()
+        hero = html.split('<section class="page-hero">')[1].split("</section>")[0]
+        self.assertIn(f"<h1>{page.title_en}</h1>", hero)
+        self.assertIn(page.lead_en, hero)
+        self.assertNotIn("<a ", hero)
+        self.assertEqual(html.count("<h1"), 1)
+
+    def test_page_sections_from_the_admin_still_render(self):
+        from core.models import ContentPage, ContentSection
+        page = ContentPage.objects.get(slug="contact")
+        ContentSection.objects.create(page=page, sort_order=0, heading_en="Before you call", body_en="Have the model number ready.")
+        html = self.client.get("/contact/").content.decode()
+        self.assertIn("<h2>Before you call</h2>", html)
+        self.assertLess(html.index("Before you call"), html.index("contact-cards"))
+
+    def test_shared_form_header_and_footer_are_unchanged(self):
+        s = self.settings()
+        html = self.client.get("/contact/").content.decode()
+        form = html.split('id="contact"')[1].split("</section>")[0]
+        for field in ('name="name"', 'name="phone"', 'name="unit"', 'name="brand"', 'name="qty"', 'name="emirate"', 'name="notes"'):
+            self.assertIn(field, form)
+        self.assertIn('action="/quote/"', form)
+        header = html.split("<header")[1].split("</header>")[0]
+        self.assertIn(f'href="tel:{s.phone}"', header)
+        self.assertIn(f"https://wa.me/{s.whatsapp}", header)
+        footer = html.split("<footer")[1]
+        self.assertIn(f'href="tel:{s.phone}"', footer)
+        self.assertIn(f'href="mailto:{s.email}"', footer)
+
+    def test_other_content_pages_do_not_get_the_contact_components(self):
+        for path in ("/about/", "/faq/", "/privacy/"):
+            body = self.client.get(path).content.decode().split('id="app"')[1].split("</main>")[0]
+            for needle in ("contact-card", 'class="office"'):
+                self.assertNotIn(needle, body, path)
+        self.assertIn('class="about__aside"', self.client.get("/about/").content.decode())
 

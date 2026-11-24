@@ -233,3 +233,12 @@ msgstr "الاسم القانوني"
 msgid "Explore Opal Galaxy"
 msgstr "استكشف Opal Galaxy"
 
+msgid "Contact methods"
+msgstr "وسائل التواصل"
+
+msgid "Telephone"
+msgstr "الهاتف"
+
+msgid "Office information"
+msgstr "بيانات المكتب"
+
