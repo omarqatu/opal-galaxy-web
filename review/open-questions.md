@@ -158,3 +158,12 @@ Terminology decisions (Omar, 23 Nov 2026) — applied to all new copy, and to th
 2. Trade terms stay as the market uses them: "شيلرات", "فان كويل", "كاسيت" (L3: the Arabic category name becomes "شيلرات ووحدات مناولة الهواء وفان كويل"; L24 keeps "فان كويل").
 3. Technical Latin terms (Inverter, Rotary, Scroll, VRF, BMS) stay in Latin, with an Arabic noun before them (L10, L20, L22, L24).
 4. Temperatures: the number with "°م" only, without the words "درجة حرارة" or "مئوية" (L11). To confirm with Omar: this is how "بدون درجة حرارة" was understood; the alternative reading is to drop temperature figures from the Arabic texts altogether.
+
+## Task 9 — Quotation form improvements (recorded during Task 17-C, not changed)
+
+| # | Text affected | To confirm | Placeholder meanwhile |
+|---|---|---|---|
+| T9-1 | Shared form heading "Request a project quote" / "طلب عرض سعر لمشروعكم" on the Maintenance page | Omar: the heading speaks of a project, but this page's requests are for maintenance or a spare part. | Shared form left unchanged. |
+| T9-2 | "Fill in the form or send your BOQ on WhatsApp." and the button "Send your BOQ on WhatsApp" on the Maintenance page | Omar: a BOQ does not apply to a maintenance or spare-part request. | Shared form left unchanged. |
+| T9-3 | Header label "Media" / "الوسائط" | Omar: Arabic wording for the Media link ("الوسائط" used; "معرض الصور" is the alternative). | "الوسائط". |
+
