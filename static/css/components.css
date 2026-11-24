@@ -707,6 +707,8 @@ h4{font-size:var(--fs-h4)}
 .link-arrow{min-block-size:var(--tap)}
 .site-footer__col a,.site-footer__col span.ltr{display:inline-flex;align-items:center;min-block-size:2rem}
 .accordion summary{min-block-size:3.25rem}
+.crumbs{align-items:center}
+.crumbs span{display:inline-flex;align-items:center;min-block-size:2rem}   /* every item on one centre line: links, separator and current page */
 .crumbs a{display:inline-flex;align-items:center;min-block-size:2rem}
 @media (max-width:860px){
   .site-footer__col ul{gap:0}
@@ -718,6 +720,7 @@ h4{font-size:var(--fs-h4)}
 [dir=rtl] .hero-x__media img{transform:none;object-position:38% 50%}
 [dir=rtl] .lightbox__count{inset-inline-start:auto;inset-inline-end:1.5rem}
 [dir=rtl] .crumbs span::before{content:"/"}
+[dir=rtl] .crumbs span:first-child::before{content:none}   /* no separator before the first item in Arabic either */
 :lang(ar) .cat-card__name,:lang(ar) .service-row__title,:lang(ar) .cap-grid h3{line-height:1.5}
 
 /* ---------- tablet: two-up hero buttons, phone bar only on phones ---------- */
