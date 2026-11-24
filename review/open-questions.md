@@ -166,4 +166,6 @@ Terminology decisions (Omar, 23 Nov 2026) — applied to all new copy, and to th
 | T9-1 | Shared form heading "Request a project quote" / "طلب عرض سعر لمشروعكم" on the Maintenance page | Omar: the heading speaks of a project, but this page's requests are for maintenance or a spare part. | Shared form left unchanged. |
 | T9-2 | "Fill in the form or send your BOQ on WhatsApp." and the button "Send your BOQ on WhatsApp" on the Maintenance page | Omar: a BOQ does not apply to a maintenance or spare-part request. | Shared form left unchanged. |
 | T9-3 | Header label "Media" / "الوسائط" | Omar: Arabic wording for the Media link ("الوسائط" used; "معرض الصور" is the alternative). | "الوسائط". |
+| T9-4 | Shared form on the AC duct cleaning page | Omar: the page asks for the type of property and the ceiling access, but the form has no field for either; customers can only write them in Notes. | Shared form left unchanged; the WhatsApp message lists the four headings. |
+| T9-5 | Shared form heading and BOQ wording on the AC duct cleaning page (same texts as T9-1 and T9-2) | Omar: "project quote" and "BOQ" do not fit a cleaning inquiry. | Shared form left unchanged. |
 

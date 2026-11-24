@@ -13,15 +13,19 @@
       <div class="svc-item__body"><h3>{{ i|tr:"title" }}</h3><p>{{ i|tr:"text" }}</p></div></li>{% endfor %}
   </ul>
 </div></section>{% endif %}
-{% if service_pages|length > 1 %}{# published service pages other than this one #}<section class="section section--ruled other-services"><div class="container">
-  <h2>{% translate "Other HVAC services" %}</h2>
-  <ul class="service-rows">{% for sp in service_pages %}{% if sp.pk != page.pk %}
-    <li><a class="service-row" href="{% lurl sp.slug|slugpath %}">
-      <span class="service-row__icon">{% if sp.icon %}{% icon sp.icon %}{% endif %}</span>
-      <span class="service-row__body"><span class="service-row__title">{{ sp|tr:"title" }}</span>{% if sp.lead_en %}<span class="service-row__text">{{ sp|tr:"lead" }}</span>{% endif %}</span>
-      <span class="service-row__go icon-dir" aria-hidden="true">{% include "includes/icons/arrow.svg" %}</span></a></li>{% endif %}{% endfor %}
-  </ul>
+{% include "core/includes/other_services.html" %}
+{% elif page.slug == "duct-cleaning" %}{# Task 17-D: AC duct cleaning. The items are details the customer prepares, shown as one sheet. #}
+{% translate "Hello, I would like to ask about AC duct cleaning." as wa_intro %}{% inquiry_message wa_intro page.items.all as wa_message %}
+{% include "includes/page_hero.html" with title=page|tr:"title" lead=page|tr:"lead" primary_label=page|tr:"cta" art_icon=page.icon wa_text=wa_message %}
+{% if page.items.all %}<section class="section"><div class="container">
+  <div class="prep">
+    {% if page.list_title_en %}<h2 class="prep__title">{{ page|tr:"list_title" }}</h2>{% endif %}
+    <dl class="prep__list">{% for i in page.items.all %}
+      <div class="prep__row"><dt><span class="prep__dot" aria-hidden="true"></span>{{ i|tr:"title" }}</dt><dd>{{ i|tr:"text" }}</dd></div>{% endfor %}
+    </dl>
+  </div>
 </div></section>{% endif %}
+{% include "core/includes/other_services.html" %}
 {% else %}
 {% include "includes/page_hero.html" with title=page|tr:"title" lead=page|tr:"lead" primary_label=page|tr:"cta" art_icon=page.icon %}
 {% if page.items.all %}<section class="section"><div class="container">

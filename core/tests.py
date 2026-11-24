@@ -527,9 +527,11 @@ class InternalPagesTests(TestCase):
         ar = self.client.get("/ar/duct-cleaning/").content.decode()
         self.assertIn("<h1>تنظيف مجاري التكييف</h1>", ar)
         self.assertIn('<option value="duct-cleaning" selected>AC duct cleaning</option>', en)
+        import re
         body = en.split('id="app"')[1].split('id="contact"')[0]
+        visible = re.sub(r"<[^>]+>", " ", body)        # what a visitor reads; link addresses are URL-encoded and hold "%"
         for banned in ("AED", "hours", "guarantee", "certified", "warranty", "%"):
-            self.assertNotIn(banned, body)
+            self.assertNotIn(banned, visible)
 
     def test_duct_cleaning_request_is_saved_with_its_service(self):
         self.client.post("/quote/", {"phone": "+971501234567", "unit": "duct-cleaning",
@@ -2067,14 +2069,121 @@ class MaintenancePageTests(TestCase):
         self.assertRegex(form, r'<option value="maintenance"[^>]*selected')
         self.assertIn('name="phone"', form)
 
-    def test_duct_cleaning_page_keeps_its_composition(self):
-        from core.models import ServicePage
-        duct = ServicePage.objects.get(slug="duct-cleaning")
-        if not duct.live:
-            duct.save_revision().publish()
-        body = self.body("/duct-cleaning/")
-        self.assertEqual(body.count('<div class="card" data-reveal>'), duct.items.count())
-        self.assertIn('<div class="grid grid--2">', body)
-        for needle in ("svc-list", "svc-item", "other-services", "wa.me"):
-            self.assertNotIn(needle, body)
 
+class DuctCleaningPageTests(TestCase):
+    """Task 17-D: the AC duct cleaning page; the maintenance page keeps its approved composition."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+        from core.models import ServicePage
+        page = ServicePage.objects.get(slug="duct-cleaning")
+        if not page.live:
+            page.save_revision().publish()
+
+    def page(self):
+        from core.models import ServicePage
+        return ServicePage.objects.get(slug="duct-cleaning")
+
+    def body(self, path):
+        return self.client.get(path).content.decode().split('id="app"')[1].split('id="contact"')[0]
+
+    def wa_text(self, path):
+        import re
+        from urllib.parse import unquote
+        from core.models import CompanySettings
+        hero = self.body(path).split('class="page-hero__cta"')[1].split("</div>")[0]
+        number = CompanySettings.load().whatsapp
+        encoded = re.search(rf'href="https://wa\.me/{number}\?text=([^"]*)"', hero).group(1)
+        self.assertNotRegex(encoded, r"[\s<>]")                                      # fully URL-encoded
+        return unquote(encoded)
+
+    def test_items_are_a_definition_list_with_the_stored_texts(self):
+        items = list(self.page().items.all())
+        self.assertEqual(len(items), 4)
+        body = self.body("/duct-cleaning/")
+        self.assertEqual(body.count('<dl class="prep__list">'), 1)
+        self.assertEqual(body.count("<dt>"), 4)
+        self.assertEqual(body.count("<dd>"), 4)
+        self.assertIn(f'<h2 class="prep__title">{self.page().list_title_en}</h2>', body)
+        positions = []
+        for item in items:
+            self.assertIn(f'<dt><span class="prep__dot" aria-hidden="true"></span>{item.title_en}</dt><dd>{item.text_en}</dd>', body)
+            positions.append(body.index(item.title_en + "</dt>"))
+        self.assertEqual(positions, sorted(positions))
+        arabic = self.body("/ar/duct-cleaning/")
+        for item in items:
+            self.assertIn(f"{item.title_ar}</dt><dd>{item.text_ar}</dd>", arabic)
+        for needle in ('class="card"', "svc-list", "cta-band", "✓"):                   # no cards, no numbered list, no second action bar, no ticks
+            self.assertNotIn(needle, body)
+        self.assertEqual(self.client.get("/duct-cleaning/").content.decode().count("<h1"), 1)
+
+    def test_the_sheet_follows_the_number_of_items(self):
+        from core.models import ServiceItem
+        page = self.page()
+        ServiceItem.objects.create(page=page, sort_order=30, title_en="Extra detail", title_ar="تفصيل إضافي", text_en="Text")
+        self.assertEqual(self.body("/duct-cleaning/").count("<dt>"), 5)
+        ServiceItem.objects.filter(page=page).delete()
+        body = self.body("/duct-cleaning/")
+        self.assertNotIn("prep", body)                                               # empty list: no empty sheet
+        self.assertEqual(self.client.get("/duct-cleaning/").status_code, 200)
+
+    def test_whatsapp_message_lists_the_item_headings_in_the_page_language(self):
+        items = list(self.page().items.all())
+        self.assertEqual(self.wa_text("/duct-cleaning/"),
+                         "Hello, I would like to ask about AC duct cleaning.\n\n" + "\n".join(f"{i.title_en}:" for i in items))
+        arabic = self.wa_text("/ar/duct-cleaning/")
+        self.assertEqual(arabic, "مرحباً، أودّ الاستفسار عن تنظيف مجاري التكييف.\n\n" + "\n".join(f"{i.title_ar}:" for i in items))
+        for item in items:
+            self.assertNotIn(item.text_en, self.wa_text("/duct-cleaning/"))           # descriptions stay out of the message
+        hero = self.body("/duct-cleaning/").split('class="page-hero__cta"')[1].split("</div>")[0]
+        self.assertIn(f'<a class="btn btn-accent" href="#contact">{self.page().cta_en}</a>', hero)
+        self.assertIn('target="_blank" rel="noopener"', hero)
+
+    def test_whatsapp_message_copes_with_missing_and_changed_items(self):
+        from core.models import ServiceItem
+        page = self.page()
+        items = list(page.items.all())
+        ServiceItem.objects.filter(pk=items[1].pk).update(title_en="   ", title_ar="")           # an empty heading is skipped
+        ServiceItem.objects.filter(pk=items[2].pk).update(title_en="Site & floor #2", title_ar="")  # no Arabic: falls back, needs encoding
+        text = self.wa_text("/duct-cleaning/")
+        self.assertEqual(text.split("\n")[2:], [f"{items[0].title_en}:", "Site & floor #2:", f"{items[3].title_en}:"])
+        self.assertIn("Site & floor #2:", self.wa_text("/ar/duct-cleaning/"))
+        ServiceItem.objects.filter(page=page).delete()
+        self.assertEqual(self.wa_text("/duct-cleaning/"), "Hello, I would like to ask about AC duct cleaning.")
+        self.assertEqual(self.wa_text("/ar/duct-cleaning/"), "مرحباً، أودّ الاستفسار عن تنظيف مجاري التكييف.")
+
+    def test_other_services_links_to_maintenance_only_while_it_is_published(self):
+        from core.models import ServicePage
+        section = self.body("/duct-cleaning/").split('other-services">')[1].split("</section>")[0]
+        self.assertEqual(section.count('class="service-row"'), 1)
+        self.assertIn('href="/maintenance/"', section)
+        self.assertNotIn('href="/duct-cleaning/"', section)
+        self.assertIn('href="/ar/maintenance/"', self.body("/ar/duct-cleaning/").split('other-services">')[1])
+        ServicePage.objects.get(slug="maintenance").unpublish()
+        self.assertNotIn("other-services", self.body("/duct-cleaning/"))
+
+    def test_maintenance_page_and_quote_form_are_unchanged(self):
+        from core.models import ServicePage
+        maintenance = self.body("/maintenance/")
+        self.assertEqual(maintenance.count('<li class="svc-item"'), ServicePage.objects.get(slug="maintenance").items.count())
+        self.assertIn('<span class="svc-item__n" aria-hidden="true">01</span>', maintenance)
+        self.assertNotIn("prep__", maintenance)
+        self.assertIn("maintenance%20and%20spare%20parts", maintenance)
+        section = maintenance.split('other-services">')[1].split("</section>")[0]
+        self.assertIn('href="/duct-cleaning/"', section)
+        form = self.client.get("/duct-cleaning/").content.decode().split('id="contact"')[1]
+        self.assertRegex(form, r'<option value="duct-cleaning"[^>]*selected')
+        for field in ('name="name"', 'name="phone"', 'name="unit"', 'name="brand"', 'name="emirate"', 'name="notes"'):
+            self.assertIn(field, form)
+
+    def test_a_future_service_page_keeps_the_plain_composition(self):
+        from core.models import HomePage, ServiceItem, ServicePage
+        page = ServicePage(title="Other", slug="other-service", title_en="Other service", form_value="other")
+        HomePage.objects.get().add_child(instance=page)
+        ServiceItem.objects.create(page=page, sort_order=0, title_en="One", text_en="Text")
+        page.save_revision().publish()
+        body = self.body("/other-service/")
+        self.assertIn('<div class="card" data-reveal>', body)
+        self.assertNotIn("prep__", body)
+        self.assertNotIn("svc-list", body)

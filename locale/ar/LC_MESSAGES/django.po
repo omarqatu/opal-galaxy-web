@@ -218,3 +218,6 @@ msgstr "مرحباً، أودّ الاستفسار عن الصيانة وقطع 
 msgid "Other HVAC services"
 msgstr "خدمات تكييف أخرى"
 
+msgid "Hello, I would like to ask about AC duct cleaning."
+msgstr "مرحباً، أودّ الاستفسار عن تنظيف مجاري التكييف."
+
