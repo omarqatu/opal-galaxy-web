@@ -2534,3 +2534,96 @@ class FaqPageTests(TestCase):
         for field in ('name="name"', 'name="phone"', 'name="unit"', 'name="notes"'):
             self.assertIn(field, form)
 
+
+class PrivacyPageTests(TestCase):
+    """Task 17-H: the Privacy Policy keeps its stored text and gets a plain document style with a print style."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_site", verbosity=0)
+
+    def page(self):
+        from core.models import ContentPage
+        return ContentPage.objects.get(slug="privacy")
+
+    def body(self, path="/privacy/"):
+        return self.client.get(path).content.decode().split('id="app"')[1].split('id="contact"')[0]
+
+    def test_stored_text_is_shown_exactly_and_in_order(self):
+        import html
+        page = self.page()
+        sections = list(page.sections.all())
+        self.assertEqual(len(sections), 8)
+        for path, lang in (("/privacy/", "en"), ("/ar/privacy/", "ar")):
+            body = html.unescape(self.body(path))
+            self.assertIn(f"<h1>{getattr(page, f'title_{lang}')}</h1>", body)
+            self.assertIn(getattr(page, f"lead_{lang}"), body)
+            self.assertEqual(body.count('class="prose__section"'), 8)
+            visible = __import__("re").sub(r"<[^>]+>", "", body)
+            positions = []
+            for sec in sections:
+                heading = getattr(sec, f"heading_{lang}")
+                self.assertIn(f"<h2>{heading}</h2>", body)
+                positions.append(body.index(f"<h2>{heading}</h2>"))
+                for line in getattr(sec, f"body_{lang}").splitlines():
+                    line = line.strip()
+                    if line:
+                        self.assertIn(line[1:].strip() if line.startswith("-") else line, visible)
+            self.assertEqual(positions, sorted(positions))
+        self.assertEqual(self.client.get("/privacy/").content.decode().count("<h1"), 1)
+
+    def test_lists_paragraphs_and_the_mail_link_render_as_markup(self):
+        body = self.body()
+        self.assertIn('<div class="prose prose--doc">', body)
+        self.assertEqual(body.count("<li>"), 8)
+        self.assertIn("<ul><li>Name (optional)</li>", body)
+        self.assertIn('<a href="mailto:info@opalgalaxy.ae">info@opalgalaxy.ae</a>', body)
+        self.assertNotIn("<p></p>", body)
+
+    def test_text_typed_in_the_admin_is_escaped(self):
+        from core.models import ContentSection
+        sec = self.page().sections.first()
+        ContentSection.objects.filter(pk=sec.pk).update(body_en="<script>alert(1)</script>\n\n- <b>item</b>")
+        body = self.body()
+        self.assertNotIn("<script>alert(1)</script>", body)
+        self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", body)
+        self.assertIn("<li>&lt;b&gt;item&lt;/b&gt;</li>", body)
+
+    def test_nothing_is_added_to_the_policy(self):
+        import re
+        visible = re.sub(r"<[^>]+>", " ", self.body())
+        for added in ("Last updated", "Analytics", "retention", "Table of contents"):
+            self.assertNotIn(added, visible)
+        self.assertNotRegex(visible, r"20\d\d")                                     # no date invented
+        for needle in ("btn-wa", "faq-next", "explore__link", "contact-card", "<details"):   # no calls to action or widgets
+            self.assertNotIn(needle, self.body())
+
+    def test_print_style_is_scoped_to_the_policy(self):
+        from django.conf import settings
+        css = (settings.BASE_DIR / "static/css/components.css").read_text()
+        block = css.split("@media print{")[1].split("\n}")[0]
+        for line in block.strip().splitlines():
+            self.assertIn(".prose--doc", line)                                      # every print rule needs the policy on the page
+        for hidden in (".site-header", ".mbar", "#contact", ".site-footer"):
+            self.assertIn(f"body:has(.prose--doc) {hidden}", block)
+
+    def test_other_pages_do_not_get_the_document_style(self):
+        for path, marker in (("/about/", 'class="about__aside"'), ("/faq/", 'class="faq-list"'), ("/contact/", 'class="contact-cards"'),
+                             ("/maintenance/", 'class="svc-list"'), ("/duct-cleaning/", 'class="prep__list"')):
+            html = self.client.get(path).content.decode()
+            self.assertIn(marker, html, path)
+            self.assertNotIn("prose--doc", html, path)
+        form = self.client.get("/privacy/").content.decode().split('id="contact"')[1]
+        for field in ('name="phone"', 'name="unit"', 'name="notes"'):
+            self.assertIn(field, form)
+
+    def test_a_future_text_page_keeps_the_plain_prose(self):
+        from core.models import ContentPage, ContentSection, HomePage
+        page = ContentPage(title="Terms", slug="terms", kind="text", title_en="Terms")
+        HomePage.objects.get().add_child(instance=page)
+        ContentSection.objects.create(page=page, sort_order=0, heading_en="One", body_en="Text")
+        page.save_revision().publish()
+        html = self.client.get("/terms/").content.decode()
+        self.assertIn('<div class="prose">', html)
+        self.assertNotIn("prose--doc", html)
+

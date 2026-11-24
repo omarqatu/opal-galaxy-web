@@ -46,7 +46,7 @@
 {% else %}
 {% include "includes/page_hero.html" with title=page|tr:"title" lead=page|tr:"lead" %}
 
-{% if page.sections.all %}<section class="section section--white"><div class="container"><div class="prose">
+{% if page.sections.all %}<section class="section section--white"><div class="container"><div class="prose{% if page.slug == 'privacy' %} prose--doc{% endif %}">
   {% for sec in page.sections.all %}<div class="prose__section">
     {% if sec.heading_en %}<h2>{{ sec|tr:"heading" }}</h2>{% endif %}
     {% for kind, value in sec.blocks %}{% if kind == "ul" %}<ul>{% for item in value %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>{{ value|urlize }}</p>{% endif %}{% endfor %}

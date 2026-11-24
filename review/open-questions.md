@@ -202,3 +202,16 @@ Terminology decisions (Omar, 23 Nov 2026) — applied to all new copy, and to th
 | F-6 | "Use the form below, or send your BOQ or HVAC drawings on WhatsApp." | Omar: tied to the form wording handled in Task 9. | Shown as stored. |
 | F-7 | No FAQPage structured data on the page | Omar: deferred with the SEO phase. | None added. |
 
+## Privacy Policy (Task 17-H)
+
+The published policy is unchanged. A proposed shorter text in both languages, with every statement that needs confirmation marked, is in `review/privacy-policy-proposal.md`.
+
+| # | Finding | To confirm | Placeholder meanwhile |
+|---|---|---|---|
+| P-1 | The live site loads Cloudflare Web Analytics (`static.cloudflareinsights.com`); it is not in the repository, so it is switched on in Cloudflare. The policy does not mention it. | Omar: intended? | Policy unchanged; nothing changed in Cloudflare. |
+| P-2 | "passed to the company's sales team" is, in code, a copy of the request sent to an n8n webhook when one is configured. | Omar: is it configured, where is it hosted, where does it send the request next? | Policy unchanged. |
+| P-3 | No retention period; nothing deletes old requests; daily backups hold copies. | Omar / company: retention wanted? | Policy unchanged. |
+| P-4 | Server, backup storage and automation locations unknown. | Omar: countries, for any cross-border statement. | Policy unchanged. |
+| P-5 | No date, no governing law, no contact beyond one email address. | Company's adviser. | Policy unchanged. |
+| P-6 | The quote form is shown under the policy ("Show quote form" is ticked for this page). | Omar: untick in the admin if not wanted. | Left as set. |
+
