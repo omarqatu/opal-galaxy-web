@@ -215,3 +215,40 @@ The published policy is unchanged. A proposed shorter text in both languages, wi
 | P-5 | No date, no governing law, no contact beyond one email address. | Company's adviser. | Policy unchanged. |
 | P-6 | The quote form is shown under the policy ("Show quote form" is ticked for this page). | Omar: untick in the admin if not wanted. | Left as set. |
 
+## Task 20 — Launch readiness: intermittent 502 responses on staging (recorded 24 Nov 2026, Task 17-I)
+
+Importance: high for launch. Cause not established; nothing was changed.
+
+| Item | Detail |
+|---|---|
+| What happened | 6 of 270 page loads returned **502 Bad Gateway** during the Task 17-I crawl of https://new.opal-galaxy.com. |
+| Affected requests | The page requests themselves: `/ar/duct-cleaning/` (1), `/ar/privacy/` (2), `/ar/gallery/` (2), `/ar/faq/` (1). All six were Arabic addresses; whether that is a coincidence is not known. |
+| Viewports of the affected loads | 1024 px (three) and 390 px (three). The viewport is unlikely to matter; it only identifies which crawler was running. |
+| Concurrency | Three headless Chromium crawlers at the same time, each loading 27 pages in two languages one after another (about three page loads in flight, each with its static files). |
+| When retried | Each of the four addresses returned 200 three times in a row when fetched one at a time, minutes later. All 64 internal links returned 200 when checked sequentially. |
+| Not observed | No 502 in any earlier single-browser check of the same pages on 23 and 24 Nov. |
+| Not known | Whether the 502 came from Cloudflare, the Coolify proxy or the application; the number of Gunicorn workers on staging; whether a deploy or restart overlapped with the crawl; server load at the time. I have no access to server or proxy logs. |
+
+Reproduction steps (read-only, no data is written):
+
+1. From one machine, start three browsers (or three `curl` loops) against staging at the same time.
+2. In each, request the 27 internal pages in English and Arabic in sequence, including their static files.
+3. Count responses with status 502.
+4. Compare with the same run using one browser only.
+
+To look at when it is reproduced: the proxy and application logs for the timestamps of the 502s, the worker count and timeout of the application server, and container restarts during the run.
+
+## Status updates backed by evidence (24 Nov 2026, Task 17-I)
+
+Only items that the live site or the code now proves are marked. Everything else above stays open for Tasks 18 to 20.
+
+| # | Item | Status | Evidence |
+|---|---|---|---|
+| 6 | Brand pages for SKM, LG, Daikin, Trane | Pages exist and are published; their texts are still Omar's to write | `/brands/skm/`, `/brands/lg/`, `/brands/daikin/`, `/brands/trane/` return 200 in both languages and show the "confirmed on the quote" state |
+| 39 | Third parties: Google Fonts | Resolved for fonts | 264 live page loads contacted no host other than the site itself and `static.cloudflareinsights.com`; fonts are self-hosted. The Cloudflare Web Analytics part stays open as P-1 |
+| P-6 | Quote form shown under the Privacy Policy | Resolved | `/privacy/` and `/ar/privacy/` no longer render the form (Omar unticked the option in the admin) |
+| QA-01 | Breadcrumb alignment and leading Arabic separator | Resolved and confirmed on staging (24 Nov, after the deploy of `b6c6859`) | Before: items 4 to 5 px apart on desktop, 10 to 11 px on phones. After, on the live site: 11 page types in both languages at 5 widths (110 loads), items 0.0 px apart, one separator fewer than items, none before the first Arabic item |
+| QA-03 | Heading level skipped in the technical panels (h2 then h4) | Fixed in this PR | Tests in `HeadingOrderTests`; computed style, size and position of the headings identical before and after |
+| QA-04 | Page descriptions of brands without text (brand name only) and descriptions over 200 characters | Deferred to the SEO and launch QA work | `templates/catalog/brand.html` line 3 |
+| QA-05 | Arabic lead line length at 1024 px on brand and category pages | Deferred; no layout change now (Omar, 24 Nov) | Crawl measurement |
+

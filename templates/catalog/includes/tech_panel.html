@@ -7,7 +7,7 @@
   </summary>
   <div class="tech__body">
     <section class="tech__block tech__block--models">
-      <h4 class="tech__heading"><span class="tech__heading-icon" aria-hidden="true">{% include "includes/icons/grid.svg" %}</span>{% translate "Series and models" %}</h4>
+      <h3 class="tech__heading"><span class="tech__heading-icon" aria-hidden="true">{% include "includes/icons/grid.svg" %}</span>{% translate "Series and models" %}</h3>
       <div class="tech__data" dir="ltr" lang="en">{% for label, items in row|model_groups %}
         <div class="tech__series">
           {% if label %}<p class="tech__series-name">{{ label }}<span class="visually-hidden">:</span></p>{% endif %}
@@ -16,7 +16,7 @@
       </div>
     </section>
     <section class="tech__block tech__block--specs">
-      <h4 class="tech__heading"><span class="tech__heading-icon" aria-hidden="true">{% include "includes/icons/doc.svg" %}</span>{% translate "Specifications" %}</h4>
+      <h3 class="tech__heading"><span class="tech__heading-icon" aria-hidden="true">{% include "includes/icons/doc.svg" %}</span>{% translate "Specifications" %}</h3>
       {% if not row.pending and row.spec_list %}<ul class="tech__specs" dir="ltr" lang="en">{% for spec in row|spec_rows %}
         <li{% if spec.btu %} class="is-capacity"{% endif %}>{% for part in spec.text|spec_parts %}<span>{{ part }}{% if not forloop.last %}<i class="tech__dot"> ·</i>{% endif %}</span>{% if not forloop.last %} {% endif %}{% endfor %}</li>{% endfor %}
       </ul>
